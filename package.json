@@ -17,13 +17,22 @@
   },
   "dependencies": {
     "gatsby": "^5.13.1",
+    "gatsby-source-filesystem": "^5.13.0",
+    "gatsby-transformer-csv": "^5.13.0",
+    "lodash": "^4.17.21",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.21.3",
+    "ua-parser-js": "^1.0.37"
   },
   "devDependencies": {
+    "@gravity-ui/components": "^2.11.0",
+    "@gravity-ui/icons": "^2.8.1",
+    "@gravity-ui/uikit": "^5.28.0",
     "@types/node": "^20.10.6",
     "@types/react": "^18.2.46",
     "@types/react-dom": "^18.2.18",
+    "@types/ua-parser-js": "^0.7.39",
     "typescript": "^5.3.3"
   }
 }

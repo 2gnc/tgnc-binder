@@ -9,7 +9,18 @@ const config: GatsbyConfig = {
   // If you use VSCode you can also use the GraphQL plugin
   // Learn more at: https://gatsby.dev/graphql-typegen
   graphqlTypegen: true,
-  plugins: [],
+  flags: {
+    IS_SSR: true
+  },
+  plugins: [
+    {
+      resolve: 'gatsby-source-filesystem',
+      options: {
+        path: `${__dirname}/data/`
+      }
+    },
+    `gatsby-transformer-csv`,
+  ]
 }
 
 export default config
