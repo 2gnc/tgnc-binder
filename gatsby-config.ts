@@ -1,7 +1,6 @@
 import type { GatsbyConfig } from "gatsby"
 
 const config: GatsbyConfig = {
-  pathPrefix: `/`,
   siteMetadata: {
     title: `site`,
     siteUrl: `https://www.yourdomain.tld`,
@@ -17,7 +16,13 @@ const config: GatsbyConfig = {
     {
       resolve: 'gatsby-source-filesystem',
       options: {
-        path: `${__dirname}/data/`
+        path: `${__dirname}/data/cards/`
+      }
+    },
+    {
+      resolve: 'gatsby-source-filesystem',
+      options: {
+        path: `${__dirname}/data/sets/`
       }
     },
     `gatsby-transformer-csv`,
