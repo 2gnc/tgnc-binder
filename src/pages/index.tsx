@@ -1,261 +1,130 @@
 import * as React from "react"
 import type { HeadFC, PageProps } from "gatsby";
 import { graphql } from "gatsby";
+import { parseRawCardsResponse } from "../utils/parse-raw-cards-response";
 import '@gravity-ui/uikit/styles/fonts.css';
 import '@gravity-ui/uikit/styles/styles.css';
 
-import Table from '../components/Table';
+import TradeThemeTable from '../components/TradeThemeTable';
 
 import './index.css';
+import { CardT, ColorsEnum, TypeEnum } from "../models";
 
 export const queryMulticolor = graphql`
   query {
-    tokens: allCardsCsv(filter: {Is_token: {eq: "true"}}, sort: {Name: ASC}) {
+    cards: allCardsCsv(sort: {name: ASC}) {
       nodes {
-        Qtty
-        Name
-        Set
-        Image
-        Price1
-        Price2
-        Price3
-        Price4
-        Collection
-        Is_foil
-        Keywords
-        Lang
-        Artist
-        EDHREC
-        Rarity
+        artist
+        set_name
+        quantity
+        name
+        set
+        image_url
+        price_usd
+        price_usd_foil
+        price_usd_foil
+        price_usd_etched
+        price_eur
+        price_eur_foil
+        price_eur_etched
+        collection
+        is_foil
+        keywords
+        lang
+        edhrec_rank
+        rarity
         id
-        Frame
-        List
-        Colors
-        Type
-        Is_land
-        Number
-      }
-    }
-    lands: allCardsCsv(filter: {Colors: {eq: ""}, Is_land: {eq: "true"}}, sort: {Name: ASC}) {
-      nodes {
-        Qtty
-        Name
-        Set
-        Image
-        Price1
-        Price2
-        Price3
-        Price4
-        Collection
-        Is_foil
-        Keywords
-        Lang
-        Artist
-        EDHREC
-        Rarity
-        id
-        Frame
-        List
-        Colors
-        Type
-        Is_land
-        Number
-      }
-    }
-    colorless: allCardsCsv(filter: {Colors: {eq: ""}, Is_token: {eq: "false"}, Is_land: {eq: "false"}}, sort: {Name: ASC}) {
-      nodes {
-        Qtty
-        Name
-        Set
-        Image
-        Price1
-        Price2
-        Price3
-        Price4
-        Collection
-        Is_foil
-        Keywords
-        Lang
-        Artist
-        EDHREC
-        Rarity
-        id
-        Frame
-        List
-        Colors
-        Number
-      }
-    }
-    red: allCardsCsv(filter: {Colors: {eq: "R"}, Is_token: {eq: "false"},}, sort: {Name: ASC}) {
-      nodes {
-        Qtty
-        Name
-        Set
-        Image
-        Price1
-        Price2
-        Price3
-        Price4
-        Collection
-        Is_foil
-        Keywords
-        Lang
-        Artist
-        EDHREC
-        Rarity
-        id
-        Frame
-        List
-        Colors
-        Number
-      }
-    }
-    black: allCardsCsv(filter: {Colors: {eq: "B"}, Is_token: {eq: "false"},}, sort: {Name: ASC}) {
-      nodes {
-        Qtty
-        Name
-        Set
-        Image
-        Price1
-        Price2
-        Price3
-        Price4
-        Collection
-        Is_foil
-        Keywords
-        Lang
-        Artist
-        EDHREC
-        Rarity
-        id
-        Frame
-        List
-        Colors
-        Number
-      }
-    }
-    white: allCardsCsv(filter: {Colors: {eq: "W"}, Is_token: {eq: "false"},}, sort: {Name: ASC}) {
-      nodes {
-        Qtty
-        Name
-        Set
-        Image
-        Price1
-        Price2
-        Price3
-        Price4
-        Collection
-        Is_foil
-        Keywords
-        Lang
-        Artist
-        EDHREC
-        Rarity
-        id
-        Frame
-        List
-        Colors
-        Number
-      }
-    }
-    green: allCardsCsv(filter: {Colors: {eq: "G"}, Is_token: {eq: "false"},}, sort: {Name: ASC}) {
-      nodes {
-        Qtty
-        Name
-        Set
-        Image
-        Price1
-        Price2
-        Price3
-        Price4
-        Collection
-        Is_foil
-        Keywords
-        Lang
-        Artist
-        EDHREC
-        Rarity
-        id
-        Frame
-        List
-        Colors
-        Number
-      }
-    }
-    blue: allCardsCsv(filter: {Colors: {eq: "U"}, Is_token: {eq: "false"},}, sort: {Name: ASC}) {
-      nodes {
-        Qtty
-        Name
-        Set
-        Image
-        Price1
-        Price2
-        Price3
-        Price4
-        Collection
-        Is_foil
-        Keywords
-        Lang
-        Artist
-        EDHREC
-        Rarity
-        id
-        Frame
-        List
-        Colors
-        Number
-      }
-    }
-    multi: allCardsCsv(filter: {Colors: {nin: ["R", "B", "W", "U", "G", ""]}, Is_token: {eq: "false"},}, sort: {Name: ASC}) {
-      nodes {
-        Qtty
-        Name
-        Set
-        Image
-        Price1
-        Price2
-        Price3
-        Price4
-        Collection
-        Is_foil
-        Keywords
-        Lang
-        Artist
-        EDHREC
-        Rarity
-        id
-        Frame
-        List
-        Colors
-        Number
+        is_list
+        frame
+        colors
+        condition
+        types
+        number
       }
     }
   }
 `;
 
 const IndexPage: React.FC<PageProps> = ({ data }) => {
-  const cards = data.multi.nodes;
-  const cardsColorless = data.colorless.nodes;
-  const cardsLands = data.lands.nodes;
-  const cardsRed = data.red.nodes;
-  const cardsBlack = data.black.nodes;
-  const cardsGreen = data.green.nodes;
-  const cardsWhite = data.white.nodes;
-  const cardsBlue = data.blue.nodes;
-  const cardsTokens = data.tokens.nodes;
+  const cards = parseRawCardsResponse(data.cards.nodes);
+
+  const byColors: Record<string, Array<CardT>> = {
+    multicolor: [],
+    colorless: [],
+    lands: [],
+    tokens: [],
+    white: [],
+    blue: [],
+    black: [],
+    red: [],
+    green: []
+  };
+  console.log(cards.length, data.cards.nodes.length)
+  cards.forEach(card => {
+    if (!card.collections?.includes('binder')) {
+      return;
+    }
+
+    if (card.colors.length > 1) {
+      byColors.multicolor.push(card);
+      return;
+    }
+    if (
+      card.colors.includes(ColorsEnum.COLORLESS)
+      && !card.isLand
+      && !card.isToken
+    ) {
+      byColors.colorless.push(card);
+      return;
+    }
+    if (
+      card.colors.includes(ColorsEnum.COLORLESS)
+      && card.isLand
+    ) {
+      byColors.lands.push(card);
+      return;
+    }
+    if (
+      card.colors.includes(ColorsEnum.COLORLESS)
+      && card.isToken
+    ) {
+      byColors.tokens.push(card);
+      return;
+    }
+
+    if (card.colors.length === 1) {
+      switch(card.colors[0]) {
+        case ColorsEnum.WHITE:
+          byColors.white.push(card);
+          return;
+        case ColorsEnum.BLUE:
+          byColors.blue.push(card);
+          return;
+        case ColorsEnum.BLACK:
+          byColors.black.push(card);
+          return;
+        case ColorsEnum.RED:
+          byColors.red.push(card);
+          return;
+        default:
+          byColors.green.push(card);
+          return;
+      }
+    }
+  });
 
   return (
     <>
       <h1>Binder</h1>
-      <Table header="Многоцветные" cards={cards} />
-      <Table header="Бесцветные" cards={cardsColorless} />
-      <Table header="Земли" cards={cardsLands} />
-      <Table header="Red" cards={cardsRed} />
-      <Table header="Black" cards={cardsBlack} />
-      <Table header="White" cards={cardsWhite} />
-      <Table header="Green" cards={cardsGreen} />
-      <Table header="Blue" cards={cardsBlue} />
-      <Table header="Tokens" cards={cardsTokens} />
+      <TradeThemeTable header="Многоцветные" cards={byColors.multicolor} />
+      <TradeThemeTable header="Бесцветные" cards={byColors.colorless} />
+      <TradeThemeTable header="Земли" cards={byColors.lands} />
+      <TradeThemeTable header="Red" cards={byColors.red} />
+      <TradeThemeTable header="Black" cards={byColors.black} />
+      <TradeThemeTable header="White" cards={byColors.white} />
+      <TradeThemeTable header="Green" cards={byColors.green} />
+      <TradeThemeTable header="Blue" cards={byColors.blue} />
+      <TradeThemeTable header="Tokens" cards={byColors.tokens} />
     </>
   )
 }

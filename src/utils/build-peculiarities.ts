@@ -1,14 +1,9 @@
 import intersection from 'lodash/intersection';
+import { FramePerticularitiesEnum } from '../models';
 
 export function buildPeculiarities(isFoil: boolean, frameData: string): string {
 
-    const frameModifiers = [
-        'showcase',
-        'miracle',
-        'extendedart',
-        'etched',
-        'shatteredglass'
-      ];
+    const frameModifiers = Object.values(FramePerticularitiesEnum);
 
     const framePeculiarities = frameData.split(',');
 
