@@ -1,6 +1,8 @@
-import React, { type FC } from 'react';
-import { Row, Col, Text, Select, RadioButton } from '@gravity-ui/uikit';
+import React, { type FC, useState, useRef, useEffect } from 'react';
+import { Row, Col, Text, Select, RadioButton, TextInput, Popup, Menu, Label, Flex } from '@gravity-ui/uikit';
 import { ColorsEnum, TypeEnum, PermamentTypeEnum } from '../../models';
+import size from 'lodash/size';
+import map from 'lodash/map';
 
 import redMana from '../../images/r.png';
 import blackMana from '../../images/b.png';
@@ -16,10 +18,13 @@ type PropsT = {
     collectionFilter: string;
     avalaibleCollections: Array<string>;
     typesFilter: Array<string>;
+    avalaibleTypes: Array<string>;
     handleColorSelect: (event: React.ChangeEvent<HTMLInputElement>) => void;
     handleFilterByLandType: (event: React.ChangeEvent<HTMLInputElement>) => void;
     handleCollectionSelect: (collection: string) => void;
-    handlePermanentTypeSelect: (type: PermamentTypeEnum) => void;
+    handleCardTypeSelect: (type: PermamentTypeEnum) => void;
+    handleSpellTypeAdd: (type: string) => void;
+    handleSpellTypeRemove: (type: string) => void;
 }
 
 const CollectionFilters: FC<PropsT> = ({
@@ -28,14 +33,37 @@ const CollectionFilters: FC<PropsT> = ({
     collectionFilter,
     avalaibleCollections,
     typesFilter,
+    avalaibleTypes,
     handleColorSelect,
     handleFilterByLandType,
     handleCollectionSelect,
-    handlePermanentTypeSelect
+    handleCardTypeSelect,
+    handleSpellTypeAdd,
+    handleSpellTypeRemove,
 }) => {
+    const spellTypeSearchRef = useRef(null);
+    const [spellTypeSearch, setSpellTypeSearch] = useState('');
+    const [isTypeSuggestOpen, setTypeSuggestOpen] = useState(false);
+    
+    useEffect(() => {
+        setTypeSuggestOpen(size(spellTypeSearch) > 2)
+    }, [spellTypeSearch]);
 
     const checkIsColorFilterSet = (color: ColorsEnum): boolean => {
         return colorsFilters.includes(color);
+    }
+
+    const closeTypeSuggest = () => {
+        setTypeSuggestOpen(false);
+    }
+
+    const openTypeSuggest = () => {
+        setTypeSuggestOpen(true);
+    }
+
+    const onSpellTypeAdd = (item: string) => {
+        handleSpellTypeAdd(item);
+        setSpellTypeSearch('');
     }
 
     return (
@@ -52,7 +80,6 @@ const CollectionFilters: FC<PropsT> = ({
                     <input type='checkbox' name={TypeEnum.LAND} id={TypeEnum.LAND} onChange={handleFilterByLandType} checked={typesFilter.includes(TypeEnum.LAND)} />
                 </div>
                 <div className='manaLabels'>
-                    {!isMobile && <Text variant='subheader-2' className='filterHeader'>По цвету: </Text>}
                     <label htmlFor={ColorsEnum.WHITE}>
                         <div className={`manaCheckbox ${checkIsColorFilterSet(ColorsEnum.WHITE) ? 'manaCheckbox_checked' : ''}`}>
                             <img src={whiteMana} className='manaSymbol' />
@@ -109,7 +136,7 @@ const CollectionFilters: FC<PropsT> = ({
                 <Text variant='subheader-2' className='filterHeader'>Тип карты: </Text>
                 <RadioButton
                     size={isMobile ? 'l' : 's'}
-                    onUpdate={handlePermanentTypeSelect}
+                    onUpdate={handleCardTypeSelect}
                     options={[
                         {
                             value: PermamentTypeEnum.CARD,
@@ -122,6 +149,50 @@ const CollectionFilters: FC<PropsT> = ({
                     ]}
                     value={ typesFilter.includes(TypeEnum.TOKEN) ? PermamentTypeEnum.TOKEN : PermamentTypeEnum.CARD }
                 />
+            </Col>
+            <Col>
+                <Text variant='subheader-2' className='filterHeader'>Тип заклинания: </Text>
+                <TextInput
+                    ref={spellTypeSearchRef}
+                    size={isMobile ? 'l' : 's'}
+                    onChange={(event) => {
+                        setSpellTypeSearch(event.target.value);
+                    }}
+                    value={spellTypeSearch}
+                    onBlur={closeTypeSuggest}
+                />
+                <Flex space={1} style={{
+                    paddingTop: '5px',
+                }}>
+                    {
+                        map(typesFilter, (type) => (
+                            <Label
+                                key={type}
+                                type='close'
+                                onClose={() => handleSpellTypeRemove(type)}
+                            >
+                                {type}
+                            </Label>
+                        ))
+                    }
+                </Flex>
+                <Popup
+                    open={isTypeSuggestOpen}
+                    anchorRef={spellTypeSearchRef}
+                    placement='bottom-start'
+                >
+                    <Menu size='l'>
+                        {
+                            avalaibleTypes
+                                .filter((type) => new RegExp(spellTypeSearch).test(type) && !typesFilter.includes(type))
+                                .map(item => (
+                                    <Menu.Item key={item} onClick={() => onSpellTypeAdd(item)} >
+                                        {item}
+                                    </Menu.Item>
+                                ))
+                        }
+                    </Menu>
+                </Popup>
             </Col>
         </Row>
     )

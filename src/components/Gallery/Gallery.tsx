@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import UAParser from 'ua-parser-js';
 import type { HeadFC, PageProps } from "gatsby";
-import {Container, ThemeProvider, Modal, Select } from '@gravity-ui/uikit';
+import {Container, ThemeProvider, Modal } from '@gravity-ui/uikit';
 import { parseRawCardsResponse } from '../../utils/parse-raw-cards-response';
 import { CardT, ColorsEnum, OwnerT, PermamentTypeEnum, TypeEnum } from '../../models';
 import intersection from 'lodash/intersection';
@@ -81,35 +81,47 @@ const GalleryPage: React.FC<PropsT> = ({ data, owner, queryName }) => {
             }
         }
 
-        // цвета
-        if (colorsFilters.length) {
-            filtredByCollectionCards = filtredByCollectionCards.filter((card) => {
-                return size(intersection(colorsFilters, card.colors)) && !card.types.includes(TypeEnum.LAND);
-            });
+        const isMatchByColor = (card: CardT) => {
+            if (!size(colorsFilters)) {
+                return true;
+            }
+            return size(intersection(colorsFilters, card.colors));
         }
 
-        // тип
-        if (typesFilter.length) {
-            // do stuff
-            filtredByCollectionCards = filtredByCollectionCards.filter((card) => {
-                const foundTypes = intersection(typesFilter, card.types);
-                return size(foundTypes) && size(foundTypes) === size(typesFilter);
-            });
+        const isMatchByTypes = (card: CardT) => {
+            if (!size(typesFilter)) {
+                return true;
+            }
+
+            const foundTypes = intersection(typesFilter, card.types);
+            return size(foundTypes) && size(foundTypes) === size(typesFilter);
         }
 
-        if (!typesFilter.includes(TypeEnum.TOKEN)) {
-            filtredByCollectionCards = filtredByCollectionCards.filter((card) => !card.types.includes(TypeEnum.TOKEN));
-        }
+        const isLandTypeIncluded = typesFilter.includes(TypeEnum.LAND);
+        const isTokenTypeIncluded = typesFilter.includes(TypeEnum.TOKEN);
+
+        const isNotLand = (card: CardT) => !card.types.includes(TypeEnum.LAND);
+        const isNotToken = (card: CardT) => !card.types.includes(TypeEnum.TOKEN);
+
+        filtredByCollectionCards = filtredByCollectionCards.filter((card) => {
+            const hasColorsMatch = isMatchByColor(card);
+            const isMatchByType = isMatchByTypes(card);
+
+            const shouldIncludeLand = isLandTypeIncluded ? true : isNotLand(card);
+            const shouldIncludeTokens = isTokenTypeIncluded ? true : isNotToken(card);
+
+            return hasColorsMatch && isMatchByType && shouldIncludeLand && shouldIncludeTokens;
+        });
 
         setCardsToDisplay(filtredByCollectionCards);
     }, [colorsFilters, collectionFilter, typesFilter]);
 
-    const handleCollectionSelect = useCallback((collection: string) => {
+    const handleCollectionSelect = (collection: string) => {
         setCollectionFilter(collection);
         updateSearchURL('collection', [collection]);
-    }, []);
+    };
 
-    const handlePermanentTypeSelect = useCallback((type: PermamentTypeEnum) => {
+    const handleCardTypeSelect = (type: PermamentTypeEnum) => {
         let typesFilterVal = [...typesFilter, type];
 
         if (type === PermamentTypeEnum.TOKEN) {
@@ -120,7 +132,19 @@ const GalleryPage: React.FC<PropsT> = ({ data, owner, queryName }) => {
         const typesSet = new Set(typesFilterVal);
         setTypesFilter([...typesSet]);
         updateSearchURL('type', [...typesSet]);
-    }, []);
+    };
+
+    const handleSpellTypeSelect = (type: string) => {
+        const typesFilterVal = [...typesFilter, type];
+        setTypesFilter(typesFilterVal);
+        updateSearchURL('type', typesFilterVal);
+    };
+
+    const handleSpellTypeRemove = (type: string) => {
+        const typesFilterVal = [...typesFilter].filter((item) => item !== type);
+        setTypesFilter(typesFilterVal);
+        updateSearchURL('type', typesFilterVal);
+    };
 
     const handleColorSelect = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
         const {name, checked} = event.target;
@@ -177,7 +201,10 @@ const GalleryPage: React.FC<PropsT> = ({ data, owner, queryName }) => {
                     handleCollectionSelect={ handleCollectionSelect }
                     avalaibleCollections={allCollections}
                     typesFilter={ typesFilter }
-                    handlePermanentTypeSelect={ handlePermanentTypeSelect }
+                    handleCardTypeSelect={ handleCardTypeSelect }
+                    avalaibleTypes={ types }
+                    handleSpellTypeAdd={ handleSpellTypeSelect }
+                    handleSpellTypeRemove={ handleSpellTypeRemove }
                 />
                 <GalleryTable cards={ cardsToDisplay } />
             </Container>
