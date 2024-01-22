@@ -17,7 +17,9 @@ const CollectionHeader:FC<PropsT> = ({
     return (
         <Row space="5">
             <Col s="4">
-                <Text variant='header-1'>{collectionName}</Text>
+                <Text variant='header-1' style={{
+                    textTransform: 'capitalize'
+                }}>{collectionName}</Text>
             </Col>
             <Col s="5">
                 <Link href={ owner.contactLink } target="_blank">

@@ -1,6 +1,6 @@
 import React, { type FC } from 'react';
-import { Row, Col, Text } from '@gravity-ui/uikit';
-import { ColorsEnum, TypeEnum } from '../../models';
+import { Row, Col, Text, Select, RadioButton } from '@gravity-ui/uikit';
+import { ColorsEnum, TypeEnum, PermamentTypeEnum } from '../../models';
 
 import redMana from '../../images/r.png';
 import blackMana from '../../images/b.png';
@@ -13,17 +13,25 @@ import landType from '../../images/l.png';
 type PropsT = {
     isMobile: boolean;
     colorsFilters: Array<ColorsEnum>;
-    onlyLandFilter: boolean;
+    collectionFilter: string;
+    avalaibleCollections: Array<string>;
+    typesFilter: Array<string>;
     handleColorSelect: (event: React.ChangeEvent<HTMLInputElement>) => void;
     handleFilterByLandType: (event: React.ChangeEvent<HTMLInputElement>) => void;
+    handleCollectionSelect: (collection: string) => void;
+    handlePermanentTypeSelect: (type: PermamentTypeEnum) => void;
 }
 
 const CollectionFilters: FC<PropsT> = ({
     isMobile,
     colorsFilters,
-    onlyLandFilter,
+    collectionFilter,
+    avalaibleCollections,
+    typesFilter,
     handleColorSelect,
-    handleFilterByLandType
+    handleFilterByLandType,
+    handleCollectionSelect,
+    handlePermanentTypeSelect
 }) => {
 
     const checkIsColorFilterSet = (color: ColorsEnum): boolean => {
@@ -41,7 +49,7 @@ const CollectionFilters: FC<PropsT> = ({
                     <input type='checkbox' name={ColorsEnum.MULTI} id={ColorsEnum.MULTI} onChange={handleColorSelect} checked={colorsFilters.includes(ColorsEnum.MULTI)} />
                     <input type='checkbox' name={ColorsEnum.RED} id={ColorsEnum.RED} onChange={handleColorSelect} checked={colorsFilters.includes(ColorsEnum.RED)} />
                     <input type='checkbox' name={ColorsEnum.WHITE} id={ColorsEnum.WHITE} onChange={handleColorSelect} checked={colorsFilters.includes(ColorsEnum.WHITE)} />
-                    <input type='checkbox' name={TypeEnum.LAND} id={TypeEnum.LAND} onChange={handleFilterByLandType} checked={onlyLandFilter} />
+                    <input type='checkbox' name={TypeEnum.LAND} id={TypeEnum.LAND} onChange={handleFilterByLandType} checked={typesFilter.includes(TypeEnum.LAND)} />
                 </div>
                 <div className='manaLabels'>
                     {!isMobile && <Text variant='subheader-2' className='filterHeader'>По цвету: </Text>}
@@ -76,11 +84,44 @@ const CollectionFilters: FC<PropsT> = ({
                         </div>
                     </label>
                     <label htmlFor={TypeEnum.LAND}>
-                    <div className={`manaCheckbox ${onlyLandFilter ? 'manaCheckbox_checked' : ''}`}>
+                        <div className={`manaCheckbox ${typesFilter.includes(TypeEnum.LAND) ? 'manaCheckbox_checked' : ''}`}>
                             <img src={landType} className='manaSymbol' />
                         </div>
                     </label>
                 </div>
+            </Col>
+            <Col>
+                <Text variant='subheader-2' className='filterHeader'>Коллекция: </Text>
+                <Select
+                    value={[collectionFilter]}
+                    placeholder='Коллекция'
+                    options={
+                        avalaibleCollections.map(coll => ({
+                            value: coll,
+                            content: coll,
+                        }))
+                    }
+                    onUpdate={([nextValue]) => handleCollectionSelect(nextValue)}
+                    size={isMobile ? 'l' : 's'}
+                />
+            </Col>
+            <Col>
+                <Text variant='subheader-2' className='filterHeader'>Тип карты: </Text>
+                <RadioButton
+                    size={isMobile ? 'l' : 's'}
+                    onUpdate={handlePermanentTypeSelect}
+                    options={[
+                        {
+                            value: PermamentTypeEnum.CARD,
+                            content: 'карта'
+                        },
+                        {
+                            value: PermamentTypeEnum.TOKEN,
+                            content: 'токен'
+                        }
+                    ]}
+                    value={ typesFilter.includes(TypeEnum.TOKEN) ? PermamentTypeEnum.TOKEN : PermamentTypeEnum.CARD }
+                />
             </Col>
         </Row>
     )

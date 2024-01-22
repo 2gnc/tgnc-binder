@@ -16,13 +16,25 @@ const config: GatsbyConfig = {
     {
       resolve: 'gatsby-source-filesystem',
       options: {
-        path: `${__dirname}/data/cards/`
+        path: `${__dirname}/data/ksenia/`,
       }
     },
     {
       resolve: 'gatsby-source-filesystem',
       options: {
-        path: `${__dirname}/data/sets/`
+        path: `${__dirname}/data/kaplya/`,
+      }
+    },
+    {
+      resolve: 'gatsby-source-filesystem',
+      options: {
+        path: `${__dirname}/data/ija/`,
+      }
+    },
+    {
+      resolve: 'gatsby-source-filesystem',
+      options: {
+        path: `${__dirname}/data/sets/`,
       }
     },
     `gatsby-transformer-csv`,

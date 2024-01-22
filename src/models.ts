@@ -21,7 +21,7 @@ export type CardT = {
     eurEtched: number;
     quantity: number;
     condition: ConditionEnum;
-    collections: Nullable<Array<string>>;
+    collections: Array<string>;
     types: Array<TypeEnum>;
     keywords: Array<string>;
     imageUrl: string;
@@ -81,4 +81,9 @@ export enum ConditionEnum {
 export type OwnerT = {
     name: string;
     contactLink: string;
+}
+
+export enum PermamentTypeEnum {
+    CARD = 'card',
+    TOKEN = 'token',
 }

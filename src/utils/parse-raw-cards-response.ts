@@ -4,14 +4,15 @@ import { RarityEnum, type CardT, ConditionEnum, TypeEnum, LangEnum } from '../mo
 import { mapCardColorToEnum } from './map-card-color-to-enum';
 import { mapCardLangToEnum } from './map-card-lang-to-enum';
 import { buildPeculiarities } from './build-peculiarities';
-import { tunePrice } from './tune-price';
 
 function safeParse(value: string): number {
     return isNaN(parseFloat(value)) ? 0 : parseFloat(value);
 }
 
-export function parseRawCardsResponse(cards: Array<Record<string, string>>): Array<CardT> {
-    return map(cards, card => {
+export function parseRawCardsResponse(cards: Array<Record<string, string>>): { cards: Array<CardT>; collections: Array<string>; types: Array<string> } {
+    const allCollections: Array<string> = [];
+    const allTypes: Array<string> = [];
+    const allCards = map(cards, card => {
         const quantity = safeParse(card.quantity);
         const types = [...new Set(
             card.types.split(' ')
@@ -30,7 +31,9 @@ export function parseRawCardsResponse(cards: Array<Record<string, string>>): Arr
         const eurNonFoil = safeParse(card.price_eur);
         const eurFoil = safeParse(card.price_eur_foil);
         const eurEtched = safeParse(card.price_eur_etched);
-        const collections = card.collection.split(',').map(col => col.trim());
+        const collections = card.collection.split(',').map(col => col.trim().toLowerCase());
+        allCollections.push(...collections);
+        allTypes.push(...types);
 
         const parsed: CardT = {
             name: card.name,
@@ -65,5 +68,11 @@ export function parseRawCardsResponse(cards: Array<Record<string, string>>): Arr
         }
 
         return parsed;
-    })
+    });
+
+    return {
+        cards: allCards,
+        collections: [...new Set(allCollections)],
+        types: [...new Set(allTypes)],
+    }
 }
