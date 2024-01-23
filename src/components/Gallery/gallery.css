@@ -65,3 +65,8 @@
 .filterHeader {
     margin-right: 8px;
 }
+
+.copyModal {
+    width: 90vw;
+    height: 90vh;
+}

@@ -33,6 +33,7 @@ export const queryCards = graphql`
                 types
                 condition
                 number
+                ru_name
             }
         }
     }

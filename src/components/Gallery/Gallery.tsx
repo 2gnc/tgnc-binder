@@ -1,12 +1,14 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useCallback, useRef, Suspense } from 'react';
 import UAParser from 'ua-parser-js';
 import type { HeadFC, PageProps } from "gatsby";
-import {Container, ThemeProvider, Modal } from '@gravity-ui/uikit';
+import {Container, ThemeProvider, Modal, Button } from '@gravity-ui/uikit';
 import { parseRawCardsResponse } from '../../utils/parse-raw-cards-response';
 import { CardT, ColorsEnum, OwnerT, PermamentTypeEnum, TypeEnum } from '../../models';
+import { SelectedCardsView  } from '../SelectedCadsView/SelectedCadsView';
 import intersection from 'lodash/intersection';
 import size from 'lodash/size';
 import isNil from 'lodash/isNil';
+import { toaster } from '@gravity-ui/uikit/toaster-singleton';
 
 import CollectionHeader from '../../components/CollectionHeader/CollectionHeader';
 import CollectionFilters from '../../components/CollectionFilters/CollectionFilters';
@@ -50,6 +52,12 @@ const GalleryPage: React.FC<PropsT> = ({ data, owner, queryName }) => {
     const [colorsFilters, setColorsFilters] = useState<Array<ColorsEnum>>([]);
     const [collectionFilter, setCollectionFilter] = useState<string>(ALL_COLLECTIONS);
     const [typesFilter, setTypesFilter] = useState<Array<string>>([]);
+    const [isRendered, setIsRendered] = useState(false);
+    const [selectedCards, setSelectedCards] = useState<Array<CardT>>([]);
+
+    useEffect(() => {
+        setIsRendered(true);
+    }, [])
 
     // парсим фильтры в стейт при загрузке страницы
     useEffect(() => {
@@ -184,33 +192,54 @@ const GalleryPage: React.FC<PropsT> = ({ data, owner, queryName }) => {
     const closeCopyPanel = () => {
         setCopyPanelOpen(false);
     }
+
+    const handleCardClick = (id: string) => {
+        const found = cards.find((card) => card.id === id);
+        if (found) {
+            const updatedSelectedCards = [...selectedCards, found];
+            setSelectedCards(updatedSelectedCards);
+            toaster.add({
+                name: found.id,
+                title: 'Добавлено к обмену',
+                autoHiding: 2000,
+                type: 'success',
+                content: found.name
+            })
+        }
+    }
+
+    if (!isRendered) {
+        return null;
+    }
+
     return (
         <ThemeProvider theme="light">
-            <Container spaceRow="10">
-                <CollectionHeader
-                    isMobile={ IS_MOBILE }
-                    owner={owner}
-                    collectionName={collectionFilter}
-                />
-                <CollectionFilters
-                    isMobile={ IS_MOBILE }
-                    handleColorSelect={handleColorSelect}
-                    handleFilterByLandType={handleFilterByLandSelect}
-                    colorsFilters={ colorsFilters }
-                    collectionFilter={ collectionFilter }
-                    handleCollectionSelect={ handleCollectionSelect }
-                    avalaibleCollections={allCollections}
-                    typesFilter={ typesFilter }
-                    handleCardTypeSelect={ handleCardTypeSelect }
-                    avalaibleTypes={ types }
-                    handleSpellTypeAdd={ handleSpellTypeSelect }
-                    handleSpellTypeRemove={ handleSpellTypeRemove }
-                />
-                <GalleryTable cards={ cardsToDisplay } />
-            </Container>
-            <Modal open={isCopyPanelOpen} onOutsideClick={closeCopyPanel}>
-                123
-            </Modal>
+                <Container spaceRow="10">
+                    <CollectionHeader
+                        isMobile={ IS_MOBILE }
+                        owner={owner}
+                        collectionName={collectionFilter}
+                        handleOpenPanel={ openCopyPanel }
+                    />
+                    <CollectionFilters
+                        isMobile={ IS_MOBILE }
+                        handleColorSelect={handleColorSelect}
+                        handleFilterByLandType={handleFilterByLandSelect}
+                        colorsFilters={ colorsFilters }
+                        collectionFilter={ collectionFilter }
+                        handleCollectionSelect={ handleCollectionSelect }
+                        avalaibleCollections={allCollections}
+                        typesFilter={ typesFilter }
+                        handleCardTypeSelect={ handleCardTypeSelect }
+                        avalaibleTypes={ types }
+                        handleSpellTypeAdd={ handleSpellTypeSelect }
+                        handleSpellTypeRemove={ handleSpellTypeRemove }
+                    />
+                    <GalleryTable cards={ cardsToDisplay } handleCardClick={handleCardClick} />
+                </Container>
+            <Modal open={isCopyPanelOpen} onOutsideClick={closeCopyPanel} contentClassName='copyModal'>
+                <SelectedCardsView cards={ selectedCards } />
+            </Modal>            
         </ThemeProvider>
     );
 }

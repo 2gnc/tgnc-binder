@@ -11,7 +11,9 @@ const Table: React.FC<TablePropsT> = ({ header, cards }) => {
     return (
         <>
             <h2>{header}</h2>
-            <table>
+            <table style={{
+                borderCollapse: 'collapse'
+            }}>
             <thead> 
                 <tr>
                     <th>Количество</th>
@@ -26,13 +28,16 @@ const Table: React.FC<TablePropsT> = ({ header, cards }) => {
             {
                 cards.map(card => {
                     return (
-                    <tr key={card.id} >
-                        <td>{card.quantity}</td>
-                        <td>{card.name}</td>
-                        <td>{card.perticularities}</td>
-                        <td>{`${card.set} #${card.number}`}</td>
-                        <td>{card.lang}</td>
-                        <td>{tunePrice(card)}</td>
+                    <tr key={card.id}>
+                        <td style={{border: '1px solid silver'}}>{card.quantity}</td>
+                        <td style={{border: '1px solid silver'}}>
+                            {card.name}
+                            { card.ruName && (<><br /> <span>{card.ruName}</span></>) }
+                        </td>
+                        <td style={{border: '1px solid silver'}}>{card.perticularities}</td>
+                        <td style={{border: '1px solid silver'}}>{`${card.set} #${card.number}`}</td>
+                        <td style={{border: '1px solid silver'}}>{card.lang}</td>
+                        <td style={{border: '1px solid silver'}}>{tunePrice(card)}</td>
                     </tr>
                     )
                 })

@@ -6,15 +6,16 @@ import size from 'lodash/size';
 
 type PropsT = {
     cards: Array<CardT>;
+    handleCardClick: (id: string) => void;
 }
 
-const GalleryTable: FC<PropsT> = ({ cards }) => {
+const GalleryTable: FC<PropsT> = ({ cards, handleCardClick }) => {
     if (!size(cards)) {
         return <Text variant='body-3'>Ничего не нашлось по заданным фильтрам...</Text>
     }
     return (
         <Row space="5">
-            { cards.map((card) => <GalleryCard card={ card } key={card.id} />) }
+            { cards.map((card) => <GalleryCard card={ card } key={card.id} handleCardClick={ handleCardClick } />) }
         </Row>
 
     );

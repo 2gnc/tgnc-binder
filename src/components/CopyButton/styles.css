@@ -1,0 +1,12 @@
+.copyButton {
+    width: 50px;
+    height: 50px;
+    border-radius: 8px;
+    opacity: 0.8;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #000;
+    z-index: 200;
+    background-color: #fff;
+}

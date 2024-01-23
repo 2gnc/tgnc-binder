@@ -29,6 +29,7 @@ export type CardT = {
     perticularities: string;
     frameEffects: Array<string>;
     artist: string;
+    ruName?: string;
 }
 
 export enum FramePerticularitiesEnum {
@@ -57,6 +58,7 @@ export enum TypeEnum {
 export enum LangEnum {
     RU = 'ru',
     EN = 'en',
+    SP = 'sp',
     OTH = 'oth',
 }
 

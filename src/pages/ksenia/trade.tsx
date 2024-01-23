@@ -37,6 +37,7 @@ export const queryMulticolor = graphql`
         condition
         types
         number
+        ru_name
       }
     }
   }

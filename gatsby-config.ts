@@ -10,7 +10,7 @@ const config: GatsbyConfig = {
   // Learn more at: https://gatsby.dev/graphql-typegen
   graphqlTypegen: true,
   flags: {
-    IS_SSR: true
+    DEV_SSR: true
   },
   plugins: [
     {

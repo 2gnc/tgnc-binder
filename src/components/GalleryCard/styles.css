@@ -1,0 +1,14 @@
+.cardCopyButton {
+    position: absolute;
+    top: 35px;
+    right: 60px;
+    transform: translate(50%, 50%);
+}
+
+.card {
+    position: relative;
+}
+
+.box {
+    padding: 0 8px;
+}

@@ -3,24 +3,31 @@ import { CardT } from '../../models';
 import { Row, Col, Card, Text, Label } from '@gravity-ui/uikit';
 import { tunePrice } from '../../utils/tune-price';
 import foilCover from '../../images/foil-cover.png';
+import { CopyButton } from '../CopyButton/CopyButton';
+
+import './styles.css';
 
 type PropsT = {
     card: CardT;
+    handleCardClick: (id: string) => void;
 }
 
-const GalleryCard: FC<PropsT> = ({ card }) => {
+const GalleryCard: FC<PropsT> = ({ card, handleCardClick }) => {
     const { edhRank, imageUrl, name, id, setName, types, keywords, lang, isFoil, isEtched, rarity, quantity, number } = card;
     const calculatedPrice = tunePrice(card);
 
     return (
         <>
             <Col s="12" m="4" l='3' key={id}>
-                <Card type='container' theme='normal' view='raised' className='card'>
-                    <img src={imageUrl} style={{
-                        width: '100%',
-                        height: '100%',
-                        borderRadius: '16px',
-                    }} />
+                <Card type='container' theme='normal' view='raised'  className='box'>
+                    <div className='card'>
+                        <CopyButton id={ id } onClick={() => handleCardClick(id)} className='cardCopyButton' />
+                        <img src={imageUrl} style={{
+                            width: '100%',
+                            height: '100%',
+                            borderRadius: '16px',
+                        }} />
+                    </div>
                     <Row space={5}>
                         <Col>
                             <Text variant='subheader-3'>{name}</Text>

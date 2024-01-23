@@ -65,6 +65,7 @@ export function parseRawCardsResponse(cards: Array<Record<string, string>>): { c
             eurEtched,
             frameEffects,
             artist: card.artist,
+            ruName: card.ru_name,
         }
 
         return parsed;

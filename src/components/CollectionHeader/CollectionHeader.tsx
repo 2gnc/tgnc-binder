@@ -8,11 +8,13 @@ type PropsT = {
     isMobile: boolean;
     collectionName: string;
     owner: OwnerT;
+    handleOpenPanel: () => void
 }
 const CollectionHeader:FC<PropsT> = ({
     isMobile,
     collectionName,
-    owner
+    owner,
+    handleOpenPanel,
 }) => {
     return (
         <Row space="5">
@@ -31,7 +33,7 @@ const CollectionHeader:FC<PropsT> = ({
                 </Link>
             </Col>
             <Col s="3">
-                <Button size="l" view="raised" /*onClick={openCopyPanel}*/>
+                <Button size="l" view="raised" onClick={ handleOpenPanel } >
                     <Icon data={Copy} />
                     {!isMobile && <Text>Отобранные карты</Text>}
                 </Button>

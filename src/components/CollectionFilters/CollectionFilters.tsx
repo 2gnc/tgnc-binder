@@ -1,5 +1,5 @@
 import React, { type FC, useState, useRef, useEffect } from 'react';
-import { Row, Col, Text, Select, RadioButton, TextInput, Popup, Menu, Label, Flex } from '@gravity-ui/uikit';
+import { Row, Col, Text, Select, RadioButton, TextInput, Popup, Menu, Label, Flex, Button, Modal } from '@gravity-ui/uikit';
 import { ColorsEnum, TypeEnum, PermamentTypeEnum } from '../../models';
 import size from 'lodash/size';
 import map from 'lodash/map';
@@ -11,6 +11,9 @@ import greenMana from '../../images/g.png';
 import blueMana from '../../images/u.png';
 import whiteMana from '../../images/w.png';
 import landType from '../../images/l.png';
+
+import './styles.css';
+import { translate } from 'googleapis/build/src/apis/translate';
 
 type PropsT = {
     isMobile: boolean;
@@ -44,6 +47,15 @@ const CollectionFilters: FC<PropsT> = ({
     const spellTypeSearchRef = useRef(null);
     const [spellTypeSearch, setSpellTypeSearch] = useState('');
     const [isTypeSuggestOpen, setTypeSuggestOpen] = useState(false);
+    const [isFiltersVisible, setIsFiltersVisible] = useState(false);
+
+    const handleFilterButtonClick = () => {
+        setIsFiltersVisible(true);
+    }
+
+    const handleFiltersClose = () => {
+        setIsFiltersVisible(false);
+    }
     
     useEffect(() => {
         setTypeSuggestOpen(size(spellTypeSearch) > 2)
@@ -66,9 +78,9 @@ const CollectionFilters: FC<PropsT> = ({
         setSpellTypeSearch('');
     }
 
-    return (
-        <Row space="10">
-            <Col>
+    const renderContent = () => (
+        <Row space={isMobile ? '2' : '5'}>
+            <Col s='12'>
                 <div className='hidden'>
                     <input type='checkbox' name={ColorsEnum.BLACK} id={ColorsEnum.BLACK} onChange={handleColorSelect} checked={colorsFilters.includes(ColorsEnum.BLACK)} />
                     <input type='checkbox' name={ColorsEnum.BLUE} id={ColorsEnum.BLUE} onChange={handleColorSelect} checked={colorsFilters.includes(ColorsEnum.BLUE)} />
@@ -117,7 +129,7 @@ const CollectionFilters: FC<PropsT> = ({
                     </label>
                 </div>
             </Col>
-            <Col>
+            <Col s={ isMobile ? '6' : '4' }>
                 <Text variant='subheader-2' className='filterHeader'>Коллекция: </Text>
                 <Select
                     value={[collectionFilter]}
@@ -130,6 +142,7 @@ const CollectionFilters: FC<PropsT> = ({
                     }
                     onUpdate={([nextValue]) => handleCollectionSelect(nextValue)}
                     size={isMobile ? 'l' : 's'}
+                    className='collectionPopup'
                 />
             </Col>
             <Col>
@@ -156,13 +169,16 @@ const CollectionFilters: FC<PropsT> = ({
                     ref={spellTypeSearchRef}
                     size={isMobile ? 'l' : 's'}
                     onChange={(event) => {
-                        setSpellTypeSearch(event.target.value);
+                        setSpellTypeSearch(event.target.value.toLowerCase());
                     }}
                     value={spellTypeSearch}
                     onBlur={closeTypeSuggest}
+                    placeholder='например, instant'
                 />
-                <Flex space={1} style={{
+                <Flex space={3} style={{
                     paddingTop: '5px',
+                    maxWidth: '100%',
+                    flexWrap: 'wrap'
                 }}>
                     {
                         map(typesFilter, (type) => (
@@ -186,7 +202,7 @@ const CollectionFilters: FC<PropsT> = ({
                             avalaibleTypes
                                 .filter((type) => new RegExp(spellTypeSearch).test(type) && !typesFilter.includes(type))
                                 .map(item => (
-                                    <Menu.Item key={item} onClick={() => onSpellTypeAdd(item)} >
+                                    <Menu.Item key={item} onClick={() => onSpellTypeAdd(item)}>
                                         {item}
                                     </Menu.Item>
                                 ))
@@ -195,7 +211,40 @@ const CollectionFilters: FC<PropsT> = ({
                 </Popup>
             </Col>
         </Row>
-    )
+    );
+
+
+    if (isMobile) {
+        return (
+            <>
+            <Modal open={ isFiltersVisible } contentClassName='filtersModal' onClose={ handleFiltersClose }>
+                <>
+                    <div className='filtersModalHeader'>
+                        <Text variant='header-1' >Фильтры:</Text>
+                    </div>
+                    { renderContent() }
+                </>
+            </Modal>
+            {
+                isMobile && (
+                    <Button size='xl' width='auto' view='action' className='filtersButton' style={{
+                        position: 'fixed',
+                        bottom: '10px',
+                        right: '50%',
+                        transform: 'translateX(50%)',
+                        zIndex: 10
+                        }}
+                        onClick={handleFilterButtonClick}
+                    >
+                        Фильтры
+                    </Button>
+                )
+            }
+            </>
+        )
+    }
+
+    return renderContent();
 };
 
 export default CollectionFilters;

@@ -6,6 +6,8 @@ export function mapCardLangToEnum(cardlang: string): LangEnum {
             return LangEnum.EN;
         case 'ru':
             return LangEnum.RU;
+        case 'sp':
+            return LangEnum.SP;
         default:
             return LangEnum.OTH;
     }

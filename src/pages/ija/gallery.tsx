@@ -32,7 +32,7 @@ export const queryCards = graphql`
                 colors
                 types
                 condition
-                number
+                number,
             }
         }
     }
