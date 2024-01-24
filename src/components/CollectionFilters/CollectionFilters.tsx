@@ -113,7 +113,7 @@ const CollectionFilters: FC<PropsT> = ({
         <Row space={isMobile ? '2' : '5'} style={{
             marginTop: !isMobile ? '45px' : '0'
         }}>
-            <Col s='12'>
+            <Col s='12' l='3' className='colorsCol_desktop'>
                 <div className='hidden'>
                     <input type='checkbox' name={ColorsEnum.BLACK} id={ColorsEnum.BLACK} onChange={handleColorSelect} checked={colorsFilters.includes(ColorsEnum.BLACK)} />
                     <input type='checkbox' name={ColorsEnum.BLUE} id={ColorsEnum.BLUE} onChange={handleColorSelect} checked={colorsFilters.includes(ColorsEnum.BLUE)} />
@@ -162,7 +162,7 @@ const CollectionFilters: FC<PropsT> = ({
                     </label>
                 </div>
             </Col>
-            <Col s={ isMobile ? '6' : '4' }>
+            <Col s='6' l='1'>
                 <Text variant='subheader-2' className='filterHeader'>Коллекция: </Text>
                 <Select
                     value={[collectionFilter]}
@@ -178,7 +178,7 @@ const CollectionFilters: FC<PropsT> = ({
                     className='collectionPopup'
                 />
             </Col>
-            <Col>
+            <Col s='6' l='1'>
                 <Text variant='subheader-2' className='filterHeader'>Тип карты: </Text>
                 <RadioButton
                     size={isMobile ? 'l' : 's'}
@@ -196,7 +196,7 @@ const CollectionFilters: FC<PropsT> = ({
                     value={ typesFilter.includes(TypeEnum.TOKEN) ? PermamentTypeEnum.TOKEN : PermamentTypeEnum.CARD }
                 />
             </Col>
-            <Col>
+            <Col s='6' l='2'>
                 <Text variant='subheader-2' className='filterHeader'>Тип заклинания: </Text>
                 <TextInput
                     ref={spellTypeSearchRef}
@@ -245,7 +245,7 @@ const CollectionFilters: FC<PropsT> = ({
                     </Menu>
                 </Popup>
             </Col>
-            <Col s={isMobile ? '12' : '6'}>
+            <Col s='6' l='3'>
                 <Text variant='subheader-2' className='filterHeader'>Название: </Text>
                 <TextInput
                     ref={spellNameSearchRef}
@@ -276,18 +276,23 @@ const CollectionFilters: FC<PropsT> = ({
                 </Popup>
             </Col>
         </Row>
-        <Row space={5}>
-            <Col s={12}>
-                <Flex justifyContent='center' className='buttonRow' space={8}>
-                    <Button view='outlined-danger' size='l' onClick={ onFiltersFlush }>
-                            Сбросить
-                    </Button>
-                    <Button view='action' size='l' onClick={ handleFiltersClose }>
-                        Применить
-                    </Button>
-                </Flex>
-            </Col>
-        </Row>
+        {
+            isMobile && (
+                <Row space={5}>
+                    <Col s={12}>
+                        <Flex justifyContent='center' className='buttonRow' space={8}>
+                            <Button view='outlined-danger' size='l' onClick={ onFiltersFlush }>
+                                    Сбросить
+                            </Button>
+                            <Button view='action' size='l' onClick={ handleFiltersClose }>
+                                Применить
+                            </Button>
+                        </Flex>
+                    </Col>
+                </Row>
+            )
+        }
+       
         </>
     );
 

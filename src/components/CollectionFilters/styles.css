@@ -11,3 +11,7 @@
 .buttonRow {
     padding-top: 16px;
 }
+
+.colorsCol_desktop {
+    align-self: flex-end;
+}
