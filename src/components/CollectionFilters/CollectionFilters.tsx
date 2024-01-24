@@ -280,7 +280,7 @@ const CollectionFilters: FC<PropsT> = ({
             isMobile && (
                 <Row space={5}>
                     <Col s={12}>
-                        <Flex justifyContent='center' className='buttonRow' space={8}>
+                        <Flex justifyContent='center' className='buttonRow' >
                             <Button view='outlined-danger' size='l' onClick={ onFiltersFlush }>
                                     Сбросить
                             </Button>

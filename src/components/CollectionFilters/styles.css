@@ -1,5 +1,7 @@
 .filtersModal {
    padding: 16px 8px;
+   min-height: 50vh;
+   position: relative
 }
 
 .filtersModalHeader {
@@ -9,7 +11,12 @@
 }
 
 .buttonRow {
-    padding-top: 16px;
+    position: absolute;
+    bottom: 16px;
+    display: flex;
+    gap: 16px;
+    width: 100%;
+    justify-content: center;
 }
 
 .colorsCol_desktop {
