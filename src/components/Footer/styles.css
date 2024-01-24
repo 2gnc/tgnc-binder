@@ -1,0 +1,21 @@
+.footerBox {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    box-sizing: border-box;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    background: #fff;
+    width: 100%;
+    z-index: 5;
+    height: 60px;
+    box-shadow: 0px -4px 8px 0px rgba(34, 60, 80, 0.2);
+}
+
+.contactButton_mob,
+.filtersButton_mob,
+.collectionButton_mob {
+    z-index: 10;
+}

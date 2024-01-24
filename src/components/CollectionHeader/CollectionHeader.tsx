@@ -1,45 +1,58 @@
 import React, { type FC } from 'react';
-import { Row, Col, Text, Button, Link, Icon } from '@gravity-ui/uikit';
-import { HelpPopover } from '@gravity-ui/components';
-import {LogoTelegram, Copy} from '@gravity-ui/icons';
+import { Breadcrumbs, Icon, Button } from '@gravity-ui/uikit';
 import { OwnerT } from '../../models';
+import { Link } from 'gatsby';
+import { Receipt } from '@gravity-ui/icons';
+import logo from '../../images/logo.png';
+
+import './styles.css';
 
 type PropsT = {
     isMobile: boolean;
-    collectionName: string;
     owner: OwnerT;
-    handleOpenPanel: () => void
+    collection: string;
+    path: string;
 }
 const CollectionHeader:FC<PropsT> = ({
     isMobile,
-    collectionName,
     owner,
-    handleOpenPanel,
+    collection,
+    path,
 }) => {
+    const items = [
+        {
+            text: owner.name,
+            action: () => {},
+        },
+        {
+            text: 'Gallery',
+            action: () => {},
+            href: path
+        },
+        {
+            text: collection,
+            action: () => {}
+        }
+    ]
     return (
-        <Row space="5">
-            <Col s="4">
-                <Text variant='header-1' style={{
-                    textTransform: 'capitalize'
-                }}>{collectionName}</Text>
-            </Col>
-            <Col s="5">
-                <Link href={ owner.contactLink } target="_blank">
-                    <Button size="l" view="outlined">
-                        <Icon data={LogoTelegram} />
-                        {!isMobile && <Text>Написать владельцу</Text>}
-                    </Button>
-                    <HelpPopover className='helpButton' contentClassName='helpContent' openOnHover size='s' content='Откроется Telegram' />      
+        <div className='headerBox'>
+            <div className='headerNavi'>
+                <Link to='/'>
+                    <img src={ logo } className='logoLink' />
                 </Link>
-            </Col>
-            <Col s="3">
-                <Button size="l" view="raised" onClick={ handleOpenPanel } >
-                    <Icon data={Copy} />
-                    {!isMobile && <Text>Отобранные карты</Text>}
+                <Breadcrumbs
+                    items={items}
+                    firstDisplayedItemsCount={0}
+                    lastDisplayedItemsCount={2}
+                    renderItemDivider={() => '>'}
+                />
+            </div>
+            <a href={`/${owner.name.toLowerCase()}/trade?collection=${collection}`} target='_blank' className='tradeListLink'>
+                <Button view='raised'>
+                    <Icon data={Receipt} size={16} />
                 </Button>
-                <HelpPopover className='helpButton' contentClassName='helpContent' openOnHover size='s' content='Посмотреть и скопировать список отобранных карт (скоро)' />  
-            </Col>
-        </Row>
+            </a>
+        </div>
     )
 
 }

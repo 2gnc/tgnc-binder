@@ -1,7 +1,7 @@
-import React, { useEffect, useState, useCallback, useRef, Suspense } from 'react';
+import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import UAParser from 'ua-parser-js';
 import type { HeadFC, PageProps } from "gatsby";
-import {Container, ThemeProvider, Modal, Button } from '@gravity-ui/uikit';
+import { Container, ThemeProvider, Modal } from '@gravity-ui/uikit';
 import { parseRawCardsResponse } from '../../utils/parse-raw-cards-response';
 import { CardT, ColorsEnum, OwnerT, PermamentTypeEnum, TypeEnum } from '../../models';
 import { SelectedCardsView  } from '../SelectedCadsView/SelectedCadsView';
@@ -13,6 +13,8 @@ import { toaster } from '@gravity-ui/uikit/toaster-singleton';
 import CollectionHeader from '../../components/CollectionHeader/CollectionHeader';
 import CollectionFilters from '../../components/CollectionFilters/CollectionFilters';
 import GalleryTable from '../../components/GalleryTable/GalleryTable';
+import { Footer } from '../Footer/Footer';
+import { GoUpButton } from '../GoUpButton/GoUpButton';
 
 import '@gravity-ui/uikit/styles/styles.css';
 import '@gravity-ui/uikit/styles/fonts.css';
@@ -43,17 +45,23 @@ type PropsT = PageProps & {
     queryName: string;
 }
 
-const GalleryPage: React.FC<PropsT> = ({ data, owner, queryName }) => {
-    const { cards, collections, types } = parseRawCardsResponse(data[queryName].nodes);
+const GalleryPage: React.FC<PropsT> = ({ data, owner, queryName, path }) => {
+    const { cards, collections, types, names } = parseRawCardsResponse(data[queryName].nodes);
     const allCollections = [...collections.filter(coll => coll.length), ALL_COLLECTIONS];
+
+    const [isRendered, setIsRendered] = useState(false);
     const initialCards = useRef(cards);
     const [cardsToDisplay, setCardsToDisplay] = useState<Array<CardT>>(initialCards.current);
     const [isCopyPanelOpen, setCopyPanelOpen] = useState(false);
+
     const [colorsFilters, setColorsFilters] = useState<Array<ColorsEnum>>([]);
     const [collectionFilter, setCollectionFilter] = useState<string>(ALL_COLLECTIONS);
     const [typesFilter, setTypesFilter] = useState<Array<string>>([]);
-    const [isRendered, setIsRendered] = useState(false);
+    const [nameFilter, setNameFilter] = useState('');
+    
     const [selectedCards, setSelectedCards] = useState<Array<CardT>>([]);
+    const [isFiltersVisible, setIsFiltersVisible] = useState(false);
+    const [filtersUsedCount, setFiltersUsedCount] = useState(0);
 
     useEffect(() => {
         setIsRendered(true);
@@ -65,6 +73,7 @@ const GalleryPage: React.FC<PropsT> = ({ data, owner, queryName }) => {
         const byColorsSearch = urlParams.get('color');
         const byTypeSearch = urlParams.get('type');
         const byCollectionSearch = urlParams.get('collection');
+        const byNameSearch = urlParams.get('name');
 
         if (!isNil(byColorsSearch)) {
             const colorFilters = byColorsSearch.split(',') as Array<ColorsEnum>;
@@ -76,6 +85,9 @@ const GalleryPage: React.FC<PropsT> = ({ data, owner, queryName }) => {
         }
         if (!isNil(byCollectionSearch)) {
             setCollectionFilter(byCollectionSearch);
+        }
+        if (!isNil(byNameSearch)) {
+            setNameFilter(byNameSearch);
         }
     }, []);
 
@@ -105,6 +117,11 @@ const GalleryPage: React.FC<PropsT> = ({ data, owner, queryName }) => {
             return size(foundTypes) && size(foundTypes) === size(typesFilter);
         }
 
+        const isMatchByName = (card: CardT) => {
+            const re = new RegExp(nameFilter.toLowerCase())
+            return re.test(card.name.toLowerCase());
+        }
+
         const isLandTypeIncluded = typesFilter.includes(TypeEnum.LAND);
         const isTokenTypeIncluded = typesFilter.includes(TypeEnum.TOKEN);
 
@@ -114,15 +131,24 @@ const GalleryPage: React.FC<PropsT> = ({ data, owner, queryName }) => {
         filtredByCollectionCards = filtredByCollectionCards.filter((card) => {
             const hasColorsMatch = isMatchByColor(card);
             const isMatchByType = isMatchByTypes(card);
+            const hasNameMatch = isMatchByName(card);
 
             const shouldIncludeLand = isLandTypeIncluded ? true : isNotLand(card);
             const shouldIncludeTokens = isTokenTypeIncluded ? true : isNotToken(card);
 
-            return hasColorsMatch && isMatchByType && shouldIncludeLand && shouldIncludeTokens;
+            return hasColorsMatch && isMatchByType && shouldIncludeLand && shouldIncludeTokens && hasNameMatch;
         });
 
         setCardsToDisplay(filtredByCollectionCards);
-    }, [colorsFilters, collectionFilter, typesFilter]);
+    }, [colorsFilters, collectionFilter, typesFilter, nameFilter]);
+
+    const handleFilterButtonClick = () => {
+        setIsFiltersVisible(true);
+    }
+
+    const handleFiltersClose = () => {
+        setIsFiltersVisible(false);
+    }
 
     const handleCollectionSelect = (collection: string) => {
         setCollectionFilter(collection);
@@ -186,11 +212,63 @@ const GalleryPage: React.FC<PropsT> = ({ data, owner, queryName }) => {
         setTypesFilter([...typesSet]);
     }
 
+    const flushFilters = () => {
+        setColorsFilters([]);
+        updateSearchURL('color', []);
+
+        setCollectionFilter('');
+        updateSearchURL('collection', []);
+
+        setTypesFilter([]);
+        updateSearchURL('type', []);
+
+        setNameFilter('');
+        updateSearchURL('name', []);
+
+        setFiltersUsedCount(0);
+    };
+
+    useEffect(() => {
+        let count = 0;
+
+        if (size(colorsFilters)) {
+            console.log(1)
+            setFiltersUsedCount(count += 1)
+        };
+        if (collectionFilter.length && collectionFilter !== 'all') {
+            console.log(2)
+
+            setFiltersUsedCount(count += 1)
+        };
+        if (size(typesFilter)) {
+            console.log(3)
+
+            setFiltersUsedCount(count += 1);
+        }
+        if (size(nameFilter)) {
+            console.log(4)
+
+            setFiltersUsedCount(count += 1);
+        }
+
+    }, [colorsFilters, collectionFilter, typesFilter, nameFilter, flushFilters]);
+
     const openCopyPanel = () => {
         setCopyPanelOpen(true);
     }
     const closeCopyPanel = () => {
         setCopyPanelOpen(false);
+    }
+
+    const flushSelected = () => {
+        setSelectedCards([]);
+    }
+
+    const removeOneSelectedCard = (id: string) => {
+        const candidat = selectedCards.findIndex(card => card.id === id);
+        const arr = [...selectedCards];
+        arr.splice(candidat, 1)
+        setSelectedCards(arr);
     }
 
     const handleCardClick = (id: string) => {
@@ -201,11 +279,16 @@ const GalleryPage: React.FC<PropsT> = ({ data, owner, queryName }) => {
             toaster.add({
                 name: found.id,
                 title: 'Добавлено к обмену',
-                autoHiding: 2000,
+                autoHiding: 1500,
                 type: 'success',
                 content: found.name
             })
         }
+    }
+
+    const handleFilterByName = (name: string) => {
+        setNameFilter(name);
+        updateSearchURL('name', name ? [name] : []);
     }
 
     if (!isRendered) {
@@ -214,31 +297,58 @@ const GalleryPage: React.FC<PropsT> = ({ data, owner, queryName }) => {
 
     return (
         <ThemeProvider theme="light">
-                <Container spaceRow="10">
-                    <CollectionHeader
-                        isMobile={ IS_MOBILE }
-                        owner={owner}
-                        collectionName={collectionFilter}
-                        handleOpenPanel={ openCopyPanel }
-                    />
-                    <CollectionFilters
-                        isMobile={ IS_MOBILE }
-                        handleColorSelect={handleColorSelect}
-                        handleFilterByLandType={handleFilterByLandSelect}
-                        colorsFilters={ colorsFilters }
-                        collectionFilter={ collectionFilter }
-                        handleCollectionSelect={ handleCollectionSelect }
-                        avalaibleCollections={allCollections}
-                        typesFilter={ typesFilter }
-                        handleCardTypeSelect={ handleCardTypeSelect }
-                        avalaibleTypes={ types }
-                        handleSpellTypeAdd={ handleSpellTypeSelect }
-                        handleSpellTypeRemove={ handleSpellTypeRemove }
-                    />
-                    <GalleryTable cards={ cardsToDisplay } handleCardClick={handleCardClick} />
-                </Container>
-            <Modal open={isCopyPanelOpen} onOutsideClick={closeCopyPanel} contentClassName='copyModal'>
-                <SelectedCardsView cards={ selectedCards } />
+            <Container spaceRow={ IS_MOBILE ? '4' : '6' } style={{
+                height: '100vh',
+                maxHeight: '100vh',
+            }}>
+                <CollectionHeader
+                    isMobile={ IS_MOBILE }
+                    owner={owner}
+                    collection={ collectionFilter }
+                    path={ path }
+                />
+                <CollectionFilters
+                    isMobile={ IS_MOBILE }
+                    handleColorSelect={handleColorSelect}
+                    handleFilterByLandType={handleFilterByLandSelect}
+                    colorsFilters={ colorsFilters }
+                    collectionFilter={ collectionFilter }
+                    handleCollectionSelect={ handleCollectionSelect }
+                    avalaibleCollections={allCollections}
+                    typesFilter={ typesFilter }
+                    handleCardTypeSelect={ handleCardTypeSelect }
+                    avalaibleTypes={ types }
+                    handleSpellTypeAdd={ handleSpellTypeSelect }
+                    handleSpellTypeRemove={ handleSpellTypeRemove }
+                    avalaibleNames={ names }
+                    handleSpellNameSet={ handleFilterByName }
+                    defaultByNameValueFromQuery={new URLSearchParams(window.location.search).get('name') || ''}
+                    handleFiltersClose={ handleFiltersClose }
+                    isFiltersVisible={ isFiltersVisible }
+                    handleFiltersFlush={ flushFilters }
+                />
+                <GalleryTable cards={ cardsToDisplay } handleCardClick={handleCardClick} />
+                <Footer
+                    isMobile={ IS_MOBILE }
+                    owner={ owner }
+                    filtersUsedCount={ filtersUsedCount }
+                    handleOpenCopyPanel={ openCopyPanel}
+                    selectionSize={ size(selectedCards) }
+                    handleFilterButtonClick={ handleFilterButtonClick }
+                />
+            </Container>
+            <GoUpButton />
+            <Modal
+                open={isCopyPanelOpen}
+                onOutsideClick={ closeCopyPanel }
+                contentClassName='copyModal'
+            >
+                <SelectedCardsView
+                    cards={ selectedCards }
+                    handleClose={ closeCopyPanel }
+                    handleClear={ flushSelected }
+                    handleRemoveItem={ removeOneSelectedCard }
+                />
             </Modal>            
         </ThemeProvider>
     );

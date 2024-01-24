@@ -13,53 +13,73 @@ import whiteMana from '../../images/w.png';
 import landType from '../../images/l.png';
 
 import './styles.css';
-import { translate } from 'googleapis/build/src/apis/translate';
 
 type PropsT = {
     isMobile: boolean;
+    isFiltersVisible: boolean;
     colorsFilters: Array<ColorsEnum>;
     collectionFilter: string;
     avalaibleCollections: Array<string>;
     typesFilter: Array<string>;
     avalaibleTypes: Array<string>;
+    avalaibleNames: Array<{ name: string; searchBase: string}>;
+    defaultByNameValueFromQuery: string;
     handleColorSelect: (event: React.ChangeEvent<HTMLInputElement>) => void;
     handleFilterByLandType: (event: React.ChangeEvent<HTMLInputElement>) => void;
     handleCollectionSelect: (collection: string) => void;
     handleCardTypeSelect: (type: PermamentTypeEnum) => void;
     handleSpellTypeAdd: (type: string) => void;
     handleSpellTypeRemove: (type: string) => void;
+    handleSpellNameSet: (name: string) => void;
+    handleFiltersClose: () => void;
+    handleFiltersFlush: () => void;
 }
 
 const CollectionFilters: FC<PropsT> = ({
     isMobile,
+    isFiltersVisible,
     colorsFilters,
     collectionFilter,
     avalaibleCollections,
     typesFilter,
     avalaibleTypes,
+    avalaibleNames,
+    defaultByNameValueFromQuery,
     handleColorSelect,
     handleFilterByLandType,
     handleCollectionSelect,
     handleCardTypeSelect,
     handleSpellTypeAdd,
     handleSpellTypeRemove,
+    handleSpellNameSet,
+    handleFiltersClose,
+    handleFiltersFlush,
 }) => {
     const spellTypeSearchRef = useRef(null);
+    const spellNameSearchRef = useRef(null);
     const [spellTypeSearch, setSpellTypeSearch] = useState('');
+    const [spellNameSearch, setSpellNameSearch] = useState(defaultByNameValueFromQuery);
     const [isTypeSuggestOpen, setTypeSuggestOpen] = useState(false);
-    const [isFiltersVisible, setIsFiltersVisible] = useState(false);
+    const [isNameSuggestOpen, setNameSuggestOpen] = useState(false);
+    const [nameSuggest, setNameSuggest] = useState<Array<string>>([]);
 
-    const handleFilterButtonClick = () => {
-        setIsFiltersVisible(true);
-    }
-
-    const handleFiltersClose = () => {
-        setIsFiltersVisible(false);
-    }
-    
     useEffect(() => {
         setTypeSuggestOpen(size(spellTypeSearch) > 2)
     }, [spellTypeSearch]);
+
+    useEffect(() => {
+        if (!size(spellNameSearch)) {
+            handleSpellNameSet('');
+        }
+        
+        if (size(spellNameSearch) < 3) return;
+        const found = avalaibleNames
+            .filter((name) => new RegExp(spellNameSearch).test(name.searchBase))
+            .map(item => item.name);
+        
+        setNameSuggest([... new Set(found)]);                
+        setNameSuggestOpen(true);
+    }, [spellNameSearch]);
 
     const checkIsColorFilterSet = (color: ColorsEnum): boolean => {
         return colorsFilters.includes(color);
@@ -69,8 +89,8 @@ const CollectionFilters: FC<PropsT> = ({
         setTypeSuggestOpen(false);
     }
 
-    const openTypeSuggest = () => {
-        setTypeSuggestOpen(true);
+    const closeNameSuggest = () => {
+        setNameSuggestOpen(false);
     }
 
     const onSpellTypeAdd = (item: string) => {
@@ -78,8 +98,21 @@ const CollectionFilters: FC<PropsT> = ({
         setSpellTypeSearch('');
     }
 
+    const onSpellNameSet = (name: string) => {
+        handleSpellNameSet(name);
+        handleFiltersClose();
+    }
+
+    const onFiltersFlush = () => {
+        handleFiltersFlush();
+        setSpellNameSearch('');
+    }
+
     const renderContent = () => (
-        <Row space={isMobile ? '2' : '5'}>
+        <>
+        <Row space={isMobile ? '2' : '5'} style={{
+            marginTop: !isMobile ? '45px' : '0'
+        }}>
             <Col s='12'>
                 <div className='hidden'>
                     <input type='checkbox' name={ColorsEnum.BLACK} id={ColorsEnum.BLACK} onChange={handleColorSelect} checked={colorsFilters.includes(ColorsEnum.BLACK)} />
@@ -200,7 +233,9 @@ const CollectionFilters: FC<PropsT> = ({
                     <Menu size='l'>
                         {
                             avalaibleTypes
-                                .filter((type) => new RegExp(spellTypeSearch).test(type) && !typesFilter.includes(type))
+                                .filter((type) => {
+                                    return new RegExp(spellTypeSearch).test(type) && !typesFilter.includes(type)}
+                                )
                                 .map(item => (
                                     <Menu.Item key={item} onClick={() => onSpellTypeAdd(item)}>
                                         {item}
@@ -210,14 +245,56 @@ const CollectionFilters: FC<PropsT> = ({
                     </Menu>
                 </Popup>
             </Col>
+            <Col s={isMobile ? '12' : '6'}>
+                <Text variant='subheader-2' className='filterHeader'>Название: </Text>
+                <TextInput
+                    ref={spellNameSearchRef}
+                    size={isMobile ? 'l' : 's'}
+                    onChange={(event) => {
+                        setSpellNameSearch(event.target.value.toLowerCase());
+                    }}
+                    value={spellNameSearch}
+                    onBlur={closeNameSuggest}
+                    placeholder='например, abrade'
+                    hasClear
+                    
+                />
+                <Popup
+                    open={isNameSuggestOpen}
+                    anchorRef={spellNameSearchRef}
+                    placement='bottom-start'
+                >
+                    <Menu size='l'>
+                        {
+                            nameSuggest.map((item) => (
+                                <Menu.Item key={item} onClick={() => onSpellNameSet(item)}>
+                                    {item}
+                                </Menu.Item>
+                            ))
+                        }
+                    </Menu>
+                </Popup>
+            </Col>
         </Row>
+        <Row space={5}>
+            <Col s={12}>
+                <Flex justifyContent='center' className='buttonRow' space={8}>
+                    <Button view='outlined-danger' size='l' onClick={ onFiltersFlush }>
+                            Сбросить
+                    </Button>
+                    <Button view='action' size='l' onClick={ handleFiltersClose }>
+                        Применить
+                    </Button>
+                </Flex>
+            </Col>
+        </Row>
+        </>
     );
 
 
     if (isMobile) {
         return (
-            <>
-            <Modal open={ isFiltersVisible } contentClassName='filtersModal' onClose={ handleFiltersClose }>
+            <Modal disableBodyScrollLock open={ isFiltersVisible } contentClassName='filtersModal' onClose={ handleFiltersClose }>
                 <>
                     <div className='filtersModalHeader'>
                         <Text variant='header-1' >Фильтры:</Text>
@@ -225,22 +302,6 @@ const CollectionFilters: FC<PropsT> = ({
                     { renderContent() }
                 </>
             </Modal>
-            {
-                isMobile && (
-                    <Button size='xl' width='auto' view='action' className='filtersButton' style={{
-                        position: 'fixed',
-                        bottom: '10px',
-                        right: '50%',
-                        transform: 'translateX(50%)',
-                        zIndex: 10
-                        }}
-                        onClick={handleFilterButtonClick}
-                    >
-                        Фильтры
-                    </Button>
-                )
-            }
-            </>
         )
     }
 

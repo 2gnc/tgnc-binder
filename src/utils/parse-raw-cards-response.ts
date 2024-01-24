@@ -9,9 +9,16 @@ function safeParse(value: string): number {
     return isNaN(parseFloat(value)) ? 0 : parseFloat(value);
 }
 
-export function parseRawCardsResponse(cards: Array<Record<string, string>>): { cards: Array<CardT>; collections: Array<string>; types: Array<string> } {
+export function parseRawCardsResponse(cards: Array<Record<string, string>>): {
+    cards: Array<CardT>;
+    collections: Array<string>;
+    types: Array<string>;
+    names: Array<{ name: string;searchBase: string}>
+} {
     const allCollections: Array<string> = [];
     const allTypes: Array<string> = [];
+    const allNames: Array<{ name: string;searchBase: string}> = [];
+
     const allCards = map(cards, card => {
         const quantity = safeParse(card.quantity);
         const types = [...new Set(
@@ -34,6 +41,10 @@ export function parseRawCardsResponse(cards: Array<Record<string, string>>): { c
         const collections = card.collection.split(',').map(col => col.trim().toLowerCase());
         allCollections.push(...collections);
         allTypes.push(...types);
+        allNames.push({
+            name: card.name,
+            searchBase: `${card.name.toLowerCase()} ${card.ru_name?.toLowerCase()}`
+        })
 
         const parsed: CardT = {
             name: card.name,
@@ -75,5 +86,6 @@ export function parseRawCardsResponse(cards: Array<Record<string, string>>): { c
         cards: allCards,
         collections: [...new Set(allCollections)],
         types: [...new Set(allTypes)],
+        names: [...new Set(allNames)]
     }
 }

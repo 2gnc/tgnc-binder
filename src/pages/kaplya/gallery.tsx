@@ -38,7 +38,7 @@ export const queryCards = graphql`
     }
 `;
 
-const OWNER = { name: 'Ija', contactLink: 'https://telegram.me/Darling_Jen' };
+const OWNER = { name: 'Kaplya', contactLink: 'https://telegram.me/Darling_Jen' };
 
 const GalleryPage: React.FC<PageProps> = (props) => {
     return (

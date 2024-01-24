@@ -1,16 +1,20 @@
-import React from 'react';
-import { tunePrice } from '../utils/tune-price';
-import { type CardT } from '../models';
+import React, { type FC } from 'react';
+import { CardT } from '../../models';
+import { tunePrice } from '../../utils/tune-price';
 
-type TablePropsT = {
-    header: string;
-    cards: Array<CardT>
+type PropsT = {
+    cards: Array<CardT>;
+    color: string;
 }
 
-const Table: React.FC<TablePropsT> = ({ header, cards }) => {
+export const TradeGroupedTable: FC<PropsT> = ({ cards, color }) => {
+    if (!cards.length) {
+        return null;
+    }
+    
     return (
         <>
-            <h2>{header}</h2>
+            <h2>{ color }</h2>
             <table style={{
                 borderCollapse: 'collapse'
             }}>
@@ -48,5 +52,3 @@ const Table: React.FC<TablePropsT> = ({ header, cards }) => {
       </>
     )
 }
-
-export default Table;

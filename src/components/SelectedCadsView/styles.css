@@ -1,0 +1,30 @@
+.selectedCardsView__box {
+    padding: 24px 16px;
+    position: relative;
+    height: 100%;
+}
+
+.selectedCardsView__buttons {
+    position: absolute;
+    bottom: 32px;
+    transform: translateY(-100%);
+}
+
+.selectedCardsView__header {
+    padding-bottom: 16px;
+}
+
+.selectedCardsView__totalRow {
+    margin-top: 16px;
+}
+
+.selectedCardsView__row {
+    padding: 4px 0;
+}
+
+.selectedCardsView__list {
+    max-height: 55vh;
+    overflow-y: scroll;
+    border: 1px solid silver;
+    padding: 0 8px 0 16px;
+}
