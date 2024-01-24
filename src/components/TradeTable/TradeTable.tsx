@@ -29,7 +29,7 @@ const TradeTable: React.FC<TablePropsT> = ({ cards }) => {
     };
 
     cards.forEach(card => {
-        if (!collection || !card.collections.includes(collection)) {
+        if ((!collection || !card.collections.includes(collection)) && collection !== 'all') {
             return;
         }
 

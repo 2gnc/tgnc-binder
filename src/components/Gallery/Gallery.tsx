@@ -216,8 +216,8 @@ const GalleryPage: React.FC<PropsT> = ({ data, owner, queryName, path }) => {
         setColorsFilters([]);
         updateSearchURL('color', []);
 
-        setCollectionFilter('');
-        updateSearchURL('collection', []);
+        setCollectionFilter('all');
+        updateSearchURL('collection', ['all']);
 
         setTypesFilter([]);
         updateSearchURL('type', []);
@@ -232,22 +232,15 @@ const GalleryPage: React.FC<PropsT> = ({ data, owner, queryName, path }) => {
         let count = 0;
 
         if (size(colorsFilters)) {
-            console.log(1)
             setFiltersUsedCount(count += 1)
         };
         if (collectionFilter.length && collectionFilter !== 'all') {
-            console.log(2)
-
             setFiltersUsedCount(count += 1)
         };
         if (size(typesFilter)) {
-            console.log(3)
-
             setFiltersUsedCount(count += 1);
         }
         if (size(nameFilter)) {
-            console.log(4)
-
             setFiltersUsedCount(count += 1);
         }
 
