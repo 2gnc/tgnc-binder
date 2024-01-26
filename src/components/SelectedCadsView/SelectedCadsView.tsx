@@ -18,20 +18,20 @@ export const SelectedCardsView: FC<PropsT> = ({ cards, handleClose, handleClear,
     let TEXT = '';
     let TOTAL = 0;
     const handleCopyList = () => {
-        copy(`${TEXT}\n ИТОГО: ${TOTAL} руб`);
+        copy(`${TEXT}\n Total: ${TOTAL} rub`);
         handleClose();
     }
 
     return (
         <div className='selectedCardsView__box'>
-            <Text variant='header-2' className='selectedCardsView__header' as='div'>Карты в заказе:</Text>
+            <Text variant='header-2' className='selectedCardsView__header' as='div'>Cards in order:</Text>
             <div className='selectedCardsView__list' id='input'>
             {
                 cards.map((card, i) => {
                     const price = tunePrice(card);
                     TOTAL += price;
 
-                    const rowText = `${card.name} (${card.colors.join(',')}) ${card.set}#${card.number} ${card.isFoil ? 'foil' : card.isEtched ? 'etched' : 'обычная'} ${card.lang} - ${price} руб.`
+                    const rowText = `${card.name} (${card.colors.join(',')}) ${card.set}#${card.number} ${card.isFoil ? 'foil' : card.isEtched ? 'etched' : 'non foil'} ${card.lang} - ${price} rub.`
                     TEXT += `${rowText}\n`
                     return (
                         <div className='selectedCardsView__row' key={i}>
@@ -47,13 +47,13 @@ export const SelectedCardsView: FC<PropsT> = ({ cards, handleClose, handleClear,
             }
             </div>
             <div className='selectedCardsView__totalRow'>
-                <Text variant='subheader-2'>{`Итого: ${TOTAL} руб.`}</Text>
+                <Text variant='subheader-2'>{`Total: ${TOTAL} rub.`}</Text>
             </div>
             <div className='selectedCardsView__buttons'>
                 <Flex space='3' justifyContent='center'>
-                    <Button view='normal' onClick={ handleClose }>Закрыть</Button>
-                    <Button view='outlined-danger' onClick={ handleClear }>Очистить</Button>
-                    <Button view='action' onClick={ handleCopyList }>Скопировать</Button>
+                    <Button view='normal' onClick={ handleClose }>Close</Button>
+                    <Button view='outlined-danger' onClick={ handleClear }>Clear</Button>
+                    <Button view='action' onClick={ handleCopyList }>Copy</Button>
                 </Flex>
             </div>
         </div>

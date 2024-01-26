@@ -16,6 +16,7 @@ const IndexPage: React.FC<PageProps> = () => {
                 <li><Link to="ksenia/gallery">Коллекция Ksenia</Link></li>
                 <li><Link to="kaplya/gallery">Коллекция Kaplya</Link></li>
                 <li><Link to="ija/gallery">Коллекция Ija</Link></li>
+                <li><Link to="twobluecats/gallery">Коллекция TwoBlueCats</Link></li>
             </ul>
             <p>Если вы хотите присоединиться к тестированию и опубликовать свою коллекцию - <a href="https://telegram.me/KseniaPolyakova" target="_blank">напишите мне</a></p>
         </div>

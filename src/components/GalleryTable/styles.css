@@ -2,3 +2,13 @@
     padding-bottom: 65px;
     padding-top: 45px;
 }
+
+.emptyBox {
+    height: 100%;
+    position: relative;
+}
+
+.emptyMsg {
+    position: absolute;
+    top: 40%;
+}

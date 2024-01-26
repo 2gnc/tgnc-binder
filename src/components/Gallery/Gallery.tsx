@@ -25,6 +25,7 @@ const { device } = new UAParser().getResult();
 const IS_MOBILE = device.type === 'mobile';
 
 const ALL_COLLECTIONS = 'all';
+const LOAD_AMOUNT = 10;
 
 function updateSearchURL(param: string, value: Array<string>) {
     const urlParams = new URLSearchParams(window.location.search);
@@ -48,20 +49,42 @@ type PropsT = PageProps & {
 const GalleryPage: React.FC<PropsT> = ({ data, owner, queryName, path }) => {
     const { cards, collections, types, names } = parseRawCardsResponse(data[queryName].nodes);
     const allCollections = [...collections.filter(coll => coll.length), ALL_COLLECTIONS];
-
-    const [isRendered, setIsRendered] = useState(false);
+    
     const initialCards = useRef(cards);
-    const [cardsToDisplay, setCardsToDisplay] = useState<Array<CardT>>(initialCards.current);
+
+    // Client side rendering guarantee
+    const [isRendered, setIsRendered] = useState(false);
+
+    const [selectedCardsToDisplay, setSelectedCardsToDisplay] = useState<Array<CardT>>(initialCards.current);
+
+    // Interface state
     const [isCopyPanelOpen, setCopyPanelOpen] = useState(false);
 
+    // Filters
     const [colorsFilters, setColorsFilters] = useState<Array<ColorsEnum>>([]);
     const [collectionFilter, setCollectionFilter] = useState<string>(ALL_COLLECTIONS);
     const [typesFilter, setTypesFilter] = useState<Array<string>>([]);
     const [nameFilter, setNameFilter] = useState('');
+    const [filtersUsedCount, setFiltersUsedCount] = useState(0);
+    const [isFiltersVisible, setIsFiltersVisible] = useState(false);
     
     const [selectedCards, setSelectedCards] = useState<Array<CardT>>([]);
-    const [isFiltersVisible, setIsFiltersVisible] = useState(false);
-    const [filtersUsedCount, setFiltersUsedCount] = useState(0);
+
+    // Infinite scroll
+    const [currentChunk, setCurrentChunk] = useState(0);
+
+    const handleLoadMore = () => {
+        return new Promise<void>((resolve) => {
+            setTimeout(() => {
+                setCurrentChunk(currentChunk +1);
+                resolve();
+            }, 500);
+        })
+    }
+
+    const getChunk = () => {
+        return selectedCardsToDisplay.slice(0, currentChunk * LOAD_AMOUNT + LOAD_AMOUNT);
+    }
 
     useEffect(() => {
         setIsRendered(true);
@@ -139,7 +162,8 @@ const GalleryPage: React.FC<PropsT> = ({ data, owner, queryName, path }) => {
             return hasColorsMatch && isMatchByType && shouldIncludeLand && shouldIncludeTokens && hasNameMatch;
         });
 
-        setCardsToDisplay(filtredByCollectionCards);
+        setSelectedCardsToDisplay(filtredByCollectionCards);
+        setCurrentChunk(1);
     }, [colorsFilters, collectionFilter, typesFilter, nameFilter]);
 
     const handleFilterButtonClick = () => {
@@ -148,6 +172,7 @@ const GalleryPage: React.FC<PropsT> = ({ data, owner, queryName, path }) => {
 
     const handleFiltersClose = () => {
         setIsFiltersVisible(false);
+        window?.scrollTo({top: 0, behavior: 'smooth'});
     }
 
     const handleCollectionSelect = (collection: string) => {
@@ -271,8 +296,8 @@ const GalleryPage: React.FC<PropsT> = ({ data, owner, queryName, path }) => {
             setSelectedCards(updatedSelectedCards);
             toaster.add({
                 name: found.id,
-                title: 'Добавлено к обмену',
-                autoHiding: 1500,
+                title: 'Added to exchange',
+                autoHiding: 1000,
                 type: 'success',
                 content: found.name
             })
@@ -320,7 +345,7 @@ const GalleryPage: React.FC<PropsT> = ({ data, owner, queryName, path }) => {
                     isFiltersVisible={ isFiltersVisible }
                     handleFiltersFlush={ flushFilters }
                 />
-                <GalleryTable cards={ cardsToDisplay } handleCardClick={handleCardClick} />
+                <GalleryTable cards={ getChunk() } handleCardClick={ handleCardClick } handleLoadMore={ handleLoadMore } total={ selectedCardsToDisplay.length } />
                 <Footer
                     isMobile={ IS_MOBILE }
                     owner={ owner }

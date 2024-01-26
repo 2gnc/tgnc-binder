@@ -19,6 +19,7 @@
   "dependencies": {
     "copy-to-clipboard": "^3.3.3",
     "gatsby": "^5.13.1",
+    "gatsby-plugin-react-helmet": "^6.13.1",
     "gatsby-source-filesystem": "^5.13.0",
     "gatsby-transformer-csv": "^5.13.0",
     "lodash": "^4.17.21",
@@ -35,6 +36,7 @@
     "@types/node": "^20.10.6",
     "@types/react": "^18.2.46",
     "@types/react-dom": "^18.2.18",
+    "@types/react-helmet": "^6.1.11",
     "@types/ua-parser-js": "^0.7.39",
     "gh-pages": "^6.1.1",
     "typescript": "^5.3.3"

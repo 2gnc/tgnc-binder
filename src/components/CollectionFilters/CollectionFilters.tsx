@@ -163,10 +163,10 @@ const CollectionFilters: FC<PropsT> = ({
                 </div>
             </Col>
             <Col s='6' l='1'>
-                <Text variant='subheader-2' className='filterHeader'>Коллекция: </Text>
+                <Text variant='subheader-2' className='filterHeader'>Collection: </Text>
                 <Select
                     value={[collectionFilter]}
-                    placeholder='Коллекция'
+                    placeholder='Collection'
                     options={
                         avalaibleCollections.map(coll => ({
                             value: coll,
@@ -179,25 +179,25 @@ const CollectionFilters: FC<PropsT> = ({
                 />
             </Col>
             <Col s='6' l='1'>
-                <Text variant='subheader-2' className='filterHeader'>Тип карты: </Text>
+                <Text variant='subheader-2' className='filterHeader'>Card type: </Text>
                 <RadioButton
                     size={isMobile ? 'l' : 's'}
                     onUpdate={handleCardTypeSelect}
                     options={[
                         {
                             value: PermamentTypeEnum.CARD,
-                            content: 'карта'
+                            content: 'card'
                         },
                         {
                             value: PermamentTypeEnum.TOKEN,
-                            content: 'токен'
+                            content: 'token'
                         }
                     ]}
                     value={ typesFilter.includes(TypeEnum.TOKEN) ? PermamentTypeEnum.TOKEN : PermamentTypeEnum.CARD }
                 />
             </Col>
-            <Col s='6' l='2'>
-                <Text variant='subheader-2' className='filterHeader'>Тип заклинания: </Text>
+            <Col s='12' l='2'>
+                <Text variant='subheader-2' className='filterHeader'>Spell type: </Text>
                 <TextInput
                     ref={spellTypeSearchRef}
                     size={isMobile ? 'l' : 's'}
@@ -206,7 +206,7 @@ const CollectionFilters: FC<PropsT> = ({
                     }}
                     value={spellTypeSearch}
                     onBlur={closeTypeSuggest}
-                    placeholder='например, instant'
+                    placeholder='instant'
                 />
                 <Flex space={3} style={{
                     paddingTop: '5px',
@@ -245,8 +245,8 @@ const CollectionFilters: FC<PropsT> = ({
                     </Menu>
                 </Popup>
             </Col>
-            <Col s='6' l='3'>
-                <Text variant='subheader-2' className='filterHeader'>Название: </Text>
+            <Col s='12' l='3'>
+                <Text variant='subheader-2' className='filterHeader'>Spell name: </Text>
                 <TextInput
                     ref={spellNameSearchRef}
                     size={isMobile ? 'l' : 's'}
@@ -255,7 +255,7 @@ const CollectionFilters: FC<PropsT> = ({
                     }}
                     value={spellNameSearch}
                     onBlur={closeNameSuggest}
-                    placeholder='например, abrade'
+                    placeholder='abrade'
                     hasClear
                     
                 />
@@ -282,10 +282,10 @@ const CollectionFilters: FC<PropsT> = ({
                     <Col s={12}>
                         <Flex justifyContent='center' className='buttonRow' >
                             <Button view='outlined-danger' size='l' onClick={ onFiltersFlush }>
-                                    Сбросить
+                                Reset
                             </Button>
                             <Button view='action' size='l' onClick={ handleFiltersClose }>
-                                Применить
+                                Apply
                             </Button>
                         </Flex>
                     </Col>
@@ -299,10 +299,10 @@ const CollectionFilters: FC<PropsT> = ({
 
     if (isMobile) {
         return (
-            <Modal disableBodyScrollLock open={ isFiltersVisible } contentClassName='filtersModal' onClose={ handleFiltersClose }>
+            <Modal open={ isFiltersVisible } contentClassName='filtersModal' onClose={ handleFiltersClose }>
                 <>
                     <div className='filtersModalHeader'>
-                        <Text variant='header-1' >Фильтры:</Text>
+                        <Text variant='header-1' >Filters:</Text>
                     </div>
                     { renderContent() }
                 </>

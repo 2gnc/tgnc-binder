@@ -32,7 +32,8 @@ export const queryCards = graphql`
                 colors
                 types
                 condition
-                number,
+                number
+                promo_types
             }
         }
     }
@@ -47,4 +48,10 @@ const GalleryPage: React.FC<PageProps> = (props) => {
 }
 
 export default GalleryPage;
-export const Head: HeadFC = () => <title>Gallery</title>
+
+export const Head: HeadFC = () => (
+    <>
+        <title>Gallery</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    </>
+);

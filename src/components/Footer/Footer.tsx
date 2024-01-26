@@ -29,7 +29,7 @@ export const Footer: FC<PropsT> = ({
                     <Button size='l' width='auto' view='action' className='filtersButton_mob'
                         onClick={ handleFilterButtonClick }
                     >
-                        <Text>{`Фильтры${ filtersUsedCount > 0 ? ` (${ filtersUsedCount })` : ''}`}</Text>
+                        <Text>{`Filters${ filtersUsedCount > 0 ? ` (${ filtersUsedCount })` : ''}`}</Text>
                     </Button>
                 )
             }
@@ -41,7 +41,7 @@ export const Footer: FC<PropsT> = ({
             </Link>
             <Button size='l' view='action' onClick={ handleOpenCopyPanel } className={ isMobile ? 'collectionButton_mob' : ''} >
                 <Icon data={Copy} />
-                <Text>{`${!isMobile ? 'Отобранные карты:' : ''} ${ selectionSize }`}</Text>
+                <Text>{`${!isMobile ? 'Selected cards:' : ''} ${ selectionSize }`}</Text>
             </Button>
         </div>
     )

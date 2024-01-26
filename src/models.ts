@@ -30,6 +30,7 @@ export type CardT = {
     frameEffects: Array<string>;
     artist: string;
     ruName?: string;
+    promoTypes: Array<string>;
 }
 
 export enum FramePerticularitiesEnum {

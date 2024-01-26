@@ -26,7 +26,7 @@ export function parseRawCardsResponse(cards: Array<Record<string, string>>): {
                 .filter(item => item.trim() !== '—' && item.trim() !== '//')
                 .map(item => item.toLowerCase())
             )] as Array<TypeEnum>;
-        const keywords = card.keywords.split(',').map(keyword => keyword.trim());
+        const keywords = card.keywords.split(',').filter((word) => word.length).map(keyword => keyword.trim());
         const isFoil = card.is_foil === 'true';
         const perticularities = buildPeculiarities(isFoil, card.frame);
         const frameEffects = card.frame.split(',').map(effect => effect.trim());
@@ -44,7 +44,8 @@ export function parseRawCardsResponse(cards: Array<Record<string, string>>): {
         allNames.push({
             name: card.name,
             searchBase: `${card.name.toLowerCase()} ${card.ru_name?.toLowerCase()}`
-        })
+        });
+        const promoTypes = card.promo_types.split(',').filter((word) => word.length && word !== 'undefined').map(keyword => keyword.trim());
 
         const parsed: CardT = {
             name: card.name,
@@ -77,6 +78,7 @@ export function parseRawCardsResponse(cards: Array<Record<string, string>>): {
             frameEffects,
             artist: card.artist,
             ruName: card.ru_name,
+            promoTypes,
         }
 
         return parsed;

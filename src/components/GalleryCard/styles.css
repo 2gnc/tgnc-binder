@@ -12,3 +12,24 @@
 .box {
     padding: 0 8px;
 }
+
+.flagIcon {
+    position: absolute;
+    width: 30px;
+    left: 34px;
+    top: 60px;
+}
+
+.textBadge {
+    background-size: 100%;
+    padding: 4px;
+    position: absolute;
+    left: 34px;
+    top: 95px;
+    display: block;
+    width: 22px;
+    height: 22px;
+    text-align: center;
+    line-height: 22px;
+    border-radius: 50%;
+}
