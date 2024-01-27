@@ -96,7 +96,8 @@ export enum SortingValsEnum {
     NAME_ASC = 'name_asc',
     NAME_DESC = 'name_desc',
     PRICE_ASC = 'price_asc',
-    PRICE_DESC = 'price_desc'
+    PRICE_DESC = 'price_desc',
+    EDHEC_RANK = 'edhrec_rank',
 }
 
 export enum SortingDirectionEnum {

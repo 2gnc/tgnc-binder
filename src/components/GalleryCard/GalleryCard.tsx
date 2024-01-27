@@ -78,7 +78,7 @@ const GalleryCard: FC<PropsT> = ({ card, handleCardClick }) => {
                     <Row space={1} className='detailsRow'>
                         <Col s='5'>
                             {
-                                edhRank < 200 && (
+                                edhRank < 300 && (
                                     <Text>
                                         {`EDHREC rank: ${edhRank}`}
                                     </Text>

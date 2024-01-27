@@ -16,5 +16,9 @@ export const sortingMenuValues = [
     {
         text: 'Price (low to high)',
         value: SortingValsEnum.PRICE_DESC,
+    },
+    {
+        text: 'EDHREC rank',
+        value: SortingValsEnum.EDHEC_RANK,
     }
 ];
