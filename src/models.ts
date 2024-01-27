@@ -93,9 +93,9 @@ export enum PermamentTypeEnum {
 }
 
 export enum SortingValsEnum {
-    NAME_ASD = 'name_asd',
+    NAME_ASC = 'name_asc',
     NAME_DESC = 'name_desc',
-    PRICE_ASD = 'price_asd',
+    PRICE_ASC = 'price_asc',
     PRICE_DESC = 'price_desc'
 }
 

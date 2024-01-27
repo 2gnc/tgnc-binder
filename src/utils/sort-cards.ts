@@ -4,7 +4,7 @@ import { tunePrice } from './tune-price';
 import orderBy from 'lodash/orderBy';
 
 export const sortCards = (cards: Array<CardT>, sortingValue: SortingValsEnum, direction: SortingDirectionEnum): Array<CardT> => {
-    const isByNameSort = [SortingValsEnum.NAME_ASD, SortingValsEnum.NAME_DESC].includes(sortingValue);
+    const isByNameSort = [SortingValsEnum.NAME_ASC, SortingValsEnum.NAME_DESC].includes(sortingValue);
 
     if (isByNameSort) {
         return orderBy(...[cards], 'name', direction === SortingDirectionEnum.DESC ? 'desc' : 'asc');

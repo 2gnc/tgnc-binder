@@ -42,7 +42,7 @@ export const Footer: FC<PropsT> = ({
         closeSortingPanel();
     };
 
-    const IconSorting = sortingDirection === SortingDirectionEnum.ASD ? BarsAscendingAlignLeftArrowUp : BarsAscendingAlignLeftArrowDown
+    const IconSorting = sortingDirection === SortingDirectionEnum.ASC ? BarsAscendingAlignLeftArrowUp : BarsAscendingAlignLeftArrowDown
 
     return (
         <div className='footerBox'>

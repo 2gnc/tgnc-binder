@@ -76,8 +76,8 @@ const GalleryPage: React.FC<PropsT> = ({ data, owner, queryName, path }) => {
     const [currentChunk, setCurrentChunk] = useState(0);
 
     // Sorting
-    const [sortingValue, setSortingValue] = useState(SortingValsEnum.NAME_ASD);
-    const [sortingDirection, setSortingDirection] = useState(SortingDirectionEnum.ASD);
+    const [sortingValue, setSortingValue] = useState(SortingValsEnum.NAME_ASC);
+    const [sortingDirection, setSortingDirection] = useState(SortingDirectionEnum.ASC);
 
     const handleLoadMore = () => {
         return new Promise<void>((resolve) => {
@@ -324,8 +324,8 @@ const GalleryPage: React.FC<PropsT> = ({ data, owner, queryName, path }) => {
 
     const handleSortingValueSelect = (value: SortingValsEnum) => {
         setSortingValue(value);
-        if (value === SortingValsEnum.NAME_ASD || value === SortingValsEnum.PRICE_ASD) {
-            setSortingDirection(SortingDirectionEnum.ASD);
+        if (value === SortingValsEnum.NAME_ASC || value === SortingValsEnum.PRICE_ASC) {
+            setSortingDirection(SortingDirectionEnum.ASC);
         } else {
             setSortingDirection(SortingDirectionEnum.DESC);
         }
