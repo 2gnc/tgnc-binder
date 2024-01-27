@@ -1,6 +1,6 @@
 .galleryTable {
     padding-bottom: 65px;
-    padding-top: 45px;
+    padding-top: 69px;
 }
 
 .emptyBox {
@@ -11,4 +11,23 @@
 .emptyMsg {
     position: absolute;
     top: 40%;
+}
+
+.gallerySummary {
+    width: 100%;
+    height: 24px;
+    position: fixed;
+    top: 40px;
+    left: 8px;
+    background-color: rgba(255, 255, 255, 0.7);
+    z-index: 4;
+    box-sizing: border-box;
+    padding: 0 16px;
+    color: var(--g-color-base-brand);
+    line-height: 24px;
+    display: flex;
+    align-items: center;
+    margin: 0;
+    justify-content: space-between;
+    backdrop-filter: blur(10px);
 }

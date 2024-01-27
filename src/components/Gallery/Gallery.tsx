@@ -2,19 +2,21 @@ import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react'
 import UAParser from 'ua-parser-js';
 import type { HeadFC, PageProps } from "gatsby";
 import { Container, ThemeProvider, Modal } from '@gravity-ui/uikit';
+import { toaster } from '@gravity-ui/uikit/toaster-singleton';
 import { parseRawCardsResponse } from '../../utils/parse-raw-cards-response';
-import { CardT, ColorsEnum, OwnerT, PermamentTypeEnum, TypeEnum } from '../../models';
+import { CardT, ColorsEnum, OwnerT, PermamentTypeEnum, TypeEnum, SortingValsEnum, SortingDirectionEnum } from '../../models';
 import { SelectedCardsView  } from '../SelectedCadsView/SelectedCadsView';
 import intersection from 'lodash/intersection';
 import size from 'lodash/size';
 import isNil from 'lodash/isNil';
-import { toaster } from '@gravity-ui/uikit/toaster-singleton';
 
 import CollectionHeader from '../../components/CollectionHeader/CollectionHeader';
 import CollectionFilters from '../../components/CollectionFilters/CollectionFilters';
 import GalleryTable from '../../components/GalleryTable/GalleryTable';
 import { Footer } from '../Footer/Footer';
 import { GoUpButton } from '../GoUpButton/GoUpButton';
+
+import { sortCards } from '../../utils/sort-cards';
 
 import '@gravity-ui/uikit/styles/styles.css';
 import '@gravity-ui/uikit/styles/fonts.css';
@@ -73,6 +75,10 @@ const GalleryPage: React.FC<PropsT> = ({ data, owner, queryName, path }) => {
     // Infinite scroll
     const [currentChunk, setCurrentChunk] = useState(0);
 
+    // Sorting
+    const [sortingValue, setSortingValue] = useState(SortingValsEnum.NAME_ASD);
+    const [sortingDirection, setSortingDirection] = useState(SortingDirectionEnum.ASD);
+
     const handleLoadMore = () => {
         return new Promise<void>((resolve) => {
             setTimeout(() => {
@@ -113,6 +119,12 @@ const GalleryPage: React.FC<PropsT> = ({ data, owner, queryName, path }) => {
             setNameFilter(byNameSearch);
         }
     }, []);
+
+    // Сортировка
+    useEffect(() => {
+        const sorted = sortCards(selectedCardsToDisplay, sortingValue, sortingDirection);
+        setSelectedCardsToDisplay(sorted);
+    }, [sortingValue]);
 
     // обновляем список карт по фильтрам
     useEffect(() => {
@@ -162,7 +174,8 @@ const GalleryPage: React.FC<PropsT> = ({ data, owner, queryName, path }) => {
             return hasColorsMatch && isMatchByType && shouldIncludeLand && shouldIncludeTokens && hasNameMatch;
         });
 
-        setSelectedCardsToDisplay(filtredByCollectionCards);
+        const sorted = sortCards(filtredByCollectionCards, sortingValue, sortingDirection);
+        setSelectedCardsToDisplay(sorted);
         setCurrentChunk(1);
     }, [colorsFilters, collectionFilter, typesFilter, nameFilter]);
 
@@ -309,6 +322,15 @@ const GalleryPage: React.FC<PropsT> = ({ data, owner, queryName, path }) => {
         updateSearchURL('name', name ? [name] : []);
     }
 
+    const handleSortingValueSelect = (value: SortingValsEnum) => {
+        setSortingValue(value);
+        if (value === SortingValsEnum.NAME_ASD || value === SortingValsEnum.PRICE_ASD) {
+            setSortingDirection(SortingDirectionEnum.ASD);
+        } else {
+            setSortingDirection(SortingDirectionEnum.DESC);
+        }
+    }
+
     if (!isRendered) {
         return null;
     }
@@ -345,7 +367,13 @@ const GalleryPage: React.FC<PropsT> = ({ data, owner, queryName, path }) => {
                     isFiltersVisible={ isFiltersVisible }
                     handleFiltersFlush={ flushFilters }
                 />
-                <GalleryTable cards={ getChunk() } handleCardClick={ handleCardClick } handleLoadMore={ handleLoadMore } total={ selectedCardsToDisplay.length } />
+                <GalleryTable
+                    cards={ getChunk() }
+                    handleCardClick={ handleCardClick }
+                    handleLoadMore={ handleLoadMore }
+                    total={ selectedCardsToDisplay.length }
+                    sortingValue={ sortingValue }
+                />
                 <Footer
                     isMobile={ IS_MOBILE }
                     owner={ owner }
@@ -353,6 +381,8 @@ const GalleryPage: React.FC<PropsT> = ({ data, owner, queryName, path }) => {
                     handleOpenCopyPanel={ openCopyPanel}
                     selectionSize={ size(selectedCards) }
                     handleFilterButtonClick={ handleFilterButtonClick }
+                    handleSortingValueSelect={ handleSortingValueSelect }
+                    sortingDirection={ sortingDirection }
                 />
             </Container>
             <GoUpButton />
@@ -367,7 +397,7 @@ const GalleryPage: React.FC<PropsT> = ({ data, owner, queryName, path }) => {
                     handleClear={ flushSelected }
                     handleRemoveItem={ removeOneSelectedCard }
                 />
-            </Modal>            
+            </Modal>
         </ThemeProvider>
     );
 }

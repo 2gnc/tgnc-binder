@@ -8,6 +8,7 @@ import flagRu from '../../images/flag_ru.png';
 import flagEn from '../../images/flag_en.png';
 import flagOth from '../../images/flag_oth.png';
 import flagSp from '../../images/flag_sp.png';
+import flagPt from '../../images/flag_portu.png';
 
 import './styles.css';
 
@@ -21,6 +22,7 @@ const mapLangEnumToIcon = {
     [LangEnum.RU]: flagRu,
     [LangEnum.OTH]: flagOth,
     [LangEnum.SP]: flagSp,
+    [LangEnum.PT]: flagPt,
 }
 
 const GalleryCard: FC<PropsT> = ({ card, handleCardClick }) => {

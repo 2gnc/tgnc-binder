@@ -60,6 +60,7 @@ export enum LangEnum {
     RU = 'ru',
     EN = 'en',
     SP = 'sp',
+    PT = 'pt',
     OTH = 'oth',
 }
 
@@ -89,4 +90,16 @@ export type OwnerT = {
 export enum PermamentTypeEnum {
     CARD = 'card',
     TOKEN = 'token',
+}
+
+export enum SortingValsEnum {
+    NAME_ASD = 'name_asd',
+    NAME_DESC = 'name_desc',
+    PRICE_ASD = 'price_asd',
+    PRICE_DESC = 'price_desc'
+}
+
+export enum SortingDirectionEnum {
+    ASC = 'asc',
+    DESC = 'desc'
 }

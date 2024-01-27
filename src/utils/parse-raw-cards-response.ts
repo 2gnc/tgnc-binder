@@ -45,7 +45,7 @@ export function parseRawCardsResponse(cards: Array<Record<string, string>>): {
             name: card.name,
             searchBase: `${card.name.toLowerCase()} ${card.ru_name?.toLowerCase()}`
         });
-        const promoTypes = card.promo_types.split(',').filter((word) => word.length && word !== 'undefined').map(keyword => keyword.trim());
+        const promoTypes = card.promo_types?.split(',').filter((word) => word.length && word !== 'undefined').map(keyword => keyword.trim()) || [];
 
         const parsed: CardT = {
             name: card.name,

@@ -1,8 +1,8 @@
 import React, { type FC } from 'react';
-import { Breadcrumbs, Icon, Button } from '@gravity-ui/uikit';
-import { OwnerT } from '../../models';
 import { Link } from 'gatsby';
+import { Breadcrumbs, Icon, Button } from '@gravity-ui/uikit';
 import { Receipt } from '@gravity-ui/icons';
+import { OwnerT, SortingValsEnum } from '../../models';
 import logo from '../../images/logo.png';
 
 import './styles.css';
@@ -33,7 +33,8 @@ const CollectionHeader:FC<PropsT> = ({
             text: collection,
             action: () => {}
         }
-    ]
+    ];
+
     return (
         <div className='headerBox'>
             <div className='headerNavi'>
