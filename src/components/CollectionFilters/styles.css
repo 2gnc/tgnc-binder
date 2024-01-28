@@ -1,13 +1,8 @@
 .filtersModal {
    padding: 16px 8px;
-   min-height: 50vh;
+   height: 100%;
+   max-height: 70vh;
    position: relative
-}
-
-.filtersModalHeader {
-    width: 100%;
-    text-align: center;
-    margin-bottom: 16px;
 }
 
 .buttonRow {
@@ -21,4 +16,15 @@
 
 .colorsCol_desktop {
     align-self: flex-end;
+}
+
+.setIcon {
+    width: 15px;
+}
+
+.setSuggestItem {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    margin: 4px 0;
 }

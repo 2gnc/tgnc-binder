@@ -6,7 +6,7 @@ import Gallery from '../../components/Gallery/Gallery';
 
 export const queryCards = graphql`
     query {
-        allKaplyaCardsCsv(filter: {}) {
+        cards: allKaplyaCardsCsv(filter: {}) {
             nodes {
                 set
                 quantity
@@ -36,6 +36,17 @@ export const queryCards = graphql`
                 promo_types
             }
         }
+        sets: allSetsCsv {
+            nodes {
+                Name
+                Block
+                Code
+                IconURI
+                ParentSetCode
+                Type
+                id
+            }
+        }
     }
 `;
 
@@ -43,7 +54,7 @@ const OWNER = { name: 'Kaplya', contactLink: 'https://telegram.me/Darling_Jen' }
 
 const GalleryPage: React.FC<PageProps> = (props) => {
     return (
-        <Gallery owner={OWNER} {...props} queryName='allKaplyaCardsCsv'  />
+        <Gallery owner={OWNER} {...props} />
     );
 }
 

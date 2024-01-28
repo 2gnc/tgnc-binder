@@ -1,12 +1,11 @@
 import React from 'react';
 import type { HeadFC, PageProps } from "gatsby";
 import { graphql } from "gatsby";
-
-import Gallery from '../../components/Gallery/Gallery';
+import { Text } from '@gravity-ui/uikit';
 
 export const queryCards = graphql`
     query {
-        cards: allMrCardholderCardsCsv(filter: {}) {
+        cards: allTwoBlueCatsCardsCsv(filter: {}) {
             nodes {
                 set
                 quantity
@@ -51,17 +50,15 @@ export const queryCards = graphql`
     }
 `;
 
-const OWNER = { name: 'MrCardholder', contactLink: 'https://telegram.me/MrCardholder' };
-
-const GalleryPage: React.FC<PageProps> = (props) => {
+const SearchPage: React.FC<PageProps> = (props) => {
     return (
         <>
-            <Gallery owner={OWNER} {...props} />
+            <Text variant='display-1'>search</Text>
         </>
     );
 }
 
-export default GalleryPage;
+export default SearchPage;
 
 export const Head: HeadFC = () => (
     <>

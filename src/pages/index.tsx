@@ -1,6 +1,8 @@
 import * as React from "react"
 import type { HeadFC, PageProps } from "gatsby";
-import { Link } from 'gatsby'
+import { Link } from 'gatsby';
+import '@gravity-ui/uikit/styles/styles.css';
+import '@gravity-ui/uikit/styles/fonts.css';
 
 import './index.css';
 
@@ -19,6 +21,7 @@ const IndexPage: React.FC<PageProps> = () => {
                 <li><Link to="twobluecats/gallery">TwoBlueCats</Link></li>
                 <li><Link to="mrcardholder/gallery">MrCardholder</Link></li>
             </ul>
+            <Link to="collections/collections">search</Link>
             <p>Если вы хотите присоединиться к тестированию и опубликовать свою коллекцию - <a href="https://telegram.me/KseniaPolyakova" target="_blank">напишите мне</a></p>
         </div>
     );

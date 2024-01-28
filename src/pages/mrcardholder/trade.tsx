@@ -2,11 +2,12 @@ import * as React from "react"
 import type { HeadFC, PageProps } from "gatsby";
 import { graphql } from "gatsby";
 import { parseRawCardsResponse } from "../../utils/parse-raw-cards-response";
+import { parseRawSetsResponse } from "../../utils/parse-raw-sets-response";
 import TradeTable from '../../components/TradeTable/TradeTable';
 
 export const queryMulticolor = graphql`
   query {
-    allMrCardholderCardsCsv(sort: {name: ASC}) {
+    cards: allMrCardholderCardsCsv(sort: {name: ASC}) {
       nodes {
         artist
         set_name
@@ -37,11 +38,23 @@ export const queryMulticolor = graphql`
         ru_name
       }
     }
+    sets: allSetsCsv {
+      nodes {
+          Name
+          Block
+          Code
+          IconURI
+          ParentSetCode
+          Type
+          id
+      }
+    }
   }
 `;
 
 const IndexPage: React.FC<PageProps> = ({ data }) => {
-  const { cards } = parseRawCardsResponse(data.allMrCardholderCardsCsv.nodes);
+  const { codesParents} = parseRawSetsResponse(data.sets.nodes);
+  const { cards } = parseRawCardsResponse(data.cards.nodes, codesParents);
   return <TradeTable cards={ cards } />
 }
 

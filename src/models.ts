@@ -2,6 +2,7 @@
 export type CardT = {
     name: string;
     set: string;
+    setParent: string;
     setName: string;
     number: number;
     edhRank: number;
@@ -61,6 +62,8 @@ export enum LangEnum {
     EN = 'en',
     SP = 'sp',
     PT = 'pt',
+    DE = 'de',
+    IT = 'it',
     OTH = 'oth',
 }
 
@@ -104,3 +107,9 @@ export enum SortingDirectionEnum {
     ASC = 'asc',
     DESC = 'desc'
 }
+
+export type SetSearchT = {
+    name: string;
+    icon: string;
+    code: string;
+};

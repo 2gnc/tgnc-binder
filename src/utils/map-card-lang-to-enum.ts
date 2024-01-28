@@ -10,6 +10,10 @@ export function mapCardLangToEnum(cardlang: string): LangEnum {
             return LangEnum.SP;
         case 'pt':
             return LangEnum.PT;
+        case 'de':
+            return LangEnum.DE;
+        case 'it':
+            return LangEnum.IT;
         default:
             return LangEnum.OTH;
     }

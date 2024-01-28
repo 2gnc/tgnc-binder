@@ -1,6 +1,7 @@
 import React, { type FC, useState, useRef, useEffect } from 'react';
-import { Row, Col, Text, Select, RadioButton, TextInput, Popup, Menu, Label, Flex, Button, Modal } from '@gravity-ui/uikit';
-import { ColorsEnum, TypeEnum, PermamentTypeEnum } from '../../models';
+import { Row, Col, Text, Select, RadioButton, TextInput, Popup, Menu, Label, Flex, Button, Modal, ControlGroupOption, Icon } from '@gravity-ui/uikit';
+import { ColorsEnum, TypeEnum, PermamentTypeEnum, LangEnum, SetSearchT } from '../../models';
+import { HighlightedSubstring } from '../HighlightedSubstring/HighlightedSubstring';
 import size from 'lodash/size';
 import map from 'lodash/map';
 
@@ -19,17 +20,24 @@ type PropsT = {
     isFiltersVisible: boolean;
     colorsFilters: Array<ColorsEnum>;
     collectionFilter: string;
+    languageFilter: LangEnum;
     avalaibleCollections: Array<string>;
     typesFilter: Array<string>;
+    setCodesFilter: Array<string>;
     avalaibleTypes: Array<string>;
     avalaibleNames: Array<{ name: string; searchBase: string}>;
     defaultByNameValueFromQuery: string;
+    avalaibleLanguages: Array<LangEnum>;
+    avalaibleSets: Array<SetSearchT>;
     handleColorSelect: (event: React.ChangeEvent<HTMLInputElement>) => void;
     handleFilterByLandType: (event: React.ChangeEvent<HTMLInputElement>) => void;
     handleCollectionSelect: (collection: string) => void;
+    handleLanguageSelect: (language: LangEnum) => void;
     handleCardTypeSelect: (type: PermamentTypeEnum) => void;
     handleSpellTypeAdd: (type: string) => void;
+    handleSetCodeAdd: (code: string) => void;
     handleSpellTypeRemove: (type: string) => void;
+    handleSetCodeRemove: (code: string) => void;
     handleSpellNameSet: (name: string) => void;
     handleFiltersClose: () => void;
     handleFiltersFlush: () => void;
@@ -40,33 +48,68 @@ const CollectionFilters: FC<PropsT> = ({
     isFiltersVisible,
     colorsFilters,
     collectionFilter,
+    languageFilter,
     avalaibleCollections,
     typesFilter,
+    setCodesFilter,
     avalaibleTypes,
     avalaibleNames,
+    avalaibleLanguages,
+    avalaibleSets,
     defaultByNameValueFromQuery,
     handleColorSelect,
     handleFilterByLandType,
     handleCollectionSelect,
+    handleLanguageSelect,
     handleCardTypeSelect,
     handleSpellTypeAdd,
     handleSpellTypeRemove,
     handleSpellNameSet,
     handleFiltersClose,
     handleFiltersFlush,
+    handleSetCodeRemove,
+    handleSetCodeAdd,
 }) => {
     const spellTypeSearchRef = useRef(null);
     const spellNameSearchRef = useRef(null);
+    const setSearchRef = useRef(null);
     const [spellTypeSearch, setSpellTypeSearch] = useState('');
+    const [setSearch, setSetSearch] = useState('');
     const [spellNameSearch, setSpellNameSearch] = useState(defaultByNameValueFromQuery);
     const [isTypeSuggestOpen, setTypeSuggestOpen] = useState(false);
     const [isNameSuggestOpen, setNameSuggestOpen] = useState(false);
+    const [isSetSuggestOpen, setSetSuggestOpen] = useState(false);
+    const [foundSetsToDisplay, setFoundSetsToDisplay] = useState(avalaibleSets.slice(0, 10))
     const [nameSuggest, setNameSuggest] = useState<Array<string>>([]);
+    const [selectedSetsCodes, setSelectedSetsCodes] = useState<Array<string>>(setCodesFilter);
+
+    const languageOptions: Array<ControlGroupOption> = avalaibleLanguages.map((lang) => ({
+        value: lang,
+        content: lang
+    })).concat([{
+        value: 'all' as LangEnum,
+        content: 'all' as LangEnum
+    }]);
 
     useEffect(() => {
         setTypeSuggestOpen(size(spellTypeSearch) > 2)
     }, [spellTypeSearch]);
 
+    // search by set code
+    useEffect(() => {
+        if (size(setSearch) < 3) {
+            setSetSuggestOpen(false);
+            return;
+        };
+        const re = new RegExp(setSearch, 'gi');
+        const found = avalaibleSets.filter(({ code, name }) => {
+            return (re.test(code) || re.test(name)) && !selectedSetsCodes.includes(code)
+        });
+        setFoundSetsToDisplay(found);
+        setSetSuggestOpen(true);
+    }, [setSearch])
+
+    // search by spell name
     useEffect(() => {
         if (!size(spellNameSearch)) {
             handleSpellNameSet('');
@@ -89,6 +132,10 @@ const CollectionFilters: FC<PropsT> = ({
         setTypeSuggestOpen(false);
     }
 
+    const closeSetSuggest = () => {
+        setSetSuggestOpen(false);
+    }
+
     const closeNameSuggest = () => {
         setNameSuggestOpen(false);
     }
@@ -106,6 +153,25 @@ const CollectionFilters: FC<PropsT> = ({
     const onFiltersFlush = () => {
         handleFiltersFlush();
         setSpellNameSearch('');
+        setSetSearch('');
+    }
+
+    const onSetSelect = (set: SetSearchT) => {
+        setSelectedSetsCodes([...selectedSetsCodes, set.code]);
+        setSetSearch('');
+        handleSetCodeAdd(set.code);
+    }
+
+    const renderSetsCodes = () => {
+        return setCodesFilter.map((code) => (
+            <Label
+                key={ code }
+                type='close'
+                onClose={() => handleSetCodeRemove(code)}
+            >
+                { code }
+            </Label>
+        ));
     }
 
     const renderContent = () => (
@@ -161,6 +227,60 @@ const CollectionFilters: FC<PropsT> = ({
                         </div>
                     </label>
                 </div>
+            </Col>
+            <Col s='12' l='3'>
+                <Text variant='subheader-2' className='filterHeader'>Language: </Text>
+                <Select
+                    value={[languageFilter]}
+                    options={ languageOptions }
+                    onUpdate={([val]) => handleLanguageSelect(val as LangEnum)}
+                    size={isMobile ? 'l' : 's'}
+                    className='languagePopup'
+                />
+            </Col>
+            <Col s='12' l='3'>
+                <Text variant='subheader-2' className='filterHeader'>Sets: </Text>
+                <TextInput
+                    ref={setSearchRef}
+                    size={isMobile ? 'l' : 's'}
+                    value={ setSearch }
+                    onChange={(event) => {
+                        setSetSearch(event.target.value);
+                    }}
+                    onBlur={closeSetSuggest}
+                    placeholder='by set code or name'
+                    hasClear
+                />
+                <Flex space={3} style={{
+                    paddingTop: '5px',
+                    maxWidth: '100%',
+                    flexWrap: 'wrap'
+                }}>
+                    { renderSetsCodes() }
+                </Flex>
+                <Popup
+                    open={isSetSuggestOpen}
+                    anchorRef={setSearchRef}
+                    placement='bottom-start'
+                >
+                    <Menu size='l'>
+                        {
+                            foundSetsToDisplay.map((set) => {
+                                const { code, name, icon } = set;
+                                return (
+                                    <Menu.Item key={ name } onClick={ () => onSetSelect(set) }>
+                                        <div className='setSuggestItem'>
+                                           <img src={icon} className='setIcon' />
+                                           <Text>{`(${code})`}</Text>
+                                           <HighlightedSubstring text={ name } substring={ setSearch } color='brand' />
+                                        </div>
+                                    </Menu.Item>
+                                )
+                            })
+                        }
+                    </Menu>
+                </Popup>
+
             </Col>
             <Col s='6' l='1'>
                 <Text variant='subheader-2' className='filterHeader'>Collection: </Text>
@@ -300,12 +420,7 @@ const CollectionFilters: FC<PropsT> = ({
     if (isMobile) {
         return (
             <Modal open={ isFiltersVisible } contentClassName='filtersModal' onClose={ handleFiltersClose }>
-                <>
-                    <div className='filtersModalHeader'>
-                        <Text variant='header-1' >Filters:</Text>
-                    </div>
-                    { renderContent() }
-                </>
+                { renderContent() }
             </Modal>
         )
     }

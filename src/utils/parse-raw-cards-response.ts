@@ -1,26 +1,24 @@
 import map from 'lodash/map';
-import isNaN from 'lodash/isNaN';
 import { RarityEnum, type CardT, ConditionEnum, TypeEnum, LangEnum } from '../models';
 import { mapCardColorToEnum } from './map-card-color-to-enum';
 import { mapCardLangToEnum } from './map-card-lang-to-enum';
 import { buildPeculiarities } from './build-peculiarities';
+import { safeNumParse  } from './safe-parse';
 
-function safeParse(value: string): number {
-    return isNaN(parseFloat(value)) ? 0 : parseFloat(value);
-}
-
-export function parseRawCardsResponse(cards: Array<Record<string, string>>): {
+export function parseRawCardsResponse(cards: Array<Record<string, string>>, parents: Record<string, string>): {
     cards: Array<CardT>;
     collections: Array<string>;
     types: Array<string>;
-    names: Array<{ name: string;searchBase: string}>
+    names: Array<{ name: string; searchBase: string}>;
+    languages: Array<LangEnum>;
 } {
     const allCollections: Array<string> = [];
     const allTypes: Array<string> = [];
     const allNames: Array<{ name: string;searchBase: string}> = [];
+    const allLanguages: Array<LangEnum> = [];
 
     const allCards = map(cards, card => {
-        const quantity = safeParse(card.quantity);
+        const quantity = safeNumParse(card.quantity);
         const types = [...new Set(
             card.types.split(' ')
                 .filter(item => item.trim() !== '—' && item.trim() !== '//')
@@ -32,12 +30,12 @@ export function parseRawCardsResponse(cards: Array<Record<string, string>>): {
         const frameEffects = card.frame.split(',').map(effect => effect.trim());
         const rarity = card.rarity as RarityEnum;
         const lang = mapCardLangToEnum(card.lang);
-        const usdNonFoil = safeParse(card.price_usd);
-        const usdFoil = safeParse(card.price_usd_foil);
-        const usdEtched = safeParse(card.price_usd_etched);
-        const eurNonFoil = safeParse(card.price_eur);
-        const eurFoil = safeParse(card.price_eur_foil);
-        const eurEtched = safeParse(card.price_eur_etched);
+        const usdNonFoil = safeNumParse(card.price_usd);
+        const usdFoil = safeNumParse(card.price_usd_foil);
+        const usdEtched = safeNumParse(card.price_usd_etched);
+        const eurNonFoil = safeNumParse(card.price_eur);
+        const eurFoil = safeNumParse(card.price_eur_foil);
+        const eurEtched = safeNumParse(card.price_eur_etched);
         const collections = card.collection.split(',').map(col => col.trim().toLowerCase());
         allCollections.push(...collections);
         allTypes.push(...types);
@@ -45,6 +43,7 @@ export function parseRawCardsResponse(cards: Array<Record<string, string>>): {
             name: card.name,
             searchBase: `${card.name.toLowerCase()} ${card.ru_name?.toLowerCase()}`
         });
+        allLanguages.push(lang);
         const promoTypes = card.promo_types?.split(',').filter((word) => word.length && word !== 'undefined').map(keyword => keyword.trim()) || [];
 
         const parsed: CardT = {
@@ -77,8 +76,9 @@ export function parseRawCardsResponse(cards: Array<Record<string, string>>): {
             eurEtched,
             frameEffects,
             artist: card.artist,
-            ruName: card.ru_name,
+            ruName: card.ru_name !== 'undefined' ? card.ru_name : card.name,
             promoTypes,
+            setParent: parents[card.set],
         }
 
         return parsed;
@@ -88,6 +88,7 @@ export function parseRawCardsResponse(cards: Array<Record<string, string>>): {
         cards: allCards,
         collections: [...new Set(allCollections)],
         types: [...new Set(allTypes)],
-        names: [...new Set(allNames)]
+        names: [...new Set(allNames)],
+        languages: [...new Set(allLanguages)],
     }
 }
