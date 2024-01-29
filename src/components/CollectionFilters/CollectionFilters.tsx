@@ -1,9 +1,12 @@
 import React, { type FC, useState, useRef, useEffect } from 'react';
 import { Row, Col, Text, Select, RadioButton, TextInput, Popup, Menu, Label, Flex, Button, Modal, ControlGroupOption, Icon } from '@gravity-ui/uikit';
-import { ColorsEnum, TypeEnum, PermamentTypeEnum, LangEnum, SetSearchT } from '../../models';
+import { ColorsEnum, TypeEnum, PermamentTypeEnum, LangEnum, SetSearchT, FilterParamNameEnum } from '../../models';
 import { HighlightedSubstring } from '../HighlightedSubstring/HighlightedSubstring';
 import size from 'lodash/size';
 import map from 'lodash/map';
+import { useSelector, useDispatch } from 'react-redux';
+
+import { userCollectionsSelector, setFilter, filtersSelector } from '../../state/gallery';
 
 import redMana from '../../images/r.png';
 import blackMana from '../../images/b.png';
@@ -19,9 +22,7 @@ type PropsT = {
     isMobile: boolean;
     isFiltersVisible: boolean;
     colorsFilters: Array<ColorsEnum>;
-    collectionFilter: string;
     languageFilter: LangEnum;
-    avalaibleCollections: Array<string>;
     typesFilter: Array<string>;
     setCodesFilter: Array<string>;
     avalaibleTypes: Array<string>;
@@ -31,7 +32,6 @@ type PropsT = {
     avalaibleSets: Array<SetSearchT>;
     handleColorSelect: (event: React.ChangeEvent<HTMLInputElement>) => void;
     handleFilterByLandType: (event: React.ChangeEvent<HTMLInputElement>) => void;
-    handleCollectionSelect: (collection: string) => void;
     handleLanguageSelect: (language: LangEnum) => void;
     handleCardTypeSelect: (type: PermamentTypeEnum) => void;
     handleSpellTypeAdd: (type: string) => void;
@@ -47,9 +47,7 @@ const CollectionFilters: FC<PropsT> = ({
     isMobile,
     isFiltersVisible,
     colorsFilters,
-    collectionFilter,
     languageFilter,
-    avalaibleCollections,
     typesFilter,
     setCodesFilter,
     avalaibleTypes,
@@ -59,7 +57,6 @@ const CollectionFilters: FC<PropsT> = ({
     defaultByNameValueFromQuery,
     handleColorSelect,
     handleFilterByLandType,
-    handleCollectionSelect,
     handleLanguageSelect,
     handleCardTypeSelect,
     handleSpellTypeAdd,
@@ -70,6 +67,10 @@ const CollectionFilters: FC<PropsT> = ({
     handleSetCodeRemove,
     handleSetCodeAdd,
 }) => {
+    const dispatch = useDispatch();
+    const { collection: currentCollection} = useSelector(filtersSelector);
+
+    const avalaibleCollections = useSelector(userCollectionsSelector);
     const spellTypeSearchRef = useRef(null);
     const spellNameSearchRef = useRef(null);
     const setSearchRef = useRef(null);
@@ -285,7 +286,7 @@ const CollectionFilters: FC<PropsT> = ({
             <Col s='6' l='1'>
                 <Text variant='subheader-2' className='filterHeader'>Collection: </Text>
                 <Select
-                    value={[collectionFilter]}
+                    value={[currentCollection]}
                     placeholder='Collection'
                     options={
                         avalaibleCollections.map(coll => ({
@@ -293,7 +294,12 @@ const CollectionFilters: FC<PropsT> = ({
                             content: coll,
                         }))
                     }
-                    onUpdate={([nextValue]) => handleCollectionSelect(nextValue)}
+                    onUpdate={([nextValue]) => {
+                        dispatch(setFilter({
+                            filter: FilterParamNameEnum.COLLECTION,
+                            value: nextValue,
+                        }));
+                    }}
                     size={isMobile ? 'l' : 's'}
                     className='collectionPopup'
                 />

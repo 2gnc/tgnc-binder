@@ -17,6 +17,7 @@
     "deploy:github": "gatsby build --prefix-paths && gh-pages -d public"
   },
   "dependencies": {
+    "@reduxjs/toolkit": "^2.1.0",
     "copy-to-clipboard": "^3.3.3",
     "gatsby": "^5.13.1",
     "gatsby-plugin-react-helmet": "^6.13.1",
@@ -28,6 +29,8 @@
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.21.3",
     "react-scroll-up": "^1.4.0",
+    "redux": "^4.2.1",
+    "reselect": "^5.1.0",
     "ua-parser-js": "^1.0.37"
   },
   "devDependencies": {

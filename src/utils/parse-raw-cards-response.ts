@@ -10,12 +10,10 @@ export function parseRawCardsResponse(cards: Array<Record<string, string>>, pare
     collections: Array<string>;
     types: Array<string>;
     names: Array<{ name: string; searchBase: string}>;
-    languages: Array<LangEnum>;
 } {
     const allCollections: Array<string> = [];
     const allTypes: Array<string> = [];
     const allNames: Array<{ name: string;searchBase: string}> = [];
-    const allLanguages: Array<LangEnum> = [];
 
     const allCards = map(cards, card => {
         const quantity = safeNumParse(card.quantity);
@@ -43,7 +41,6 @@ export function parseRawCardsResponse(cards: Array<Record<string, string>>, pare
             name: card.name,
             searchBase: `${card.name.toLowerCase()} ${card.ru_name?.toLowerCase()}`
         });
-        allLanguages.push(lang);
         const promoTypes = card.promo_types?.split(',').filter((word) => word.length && word !== 'undefined').map(keyword => keyword.trim()) || [];
 
         const parsed: CardT = {
@@ -89,6 +86,5 @@ export function parseRawCardsResponse(cards: Array<Record<string, string>>, pare
         collections: [...new Set(allCollections)],
         types: [...new Set(allTypes)],
         names: [...new Set(allNames)],
-        languages: [...new Set(allLanguages)],
     }
 }

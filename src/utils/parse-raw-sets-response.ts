@@ -1,28 +1,8 @@
 import map from 'lodash/map';
 import forEach from 'lodash/forEach';
-import { SetSearchT } from '../models';
+import { SetSearchT, SetRawT, SetListT, SetT } from '../models';
 
-export type SetsListT = Record<string, SetT>;
-export type SetT = {
-    code: string;
-    parent: Nullable<string>;
-    children: Array<SetT>;
-    name: string;
-    imageUri: string;
-    type: string;
-    block: string;
-}
-
-type SetRaw = {
-    Code: string;
-    Name: string;
-    ParentSetCode: string;
-    Type: string;
-    IconURI: string;
-    Block: string;
-}
-
-const buildSetData = ({ Code, Name, ParentSetCode, Type, IconURI, Block }: SetRaw): SetT => ({
+const buildSetData = ({ Code, Name, ParentSetCode, Type, IconURI, Block }: SetRawT): SetT => ({
     code: Code,
     name: Name,
     parent: ParentSetCode.length ? ParentSetCode : null,
@@ -33,8 +13,8 @@ const buildSetData = ({ Code, Name, ParentSetCode, Type, IconURI, Block }: SetRa
 });
 
 
-export function parseRawSetsResponse(sets: Array<SetRaw>) {
-    const preparedSets: SetsListT = {};
+export function parseRawSetsResponse(sets: Array<SetRawT>) {
+    const preparedSets: SetListT = {};
     const setTypes = new Set<string>();
     const setBlocks = new Set<string>();
     const parentSets = {} as Record<string, SetSearchT>;

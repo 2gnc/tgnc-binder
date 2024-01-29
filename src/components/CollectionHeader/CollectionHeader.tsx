@@ -4,21 +4,24 @@ import { Breadcrumbs, Icon, Button } from '@gravity-ui/uikit';
 import { Receipt } from '@gravity-ui/icons';
 import { OwnerT, SortingValsEnum } from '../../models';
 import logo from '../../images/logo.png';
+import { useSelector, useDispatch } from 'react-redux';
+import { filtersSelector } from '../../state/gallery';
 
 import './styles.css';
 
 type PropsT = {
     isMobile: boolean;
     owner: OwnerT;
-    collection: string;
+    // collection: string;
     path: string;
 }
 const CollectionHeader:FC<PropsT> = ({
     isMobile,
     owner,
-    collection,
+    // collection,
     path,
 }) => {
+    const { byCollection: collection } = useSelector(filtersSelector);
     const items = [
         {
             text: owner.name,

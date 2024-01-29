@@ -113,3 +113,28 @@ export type SetSearchT = {
     icon: string;
     code: string;
 };
+
+export enum FilterParamNameEnum {
+    COLLECTION = 'collection',
+
+}
+
+export type SetRawT = {
+    Code: string;
+    Name: string;
+    ParentSetCode: string;
+    Type: string;
+    IconURI: string;
+    Block: string;
+}
+
+export type SetListT = Record<string, SetT>;
+export type SetT = {
+    code: string;
+    parent: Nullable<string>;
+    children: Array<SetT>;
+    name: string;
+    imageUri: string;
+    type: string;
+    block: string;
+};

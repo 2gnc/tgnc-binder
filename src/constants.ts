@@ -22,3 +22,5 @@ export const sortingMenuValues = [
         value: SortingValsEnum.EDHEC_RANK,
     }
 ];
+
+export const ALL = 'all';

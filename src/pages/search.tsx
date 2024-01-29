@@ -46,7 +46,6 @@ export const queryCards = graphql`
 
 const SearchPage: React.FC<PageProps> = (props) => {
     const [rendered, setIsRendered] = useState(false);
-    console.log({ props })
     useEffect(() => {
         setIsRendered(true);
     }, []);
