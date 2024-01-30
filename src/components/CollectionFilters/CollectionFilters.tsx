@@ -1,12 +1,12 @@
 import React, { type FC, useState, useRef, useEffect } from 'react';
 import { Row, Col, Text, Select, RadioButton, TextInput, Popup, Menu, Label, Flex, Button, Modal, ControlGroupOption, Icon } from '@gravity-ui/uikit';
-import { ColorsEnum, TypeEnum, PermamentTypeEnum, LangEnum, SetSearchT, FilterParamNameEnum } from '../../models';
+import { ColorEnum, TypeEnum, PermamentTypeEnum, LangEnum, SetSearchT, FilterParamNameEnum } from '../../models';
 import { HighlightedSubstring } from '../HighlightedSubstring/HighlightedSubstring';
 import size from 'lodash/size';
 import map from 'lodash/map';
 import { useSelector, useDispatch } from 'react-redux';
 
-import { userCollectionsSelector, setFilter, filtersSelector } from '../../state/gallery';
+import { actions as a, selectors as s } from '../../state/gallery';
 
 import redMana from '../../images/r.png';
 import blackMana from '../../images/b.png';
@@ -16,99 +16,60 @@ import blueMana from '../../images/u.png';
 import whiteMana from '../../images/w.png';
 import landType from '../../images/l.png';
 
+const mapColorEnumToImage: Record<ColorEnum, any> = {
+    [ColorEnum.BLACK]: blackMana,
+    [ColorEnum.BLUE]: blueMana,
+    [ColorEnum.COLORLESS]: colorlessMana,
+    [ColorEnum.GREEN]: greenMana,
+    [ColorEnum.RED]: redMana,
+    [ColorEnum.WHITE]: whiteMana,
+    [ColorEnum.MULTI]: undefined,
+};
+
 import './styles.css';
 
 type PropsT = {
     isMobile: boolean;
     isFiltersVisible: boolean;
-    colorsFilters: Array<ColorsEnum>;
-    languageFilter: LangEnum;
-    typesFilter: Array<string>;
-    setCodesFilter: Array<string>;
-    avalaibleTypes: Array<string>;
-    avalaibleNames: Array<{ name: string; searchBase: string}>;
-    defaultByNameValueFromQuery: string;
-    avalaibleLanguages: Array<LangEnum>;
-    avalaibleSets: Array<SetSearchT>;
-    handleColorSelect: (event: React.ChangeEvent<HTMLInputElement>) => void;
-    handleFilterByLandType: (event: React.ChangeEvent<HTMLInputElement>) => void;
-    handleLanguageSelect: (language: LangEnum) => void;
-    handleCardTypeSelect: (type: PermamentTypeEnum) => void;
-    handleSpellTypeAdd: (type: string) => void;
-    handleSetCodeAdd: (code: string) => void;
-    handleSpellTypeRemove: (type: string) => void;
-    handleSetCodeRemove: (code: string) => void;
-    handleSpellNameSet: (name: string) => void;
+    // avalaibleNames: Array<{ name: string; searchBase: string}>;
+    // defaultByNameValueFromQuery: string;
+    // handleSpellNameSet: (name: string) => void;
     handleFiltersClose: () => void;
-    handleFiltersFlush: () => void;
 }
 
 const CollectionFilters: FC<PropsT> = ({
     isMobile,
     isFiltersVisible,
-    colorsFilters,
-    languageFilter,
-    typesFilter,
-    setCodesFilter,
-    avalaibleTypes,
-    avalaibleNames,
-    avalaibleLanguages,
-    avalaibleSets,
-    defaultByNameValueFromQuery,
-    handleColorSelect,
-    handleFilterByLandType,
-    handleLanguageSelect,
-    handleCardTypeSelect,
-    handleSpellTypeAdd,
-    handleSpellTypeRemove,
-    handleSpellNameSet,
+    // avalaibleNames,
+    // defaultByNameValueFromQuery,
+    // handleSpellNameSet,
     handleFiltersClose,
-    handleFiltersFlush,
-    handleSetCodeRemove,
-    handleSetCodeAdd,
 }) => {
     const dispatch = useDispatch();
-    const { collection: currentCollection} = useSelector(filtersSelector);
+    const {
+        collection: currentCollection,
+        type: typesFilter,
+        color: colorFilter,
+        lang: languageFilter,
+        set: setsFilter,
+    } = useSelector(s.filters);
+    const avalaibleTypes = useSelector(s.avalaibleTypes);
+    const avalaibleLanguages = useSelector(s.avalaibleLanguages);
+    const collections = useSelector(s.userCollections);
+    const setsListSuggest = useSelector(s.setsListSuggest);
+    const { set: setSearch } = useSelector(s.searchValues);
 
-    const avalaibleCollections = useSelector(userCollectionsSelector);
     const spellTypeSearchRef = useRef(null);
     const spellNameSearchRef = useRef(null);
     const setSearchRef = useRef(null);
-    const [spellTypeSearch, setSpellTypeSearch] = useState('');
-    const [setSearch, setSetSearch] = useState('');
+
+    // const [spellTypeSearch, setSpellTypeSearch] = useState('');
+
     const [spellNameSearch, setSpellNameSearch] = useState(defaultByNameValueFromQuery);
     const [isTypeSuggestOpen, setTypeSuggestOpen] = useState(false);
     const [isNameSuggestOpen, setNameSuggestOpen] = useState(false);
     const [isSetSuggestOpen, setSetSuggestOpen] = useState(false);
-    const [foundSetsToDisplay, setFoundSetsToDisplay] = useState(avalaibleSets.slice(0, 10))
     const [nameSuggest, setNameSuggest] = useState<Array<string>>([]);
-    const [selectedSetsCodes, setSelectedSetsCodes] = useState<Array<string>>(setCodesFilter);
-
-    const languageOptions: Array<ControlGroupOption> = avalaibleLanguages.map((lang) => ({
-        value: lang,
-        content: lang
-    })).concat([{
-        value: 'all' as LangEnum,
-        content: 'all' as LangEnum
-    }]);
-
-    useEffect(() => {
-        setTypeSuggestOpen(size(spellTypeSearch) > 2)
-    }, [spellTypeSearch]);
-
-    // search by set code
-    useEffect(() => {
-        if (size(setSearch) < 3) {
-            setSetSuggestOpen(false);
-            return;
-        };
-        const re = new RegExp(setSearch, 'gi');
-        const found = avalaibleSets.filter(({ code, name }) => {
-            return (re.test(code) || re.test(name)) && !selectedSetsCodes.includes(code)
-        });
-        setFoundSetsToDisplay(found);
-        setSetSuggestOpen(true);
-    }, [setSearch])
 
     // search by spell name
     useEffect(() => {
@@ -125,10 +86,124 @@ const CollectionFilters: FC<PropsT> = ({
         setNameSuggestOpen(true);
     }, [spellNameSearch]);
 
-    const checkIsColorFilterSet = (color: ColorsEnum): boolean => {
-        return colorsFilters.includes(color);
-    }
+    // Colors and lands type handle -- start
+    const checkIsColorFilterSet = (color: ColorEnum): boolean => {
+        return colorFilter.includes(color);
+    };
+    const handleColorSelect = (color: ColorEnum) => {
+        const checked = checkIsColorFilterSet(color);
+        const payload = {
+            filter: FilterParamNameEnum.COLOR,
+            value: color,
+        };
+        if (!checked) {
+            dispatch(a.setFilter(payload));
+        } else {
+            dispatch(a.removeFilter(payload));
+        }
 
+    };
+    const handleFilterByLandType = () => {
+        const checked = typesFilter.includes(TypeEnum.LAND);
+        const payload = {
+            filter: FilterParamNameEnum.TYPE,
+            value: TypeEnum.LAND,
+        }
+        if (!checked) {
+            dispatch(a.setFilter(payload));
+        } else {
+            dispatch(a.removeFilter(payload));
+        }
+    };
+    const renderColorCheckboxesList = () => (
+        map(Object.values(ColorEnum), (color) => (
+            <input
+                key={ color }
+                type='checkbox'
+                name={color}
+                id={color}
+                onChange={() => handleColorSelect(color)}
+                checked={checkIsColorFilterSet(color)}
+            />
+        ))
+    );
+    const renderColorIconsList = () => (
+        map(Object.values(ColorEnum), (color) => (
+            <label htmlFor={ color } key={ color }>
+                <div className={`manaCheckbox ${checkIsColorFilterSet(color) ? 'manaCheckbox_checked' : ''}`}>
+                    <img src={ mapColorEnumToImage[color] } className='manaSymbol' />
+                </div>
+            </label>
+        ))
+    );
+    // Colors and lands type handle -- end
+
+    // Language handle -- start
+    const handleFilterByLanguage = ([value]: Array<string>) => {
+        dispatch(a.setFilter({
+            filter: FilterParamNameEnum.LANG,
+            value
+        }))
+    };
+    const languageOptions: Array<ControlGroupOption> = avalaibleLanguages.map((lang) => ({
+        value: lang,
+        content: lang
+    }));
+    // Language handle -- end
+
+    // Sets search handle -- start
+    const handleSetSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const { value } = event.target;
+        setSetSuggestOpen(true);
+        dispatch(a.setSearchValue({
+            entity: FilterParamNameEnum.SET,
+            value: value,
+        }));
+    };
+    const onSetSelect = (set: SetSearchT) => {
+        dispatch(a.setSearchValue({
+            entity: FilterParamNameEnum.SET,
+            value: '',
+        }));
+        dispatch(a.setFilter({
+            filter: FilterParamNameEnum.SET,
+            value: set.code,
+        }));
+    };
+    const onSetRemove = (setCode: string) => {
+        dispatch(a.removeFilter({
+            filter: FilterParamNameEnum.SET,
+            value: setCode,
+        }))
+    };
+    const renderSetsCodes = () => {
+        return setsFilter.map((code) => (
+            <Label
+                key={ code }
+                type='close'
+                onClose={() => onSetRemove(code)}
+            >
+                { code }
+            </Label>
+        ));
+    };
+    const renderSetsSuggest = () => (
+        setsListSuggest.map((set) => {
+            const { code, name, icon } = set;
+            return (
+                <Menu.Item key={ name } onClick={ () => onSetSelect(set) } style={{ outline: '1px solid lime'}}>
+                    <div className='setSuggestItem'>
+                       <img src={ icon } className='setIcon' />
+                       <Text>{`(${code})`}</Text>
+                       <HighlightedSubstring text={ name } substring={ setSearch } color='brand' />
+                    </div>
+                </Menu.Item>
+            )
+        })
+    );
+    // Sets search handle -- end
+
+    // UI handle -- start
     const closeTypeSuggest = () => {
         setTypeSuggestOpen(false);
     }
@@ -140,11 +215,7 @@ const CollectionFilters: FC<PropsT> = ({
     const closeNameSuggest = () => {
         setNameSuggestOpen(false);
     }
-
-    const onSpellTypeAdd = (item: string) => {
-        handleSpellTypeAdd(item);
-        setSpellTypeSearch('');
-    }
+    // UI handle -- end
 
     const onSpellNameSet = (name: string) => {
         handleSpellNameSet(name);
@@ -152,28 +223,36 @@ const CollectionFilters: FC<PropsT> = ({
     }
 
     const onFiltersFlush = () => {
-        handleFiltersFlush();
-        setSpellNameSearch('');
-        setSetSearch('');
-    }
+        dispatch(a.flushFilters());
+    };
 
-    const onSetSelect = (set: SetSearchT) => {
-        setSelectedSetsCodes([...selectedSetsCodes, set.code]);
-        setSetSearch('');
-        handleSetCodeAdd(set.code);
-    }
+    const renderTypesMenu = () => {
+        return avalaibleTypes
+            .filter((type) => {
+                return new RegExp(spellTypeSearch).test(type) && !typesFilter.includes(type)}
+            )
+            .map(item => (
+                <Menu.Item key={item} onClick={() => dispatch(a.setFilter({
+                    filter: FilterParamNameEnum.TYPE,
+                    value: item,
+                }))}>
+                    {item}
+                </Menu.Item>
+            ))
+    };
 
-    const renderSetsCodes = () => {
-        return setCodesFilter.map((code) => (
-            <Label
-                key={ code }
-                type='close'
-                onClose={() => handleSetCodeRemove(code)}
-            >
-                { code }
-            </Label>
-        ));
-    }
+    const renderTypesLabels = () => map(typesFilter, (type) => (
+        <Label
+            key={type}
+            type='close'
+            onClose={() => dispatch(a.removeFilter({
+                filter: FilterParamNameEnum.TYPE,
+                value: type
+            }))}
+        >
+            {type}
+        </Label>
+    ));
 
     const renderContent = () => (
         <>
@@ -182,46 +261,11 @@ const CollectionFilters: FC<PropsT> = ({
         }}>
             <Col s='12' l='3' className='colorsCol_desktop'>
                 <div className='hidden'>
-                    <input type='checkbox' name={ColorsEnum.BLACK} id={ColorsEnum.BLACK} onChange={handleColorSelect} checked={colorsFilters.includes(ColorsEnum.BLACK)} />
-                    <input type='checkbox' name={ColorsEnum.BLUE} id={ColorsEnum.BLUE} onChange={handleColorSelect} checked={colorsFilters.includes(ColorsEnum.BLUE)} />
-                    <input type='checkbox' name={ColorsEnum.COLORLESS} id={ColorsEnum.COLORLESS} onChange={handleColorSelect} checked={colorsFilters.includes(ColorsEnum.COLORLESS)} />
-                    <input type='checkbox' name={ColorsEnum.GREEN} id={ColorsEnum.GREEN} onChange={handleColorSelect} checked={colorsFilters.includes(ColorsEnum.GREEN)} />
-                    <input type='checkbox' name={ColorsEnum.MULTI} id={ColorsEnum.MULTI} onChange={handleColorSelect} checked={colorsFilters.includes(ColorsEnum.MULTI)} />
-                    <input type='checkbox' name={ColorsEnum.RED} id={ColorsEnum.RED} onChange={handleColorSelect} checked={colorsFilters.includes(ColorsEnum.RED)} />
-                    <input type='checkbox' name={ColorsEnum.WHITE} id={ColorsEnum.WHITE} onChange={handleColorSelect} checked={colorsFilters.includes(ColorsEnum.WHITE)} />
-                    <input type='checkbox' name={TypeEnum.LAND} id={TypeEnum.LAND} onChange={handleFilterByLandType} checked={typesFilter.includes(TypeEnum.LAND)} />
+                    { renderColorCheckboxesList() }
+                    <input type='checkbox' name={TypeEnum.LAND} id={TypeEnum.LAND} onChange={ handleFilterByLandType } checked={typesFilter.includes(TypeEnum.LAND)} />
                 </div>
                 <div className='manaLabels'>
-                    <label htmlFor={ColorsEnum.WHITE}>
-                        <div className={`manaCheckbox ${checkIsColorFilterSet(ColorsEnum.WHITE) ? 'manaCheckbox_checked' : ''}`}>
-                            <img src={whiteMana} className='manaSymbol' />
-                        </div>
-                    </label>
-                    <label htmlFor={ColorsEnum.BLUE}>
-                        <div className={`manaCheckbox ${checkIsColorFilterSet(ColorsEnum.BLUE) ? 'manaCheckbox_checked' : ''}`}>
-                            <img src={blueMana} className='manaSymbol' />
-                        </div>
-                    </label>
-                    <label htmlFor={ColorsEnum.BLACK}>
-                        <div className={`manaCheckbox ${checkIsColorFilterSet(ColorsEnum.BLACK) ? 'manaCheckbox_checked' : ''}`}>
-                            <img src={blackMana} className='manaSymbol' />
-                        </div>
-                    </label>
-                    <label htmlFor={ColorsEnum.RED}>
-                        <div className={`manaCheckbox ${checkIsColorFilterSet(ColorsEnum.RED) ? 'manaCheckbox_checked' : ''}`}>
-                            <img src={redMana} className='manaSymbol' />
-                        </div>
-                    </label>
-                    <label htmlFor={ColorsEnum.GREEN}>
-                        <div className={`manaCheckbox ${checkIsColorFilterSet(ColorsEnum.GREEN) ? 'manaCheckbox_checked' : ''}`}>
-                            <img src={greenMana} className='manaSymbol' />
-                        </div>
-                    </label>
-                    <label htmlFor={ColorsEnum.COLORLESS}>
-                        <div className={`manaCheckbox ${checkIsColorFilterSet(ColorsEnum.COLORLESS) ? 'manaCheckbox_checked' : ''}`}>
-                            <img src={colorlessMana} className='manaSymbol' />
-                        </div>
-                    </label>
+                    { renderColorIconsList() }
                     <label htmlFor={TypeEnum.LAND}>
                         <div className={`manaCheckbox ${typesFilter.includes(TypeEnum.LAND) ? 'manaCheckbox_checked' : ''}`}>
                             <img src={landType} className='manaSymbol' />
@@ -232,23 +276,21 @@ const CollectionFilters: FC<PropsT> = ({
             <Col s='12' l='3'>
                 <Text variant='subheader-2' className='filterHeader'>Language: </Text>
                 <Select
-                    value={[languageFilter]}
+                    value={[(languageFilter as unknown as string)]}
                     options={ languageOptions }
-                    onUpdate={([val]) => handleLanguageSelect(val as LangEnum)}
+                    onUpdate={ handleFilterByLanguage }
                     size={isMobile ? 'l' : 's'}
                     className='languagePopup'
                 />
             </Col>
             <Col s='12' l='3'>
-                <Text variant='subheader-2' className='filterHeader'>Sets: </Text>
+                <Text variant='subheader-2' className='filterHeader'>Sets:</Text>
                 <TextInput
-                    ref={setSearchRef}
-                    size={isMobile ? 'l' : 's'}
+                    ref={ setSearchRef }
+                    size={ isMobile ? 'l' : 's' }
                     value={ setSearch }
-                    onChange={(event) => {
-                        setSetSearch(event.target.value);
-                    }}
-                    onBlur={closeSetSuggest}
+                    onChange={ handleSetSearch }
+                    onBlur={ closeSetSuggest }
                     placeholder='by set code or name'
                     hasClear
                 />
@@ -260,25 +302,12 @@ const CollectionFilters: FC<PropsT> = ({
                     { renderSetsCodes() }
                 </Flex>
                 <Popup
-                    open={isSetSuggestOpen}
+                    open={ isSetSuggestOpen }
                     anchorRef={setSearchRef}
                     placement='bottom-start'
                 >
                     <Menu size='l'>
-                        {
-                            foundSetsToDisplay.map((set) => {
-                                const { code, name, icon } = set;
-                                return (
-                                    <Menu.Item key={ name } onClick={ () => onSetSelect(set) }>
-                                        <div className='setSuggestItem'>
-                                           <img src={icon} className='setIcon' />
-                                           <Text>{`(${code})`}</Text>
-                                           <HighlightedSubstring text={ name } substring={ setSearch } color='brand' />
-                                        </div>
-                                    </Menu.Item>
-                                )
-                            })
-                        }
+                        { renderSetsSuggest() }
                     </Menu>
                 </Popup>
 
@@ -286,16 +315,16 @@ const CollectionFilters: FC<PropsT> = ({
             <Col s='6' l='1'>
                 <Text variant='subheader-2' className='filterHeader'>Collection: </Text>
                 <Select
-                    value={[currentCollection]}
+                    value={currentCollection}
                     placeholder='Collection'
                     options={
-                        avalaibleCollections.map(coll => ({
+                        collections.map(coll => ({
                             value: coll,
                             content: coll,
                         }))
                     }
                     onUpdate={([nextValue]) => {
-                        dispatch(setFilter({
+                        dispatch(a.setFilter({
                             filter: FilterParamNameEnum.COLLECTION,
                             value: nextValue,
                         }));
@@ -308,7 +337,12 @@ const CollectionFilters: FC<PropsT> = ({
                 <Text variant='subheader-2' className='filterHeader'>Card type: </Text>
                 <RadioButton
                     size={isMobile ? 'l' : 's'}
-                    onUpdate={handleCardTypeSelect}
+                    onUpdate={(type) => {
+                        dispatch(a.setFilter({
+                            filter: FilterParamNameEnum.TYPE,
+                            value: type,
+                        }));
+                    }}
                     options={[
                         {
                             value: PermamentTypeEnum.CARD,
@@ -330,8 +364,8 @@ const CollectionFilters: FC<PropsT> = ({
                     onChange={(event) => {
                         setSpellTypeSearch(event.target.value.toLowerCase());
                     }}
-                    value={spellTypeSearch}
-                    onBlur={closeTypeSuggest}
+                    value={ spellTypeSearch }
+                    onBlur={ closeTypeSuggest }
                     placeholder='instant'
                 />
                 <Flex space={3} style={{
@@ -339,17 +373,7 @@ const CollectionFilters: FC<PropsT> = ({
                     maxWidth: '100%',
                     flexWrap: 'wrap'
                 }}>
-                    {
-                        map(typesFilter, (type) => (
-                            <Label
-                                key={type}
-                                type='close'
-                                onClose={() => handleSpellTypeRemove(type)}
-                            >
-                                {type}
-                            </Label>
-                        ))
-                    }
+                    { renderTypesLabels() }
                 </Flex>
                 <Popup
                     open={isTypeSuggestOpen}
@@ -357,17 +381,7 @@ const CollectionFilters: FC<PropsT> = ({
                     placement='bottom-start'
                 >
                     <Menu size='l'>
-                        {
-                            avalaibleTypes
-                                .filter((type) => {
-                                    return new RegExp(spellTypeSearch).test(type) && !typesFilter.includes(type)}
-                                )
-                                .map(item => (
-                                    <Menu.Item key={item} onClick={() => onSpellTypeAdd(item)}>
-                                        {item}
-                                    </Menu.Item>
-                                ))
-                        }
+                        { renderTypesMenu() }
                     </Menu>
                 </Popup>
             </Col>
@@ -421,7 +435,6 @@ const CollectionFilters: FC<PropsT> = ({
        
         </>
     );
-
 
     if (isMobile) {
         return (

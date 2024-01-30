@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { type CardT, ColorsEnum } from '../../models';
+import { type CardT, ColorEnum } from '../../models';
 import { TradeGroupedTable } from './TradeGroupedTable';
 import entries from 'lodash/entries'; 
 import map from 'lodash/map';
@@ -38,7 +38,7 @@ const TradeTable: React.FC<TablePropsT> = ({ cards }) => {
           return;
         }
         if (
-          card.colors.includes(ColorsEnum.COLORLESS)
+          card.colors.includes(ColorEnum.COLORLESS)
           && !card.isLand
           && !card.isToken
         ) {
@@ -46,14 +46,14 @@ const TradeTable: React.FC<TablePropsT> = ({ cards }) => {
           return;
         }
         if (
-          card.colors.includes(ColorsEnum.COLORLESS)
+          card.colors.includes(ColorEnum.COLORLESS)
           && card.isLand
         ) {
           byColors.lands.push(card);
           return;
         }
         if (
-          card.colors.includes(ColorsEnum.COLORLESS)
+          card.colors.includes(ColorEnum.COLORLESS)
           && card.isToken
         ) {
           byColors.tokens.push(card);
@@ -62,16 +62,16 @@ const TradeTable: React.FC<TablePropsT> = ({ cards }) => {
     
         if (card.colors.length === 1) {
           switch(card.colors[0]) {
-            case ColorsEnum.WHITE:
+            case ColorEnum.WHITE:
               byColors.white.push(card);
               return;
-            case ColorsEnum.BLUE:
+            case ColorEnum.BLUE:
               byColors.blue.push(card);
               return;
-            case ColorsEnum.BLACK:
+            case ColorEnum.BLACK:
               byColors.black.push(card);
               return;
-            case ColorsEnum.RED:
+            case ColorEnum.RED:
               byColors.red.push(card);
               return;
             default:

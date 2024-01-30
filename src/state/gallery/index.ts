@@ -1,57 +1,36 @@
-import { createSelector, createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import filter from 'lodash/filter';
 import store from '../store';
 import { RootState, Thunk, Dispatch } from '../store';
-import { CardT, FilterParamNameEnum, OwnerT, SetRawT, SetListT, SetSearchT, LangEnum } from '../../models';
+import { CardT, FilterParamNameEnum, LangEnum, PermamentTypeEnum, ColorEnum } from '../../models';
 import { ALL } from '../../constants';
 import { nonEmptyStringsArrTransformer } from '../transformers';
-import filter from 'lodash/filter';
 import { parseRawSetsResponse } from '../../utils/parse-raw-sets-response';
 import { parseRawCardsResponse } from '../../utils/parse-raw-cards-response';
-
-type GalleryDataReceivedActionT = PayloadAction<{
-    rawSets: Array<SetRawT>;
-    rawCards: Array<Record<string, string>>;
-    owner: OwnerT;
-}>;
-type SetCollectionFilterActionT = PayloadAction<{
-    filter: FilterParamNameEnum;
-    value: string;
-}>;
-
-type CardsStateT = {
-    owner: Nullable<OwnerT>;
-    cards: Array<CardT>;
-    filters: {
-        [FilterParamNameEnum.COLLECTION]: string
-    };
-    thesaurus: {
-        collections: Array<string>;
-        sets: SetListT;
-        setTypes: Set<string>;
-        setBlocks: Set<string>;
-        parentSets: Record<string, SetSearchT>;
-        languages: Array<LangEnum>;
-        names: Array<{
-            name: string;
-            searchBase: string;
-        }>;
-        types: Array<string>;
-    };
-}
+export { selectors } from './selectors';
+import { GalleryDataReceivedActionT, SetCollectionFilterActionT, RemoveCollectionFilterActionT, SetSearchValueActionT } from './actions';
+import { CardsStateT } from './models';
 
 const initialState: CardsStateT = {
     owner: null,
     cards: [],
     filters: {
-        [FilterParamNameEnum.COLLECTION]: ALL,
+        [FilterParamNameEnum.COLLECTION]: [ALL],
+        [FilterParamNameEnum.TYPE]: [PermamentTypeEnum.CARD],
+        [FilterParamNameEnum.COLOR]: [],
+        [FilterParamNameEnum.LANG]: [ALL as LangEnum],
+        [FilterParamNameEnum.SET]: [],
+    },
+    searchValues: {
+        [FilterParamNameEnum.SET]: '',
     },
     thesaurus: {
         collections : [],
         sets: {},
-        setTypes: new Set<string>(),
-        setBlocks: new Set<string>(),
+        setTypes: [],
+        setBlocks: [],
         parentSets: {},
-        languages: Object.values(LangEnum),
+        languages: [...Object.values(LangEnum), ALL as LangEnum],
         names: [],
         types: [],
     },
@@ -73,10 +52,10 @@ const gallerySlice = createSlice({
             cards,
             thesaurus: {
                 ...state.thesaurus,
-                collections: nonEmptyStringsArrTransformer(collections),
+                collections: [...nonEmptyStringsArrTransformer(collections), ALL],
                 sets,
-                setTypes,
-                setBlocks,
+                setTypes: [...setTypes],
+                setBlocks: [...setBlocks],
                 parentSets,
                 names,
                 types,
@@ -85,44 +64,69 @@ const gallerySlice = createSlice({
 
     },
     setFilter: (state, { payload }: SetCollectionFilterActionT): CardsStateT => {
+        const { filter, value } = payload;
+        const filters = new Set(state.filters[payload.filter]);
+
+        // spell type: card - token
+        const spellTypeValues = Object.values(PermamentTypeEnum);
+        const isSpellTypeFilter = filter === FilterParamNameEnum.TYPE && spellTypeValues.includes(value as PermamentTypeEnum);
+        if (isSpellTypeFilter) {
+            filters.delete(PermamentTypeEnum.CARD);
+            filters.delete(PermamentTypeEnum.TOKEN);
+        };
+
+        // collection, lang
+        const soloFilters = [
+            FilterParamNameEnum.COLLECTION,
+            FilterParamNameEnum.LANG,
+        ];
+        const isSoloFilter = soloFilters.includes(filter);
+        if (isSoloFilter) {
+            filters.clear();
+        }
+
+        filters.add(payload.value);
+
         return {
             ...state,
             filters: {
                 ...state.filters,
-                [payload.filter]: payload.value,
+                [payload.filter]: [...filters],
             }
         }
-    }
+    },
+    removeFilter: (state, { payload }: RemoveCollectionFilterActionT): CardsStateT => {
+        return {
+            ...state,
+            filters: {
+                ...state.filters,
+                [payload.filter]: filter(state.filters[payload.filter], (val) => val !== payload.value)
+            }
+        }
+    },
+    flushFilters: (state): CardsStateT => {
+        return {
+            ...state,
+            filters: initialState.filters,
+            searchValues: initialState.searchValues,
+        }
+    },
+    setSearchValue: (state, { payload }: SetSearchValueActionT): CardsStateT => {
+        return {
+            ...state,
+            searchValues: {
+                ...state.searchValues,
+                [payload.entity]: payload.value,
+            }
+        }
+    },
   }
 });
 
 // Reducers
 export default gallerySlice.reducer;
 
-// Selectors
-export const gallerySelector = (state: RootState) => state.gallery;
-export const userCollectionsSelector = (state: RootState) => state.gallery.thesaurus.collections;
-export const userCardsSelector = (state: RootState) => state.gallery.cards;
-export const byCollectionFilterSelector = (state: RootState) => state.gallery.filters[FilterParamNameEnum.COLLECTION];
-export const cardsFiltredByCollectionSelector = createSelector([
-    userCardsSelector,
-    byCollectionFilterSelector
-], (cards, collection) => {
-    if (collection === ALL) {
-        return cards;
-    }
-    return cards.filter((card) => card.collections.includes(collection));
-});
-export const filtersSelector = createSelector([
-    gallerySelector
-], (gallery) => {
-    return gallery.filters;
-})
-
 // Actions
-export const {
-    setFilter,
-    galleryPageDataReceived,
-} = gallerySlice.actions;
+export const actions = gallerySlice.actions;
 
 // Thunks

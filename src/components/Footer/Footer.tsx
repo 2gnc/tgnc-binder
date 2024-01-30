@@ -1,8 +1,10 @@
 import React, { type FC, useRef, useState } from 'react';
 import { Text, Button, Link, Icon, Menu, Popup } from '@gravity-ui/uikit';
+import { useSelector, useDispatch } from 'react-redux';
 import { LogoTelegram, Copy, BarsAscendingAlignLeftArrowDown, BarsAscendingAlignLeftArrowUp } from '@gravity-ui/icons';
 import { SortingDirectionEnum, SortingValsEnum, OwnerT } from '../../models';
 import { sortingMenuValues } from '../../constants';
+import { selectors as s } from '../../state/gallery';
 
 import './styles.css';
 
@@ -10,7 +12,7 @@ type PropsT = React.PropsWithChildren & {
     isMobile: boolean;
     owner: OwnerT;
     selectionSize: number;
-    filtersUsedCount: number;
+    // filtersUsedCount: number;
     sortingDirection: SortingDirectionEnum;
     handleOpenCopyPanel: () => void;
     handleFilterButtonClick: () => void;
@@ -24,9 +26,10 @@ export const Footer: FC<PropsT> = ({
     isMobile,
     owner,
     selectionSize,
-    filtersUsedCount,
+    // filtersUsedCount,
     sortingDirection,
 }) => {
+    const filtersCount = useSelector(s.filtersCount);
     const buttonFiltersRef = useRef(null);
     const [isSortingMenuOpen, setSortingMenuOpen] = useState(false);
 
@@ -51,7 +54,7 @@ export const Footer: FC<PropsT> = ({
                     <Button size='l' width='auto' view='action' className='filtersButton_mob'
                         onClick={ handleFilterButtonClick }
                     >
-                        <Text>{`Filters${ filtersUsedCount > 0 ? ` (${ filtersUsedCount })` : ''}`}</Text>
+                        <Text>{`Filters${ filtersCount > 0 ? ` (${ filtersCount })` : ''}`}</Text>
                     </Button>
                 )
             }

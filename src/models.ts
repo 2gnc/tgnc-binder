@@ -6,7 +6,7 @@ export type CardT = {
     setName: string;
     number: number;
     edhRank: number;
-    colors: Array<ColorsEnum>;
+    colors: Array<ColorEnum>;
     isFoil: boolean;
     isEtched: boolean;
     isList: boolean;
@@ -42,7 +42,7 @@ export enum FramePerticularitiesEnum {
     SHATTERED = 'shatteredglass'
 }
 
-export enum ColorsEnum {
+export enum ColorEnum {
     RED = 'red',
     GREEN = 'green',
     WHITE = 'white',
@@ -64,6 +64,8 @@ export enum LangEnum {
     PT = 'pt',
     DE = 'de',
     IT = 'it',
+    FR = 'fr', // лобавить иконку
+    JP = 'jp', // добавить иконку
     OTH = 'oth',
 }
 
@@ -116,7 +118,10 @@ export type SetSearchT = {
 
 export enum FilterParamNameEnum {
     COLLECTION = 'collection',
-
+    TYPE = 'type',
+    COLOR = 'color',
+    LANG = 'lang',
+    SET = 'set',
 }
 
 export type SetRawT = {

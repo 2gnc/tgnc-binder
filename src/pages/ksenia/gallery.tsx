@@ -54,7 +54,6 @@ export const queryCards = graphql`
 const OWNER = { name: 'Ksenia', contactLink: 'https://telegram.me/KseniaPolyakova' };
 
 const GalleryPage: React.FC<PageProps> = (props) => {
-    console.log({ props })
     return (
         <>
             <Gallery owner={OWNER} {...props} />

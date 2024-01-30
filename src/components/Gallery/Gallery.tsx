@@ -3,13 +3,10 @@ import UAParser from 'ua-parser-js';
 import type { HeadFC, PageProps } from "gatsby";
 import { Container, ThemeProvider, Modal } from '@gravity-ui/uikit';
 import { toaster } from '@gravity-ui/uikit/toaster-singleton';
-import { parseRawCardsResponse } from '../../utils/parse-raw-cards-response';
-import { parseRawSetsResponse } from '../../utils/parse-raw-sets-response';
-import { CardT, ColorsEnum, OwnerT, PermamentTypeEnum, TypeEnum, SortingValsEnum, SortingDirectionEnum, LangEnum, FilterParamNameEnum } from '../../models';
+import { CardT, ColorEnum, OwnerT, PermamentTypeEnum, TypeEnum, SortingValsEnum, SortingDirectionEnum, LangEnum, FilterParamNameEnum } from '../../models';
 import { SelectedCardsView  } from '../SelectedCadsView/SelectedCadsView';
 import intersection from 'lodash/intersection';
 import size from 'lodash/size';
-import isNil from 'lodash/isNil';
 
 import CollectionHeader from '../../components/CollectionHeader/CollectionHeader';
 import CollectionFilters from '../../components/CollectionFilters/CollectionFilters';
@@ -20,8 +17,7 @@ import { GoUpButton } from '../GoUpButton/GoUpButton';
 import { sortCards } from '../../utils/sort-cards';
 
 import { useSelector, useDispatch } from 'react-redux';
-import { galleryPageDataReceived, setFilter, cardsFiltredByCollectionSelector, filtersSelector } from '../../state/gallery';
-import { RootState } from '../../state/store';
+import { actions as a, selectors as s } from '../../state/gallery';
 import { ALL } from '../../constants';
 
 import './gallery.css';
@@ -51,30 +47,17 @@ type PropsT = PageProps & {
 
 const GalleryPage: React.FC<PropsT> = ({ data, owner, path }) => {
     const dispatch = useDispatch();
-    const { collection: byCollectionFilter } = useSelector(filtersSelector)
-    
-    // const { codesParents, parentSets } = parseRawSetsResponse(data.sets.nodes);
-    // const { cards, collections, types, names, languages } = parseRawCardsResponse(data.cards.nodes, codesParents);
+    const { collection: byCollectionFilter } = useSelector(s.filters)
     
     useEffect(() => {
-        dispatch(galleryPageDataReceived({
+        dispatch(a.galleryPageDataReceived({
             owner,
             rawSets: data.sets.nodes,
             rawCards: data.cards.nodes,
         }));
     }, [])
     
-    const byCollectionCards = useSelector(cardsFiltredByCollectionSelector);
-    
-    // const initialCards = useRef(cards);
-    
-    // useEffect(() => {
-        
-    // }, [initialCards]);
-
-    // const result = useSelector((state: RootState) => selectCardsByUser(state, owner.name));
-    // const result2 = useSelector(allCardsSelector);
-
+    const byCollectionCards = useSelector(s.cardsFiltredByCollection);
 
     // Client side rendering guarantee
     const [isRendered, setIsRendered] = useState(false);
@@ -85,12 +68,9 @@ const GalleryPage: React.FC<PropsT> = ({ data, owner, path }) => {
     const [isCopyPanelOpen, setCopyPanelOpen] = useState(false);
 
     // Filters
-    const [colorsFilters, setColorsFilters] = useState<Array<ColorsEnum>>([]);
-    // const [collectionFilter, setCollectionFilter] = useState<string>(ALL);
-    const [typesFilter, setTypesFilter] = useState<Array<string>>([]);
+    const [colorsFilters, setColorsFilters] = useState<Array<ColorEnum>>([]);
     const [setCodesFilter, setSetCodesFilter] = useState<Array<string>>([]);
     const [nameFilter, setNameFilter] = useState('');
-    const [filtersUsedCount, setFiltersUsedCount] = useState(0);
     const [isFiltersVisible, setIsFiltersVisible] = useState(false);
     const [languageFilter, setLanguageFilter] = useState(ALL as LangEnum)
     
@@ -120,65 +100,15 @@ const GalleryPage: React.FC<PropsT> = ({ data, owner, path }) => {
         setIsRendered(true);
     }, [])
 
-    // парсим фильтры в стейт при загрузке страницы
-    // диспатчить экшен и обновлять в мидлваре
-    useEffect(() => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const byColorsSearch = urlParams.get('color');
-        const byTypeSearch = urlParams.get('type');
-        // const byCollectionSearch = urlParams.get('collection');
-        const byNameSearch = urlParams.get('name');
-        const byLanguageSearch = urlParams.get('lang');
-        const bySetsSearch = urlParams.get('set');
-
-        if (!isNil(byColorsSearch)) {
-            const colorFilters = byColorsSearch.split(',') as Array<ColorsEnum>;
-            setColorsFilters(colorFilters || []);
-        }
-        if (!isNil(byTypeSearch)) {
-            const typesFilter = byTypeSearch.split(',');
-            setTypesFilter(typesFilter);
-        }
-        if (!isNil(bySetsSearch)) {
-            const setsFilter = bySetsSearch.split(',');
-            setSetCodesFilter(setsFilter);
-        }
-        // if (!isNil(byCollectionSearch)) {
-        //     dispatch(setByCollectionFilter({
-        //         filter: FilterParamNameEnum.COLLECTION,
-        //         value: byCollectionSearch,
-        //     }));
-        //     // setCollectionFilter(byCollectionSearch);
-        // }
-        if (!isNil(byLanguageSearch)) {
-            setLanguageFilter(byLanguageSearch as LangEnum);
-        }
-        if (!isNil(byNameSearch)) {
-            setNameFilter(byNameSearch);
-        }
-    }, []);
-
     // Сортировка
     useEffect(() => {
         const sorted = sortCards(selectedCardsToDisplay, sortingValue, sortingDirection);
         setSelectedCardsToDisplay(sorted);
     }, [sortingValue]);
 
-    // Обновляем урл при выборе фильтров
-    // TODO в мидлвару это!
-    useEffect(() => {
-        updateSearchURL('collection', [byCollectionFilter]);
-    }, [byCollectionFilter])
-
     // обновляем список карт по фильтрам
     useEffect(() => {
         let filtredByCollectionCards = [...byCollectionCards];
-        // отбираем по коллекции
-        // if (collectionFilter) {
-        //     if (collectionFilter !== ALL) {
-        //         filtredByCollectionCards = filtredByCollectionCards.filter(card => card.collections.includes(collectionFilter))
-        //     }
-        // }
 
         const isMatchByColor = (card: CardT) => {
             if (!size(colorsFilters)) {
@@ -188,12 +118,13 @@ const GalleryPage: React.FC<PropsT> = ({ data, owner, path }) => {
         }
 
         const isMatchByTypes = (card: CardT) => {
-            if (!size(typesFilter)) {
-                return true;
-            }
+            return true;
+            // if (!size(typesFilter)) {
+            //     return true;
+            // }
 
-            const foundTypes = intersection(typesFilter, card.types);
-            return size(foundTypes) && size(foundTypes) === size(typesFilter);
+            // const foundTypes = intersection(typesFilter, card.types);
+            // return size(foundTypes) && size(foundTypes) === size(typesFilter);
         }
 
         const isMatchByName = (card: CardT) => {
@@ -213,8 +144,10 @@ const GalleryPage: React.FC<PropsT> = ({ data, owner, path }) => {
             return setCodesFilter.includes(card.setParent);
         }
 
-        const isLandTypeIncluded = typesFilter.includes(TypeEnum.LAND);
-        const isTokenTypeIncluded = typesFilter.includes(TypeEnum.TOKEN);
+        // const isLandTypeIncluded = typesFilter.includes(TypeEnum.LAND);
+        // const isTokenTypeIncluded = typesFilter.includes(TypeEnum.TOKEN);
+        const isLandTypeIncluded = true; //typesFilter.includes(TypeEnum.LAND);
+        const isTokenTypeIncluded = true; //typesFilter.includes(TypeEnum.TOKEN);
 
         const isNotLand = (card: CardT) => !card.types.includes(TypeEnum.LAND);
         const isNotToken = (card: CardT) => !card.types.includes(TypeEnum.TOKEN);
@@ -235,7 +168,7 @@ const GalleryPage: React.FC<PropsT> = ({ data, owner, path }) => {
         const sorted = sortCards(filtredByCollectionCards, sortingValue, sortingDirection);
         setSelectedCardsToDisplay(sorted);
         setCurrentChunk(1);
-    }, [colorsFilters, /*collectionFilter,*/ byCollectionFilter, typesFilter, nameFilter, languageFilter, setCodesFilter, byCollectionCards]);
+    }, [colorsFilters, byCollectionFilter, /*typesFilter,*/ nameFilter, languageFilter, setCodesFilter, byCollectionCards]);
 
     const handleFilterButtonClick = () => {
         setIsFiltersVisible(true);
@@ -245,41 +178,6 @@ const GalleryPage: React.FC<PropsT> = ({ data, owner, path }) => {
         setIsFiltersVisible(false);
         window?.scrollTo({top: 0, behavior: 'smooth'});
     }
-
-    const handleCollectionSelect = (collection: string) => {
-        // setCollectionFilter(collection);
-        updateSearchURL('collection', [collection]);
-    };
-
-    const handleLanguageFilterSelect = (language: LangEnum) => {
-        setLanguageFilter(language);
-        updateSearchURL('lang', [language]);
-    }
-
-    const handleCardTypeSelect = (type: PermamentTypeEnum) => {
-        let typesFilterVal = [...typesFilter, type];
-
-        if (type === PermamentTypeEnum.TOKEN) {
-            typesFilterVal.push(TypeEnum.TOKEN);
-        } else {
-            typesFilterVal = typesFilterVal.filter((type) => type !== TypeEnum.TOKEN && type !== 'card');
-        }
-        const typesSet = new Set(typesFilterVal);
-        setTypesFilter([...typesSet]);
-        updateSearchURL('type', [...typesSet]);
-    };
-
-    const handleSpellTypeSelect = (type: string) => {
-        const typesFilterVal = [...typesFilter, type];
-        setTypesFilter(typesFilterVal);
-        updateSearchURL('type', typesFilterVal);
-    };
-
-    const handleSpellTypeRemove = (type: string) => {
-        const typesFilterVal = [...typesFilter].filter((item) => item !== type);
-        setTypesFilter(typesFilterVal);
-        updateSearchURL('type', typesFilterVal);
-    };
 
     const handleSetCodeAdd = (code: string) => {
         const setCodesFilterVal = [...setCodesFilter, code];
@@ -298,7 +196,7 @@ const GalleryPage: React.FC<PropsT> = ({ data, owner, path }) => {
         const filters = [...colorsFilters];
         let updatedFilters;
         if (checked) {
-            filters.push(name as ColorsEnum);
+            filters.push(name as ColorEnum);
             updatedFilters = [...new Set(filters)];
             setColorsFilters(updatedFilters);
         } else {
@@ -311,70 +209,6 @@ const GalleryPage: React.FC<PropsT> = ({ data, owner, path }) => {
         colorsFilters,
         setColorsFilters,
     ])
-
-    const handleFilterByLandSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const { checked } = event.target;
-        let typesFilterVal = [...typesFilter];
-        if ( checked ) {
-            typesFilterVal.push(TypeEnum.LAND)
-        } else {
-            typesFilterVal = typesFilterVal.filter((type) => type !== TypeEnum.LAND)
-        }
-        const typesSet = new Set(typesFilterVal);
-        updateSearchURL('type', [...typesSet]);
-        setTypesFilter([...typesSet]);
-    }
-
-    const flushFilters = () => {
-        setColorsFilters([]);
-        updateSearchURL('color', []);
-
-        // setCollectionFilter(ALL);
-        dispatch(setFilter({
-            filter: FilterParamNameEnum.COLLECTION,
-            value: ALL
-        }));
-        updateSearchURL('collection', [ALL]);
-
-        setTypesFilter([]);
-        updateSearchURL('type', []);
-
-        setNameFilter('');
-        updateSearchURL('name', []);
-
-        setLanguageFilter(ALL as LangEnum);
-        updateSearchURL('lang', []);
-
-        setSetCodesFilter([]);
-        updateSearchURL('set', []);
-
-        setFiltersUsedCount(0);
-    };
-
-    useEffect(() => {
-        let count = 0;
-
-        if (size(colorsFilters)) {
-            setFiltersUsedCount(count += 1)
-        };
-        // if (collectionFilter.length && collectionFilter !== ALL) {
-        if (byCollectionFilter !== ALL) {
-            setFiltersUsedCount(count += 1)
-        };
-        if (languageFilter.length && languageFilter !== ALL as LangEnum) {
-            setFiltersUsedCount(count += 1)
-        };
-        if (size(typesFilter)) {
-            setFiltersUsedCount(count += 1);
-        }
-        if (size(nameFilter)) {
-            setFiltersUsedCount(count += 1);
-        }
-        if (size(setCodesFilter)) {
-            setFiltersUsedCount(count += 1);
-        }
-
-    }, [colorsFilters, /*collectionFilter, byCollectionFilter,*/ typesFilter, nameFilter, flushFilters, languageFilter, setCodesFilter]);
 
     const openCopyPanel = () => {
         setCopyPanelOpen(true);
@@ -395,18 +229,18 @@ const GalleryPage: React.FC<PropsT> = ({ data, owner, path }) => {
     }
 
     const handleCardClick = (id: string) => {
-        const found = cards.find((card) => card.id === id);
-        if (found) {
-            const updatedSelectedCards = [...selectedCards, found];
-            setSelectedCards(updatedSelectedCards);
-            toaster.add({
-                name: found.id,
-                title: 'Added to exchange',
-                autoHiding: 1000,
-                type: 'success',
-                content: found.name
-            })
-        }
+        // const found = cards.find((card) => card.id === id);
+        // if (found) {
+        //     const updatedSelectedCards = [...selectedCards, found];
+        //     setSelectedCards(updatedSelectedCards);
+        //     toaster.add({
+        //         name: found.id,
+        //         title: 'Added to exchange',
+        //         autoHiding: 1000,
+        //         type: 'success',
+        //         content: found.name
+        //     })
+        // }
     }
 
     const handleFilterByName = (name: string) => {
@@ -435,35 +269,12 @@ const GalleryPage: React.FC<PropsT> = ({ data, owner, path }) => {
             }}>
                 <CollectionHeader
                     isMobile={ IS_MOBILE }
-                    owner={owner}
-                    // collection={ collectionFilter }
                     path={ path }
                 />
                 <CollectionFilters
                     isMobile={ IS_MOBILE }
-                    handleColorSelect={handleColorSelect}
-                    handleFilterByLandType={handleFilterByLandSelect}
-                    colorsFilters={ colorsFilters }
-                    // collectionFilter={ collectionFilter }
-                    // handleCollectionSelect={ handleCollectionSelect }
-                    typesFilter={ typesFilter }
-                    handleCardTypeSelect={ handleCardTypeSelect }
-                    avalaibleTypes={ types }
-                    handleSpellTypeAdd={ handleSpellTypeSelect }
-                    handleSpellTypeRemove={ handleSpellTypeRemove }
-                    avalaibleNames={ names }
-                    handleSpellNameSet={ handleFilterByName }
-                    defaultByNameValueFromQuery={new URLSearchParams(window.location.search).get('name') || ''}
                     handleFiltersClose={ handleFiltersClose }
                     isFiltersVisible={ isFiltersVisible }
-                    handleFiltersFlush={ flushFilters }
-                    avalaibleLanguages={ languages }
-                    languageFilter={ languageFilter }
-                    handleLanguageSelect={ handleLanguageFilterSelect }
-                    avalaibleSets={ Object.values(parentSets) }
-                    handleSetCodeRemove={ handleSetCodeRemove }
-                    setCodesFilter={ setCodesFilter }
-                    handleSetCodeAdd={ handleSetCodeAdd }
                 />
                 <GalleryTable
                     cards={ getChunk() }
@@ -475,7 +286,6 @@ const GalleryPage: React.FC<PropsT> = ({ data, owner, path }) => {
                 <Footer
                     isMobile={ IS_MOBILE }
                     owner={ owner }
-                    filtersUsedCount={ filtersUsedCount }
                     handleOpenCopyPanel={ openCopyPanel}
                     selectionSize={ size(selectedCards) }
                     handleFilterButtonClick={ handleFilterButtonClick }

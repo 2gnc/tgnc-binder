@@ -5,24 +5,21 @@ import { Receipt } from '@gravity-ui/icons';
 import { OwnerT, SortingValsEnum } from '../../models';
 import logo from '../../images/logo.png';
 import { useSelector, useDispatch } from 'react-redux';
-import { filtersSelector } from '../../state/gallery';
+import { selectors as s } from '../../state/gallery';
 
 import './styles.css';
 
 type PropsT = {
     isMobile: boolean;
-    owner: OwnerT;
-    // collection: string;
     path: string;
 }
 const CollectionHeader:FC<PropsT> = ({
     isMobile,
-    owner,
-    // collection,
     path,
 }) => {
-    const { byCollection: collection } = useSelector(filtersSelector);
-    const items = [
+    const { collection } = useSelector(s.filters);
+    const owner = useSelector(s.owner)
+    const items = owner ? [
         {
             text: owner.name,
             action: () => {},
@@ -36,7 +33,7 @@ const CollectionHeader:FC<PropsT> = ({
             text: collection,
             action: () => {}
         }
-    ];
+    ] : [];
 
     return (
         <div className='headerBox'>
@@ -51,7 +48,7 @@ const CollectionHeader:FC<PropsT> = ({
                     renderItemDivider={() => '>'}
                 />
             </div>
-            <a href={`/${owner.name.toLowerCase()}/trade?collection=${collection}`} target='_blank' className='tradeListLink'>
+            <a href={`/${owner?.name.toLowerCase()}/trade?collection=${collection}`} target='_blank' className='tradeListLink'>
                 <Button view='raised'>
                     <Icon data={Receipt} size={16} />
                 </Button>

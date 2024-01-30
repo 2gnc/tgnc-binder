@@ -1,29 +1,29 @@
-import { ColorsEnum } from '../models';
+import { ColorEnum } from '../models';
 
-export function mapCardColorToEnum(cardColor: string): Array<ColorsEnum> {
+export function mapCardColorToEnum(cardColor: string): Array<ColorEnum> {
     const colors = cardColor.split(',');
-    const enumColors: Array<ColorsEnum> = [];
+    const enumColors: Array<ColorEnum> = [];
 
     colors.forEach((color) => {
         let currentColor;
         switch(color) {
             case 'R':
-                currentColor = ColorsEnum.RED;
+                currentColor = ColorEnum.RED;
                 break;
             case 'W':
-                currentColor = ColorsEnum.WHITE;
+                currentColor = ColorEnum.WHITE;
                 break;
             case 'B':
-                currentColor = ColorsEnum.BLACK;
+                currentColor = ColorEnum.BLACK;
                 break;
             case 'U':
-                currentColor = ColorsEnum.BLUE;
+                currentColor = ColorEnum.BLUE;
                 break;
             case 'G':
-                currentColor = ColorsEnum.GREEN;
+                currentColor = ColorEnum.GREEN;
                 break;
             default:
-                currentColor = ColorsEnum.COLORLESS;
+                currentColor = ColorEnum.COLORLESS;
         }
         enumColors.push(currentColor);
     })
