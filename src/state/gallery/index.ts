@@ -1,5 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import filter from 'lodash/filter';
+import uniq from 'lodash/uniq';
+import remove from 'lodash/remove';
 import store from '../store';
 import { RootState, Thunk, Dispatch } from '../store';
 import { CardT, FilterParamNameEnum, LangEnum, PermamentTypeEnum, ColorEnum } from '../../models';
@@ -20,9 +22,11 @@ const initialState: CardsStateT = {
         [FilterParamNameEnum.COLOR]: [],
         [FilterParamNameEnum.LANG]: [ALL as LangEnum],
         [FilterParamNameEnum.SET]: [],
+        [FilterParamNameEnum.NAME]: []
     },
     searchValues: {
         [FilterParamNameEnum.SET]: '',
+        [FilterParamNameEnum.NAME]: '',
     },
     thesaurus: {
         collections : [],
@@ -65,27 +69,25 @@ const gallerySlice = createSlice({
     },
     setFilter: (state, { payload }: SetCollectionFilterActionT): CardsStateT => {
         const { filter, value } = payload;
-        const filters = new Set(state.filters[payload.filter]);
+        let filters = uniq(state.filters[payload.filter]);
 
         // spell type: card - token
         const spellTypeValues = Object.values(PermamentTypeEnum);
         const isSpellTypeFilter = filter === FilterParamNameEnum.TYPE && spellTypeValues.includes(value as PermamentTypeEnum);
         if (isSpellTypeFilter) {
-            filters.delete(PermamentTypeEnum.CARD);
-            filters.delete(PermamentTypeEnum.TOKEN);
+            filters = filters.filter((item) => item !== PermamentTypeEnum.CARD && item !== PermamentTypeEnum.TOKEN)
         };
 
-        // collection, lang
         const soloFilters = [
             FilterParamNameEnum.COLLECTION,
             FilterParamNameEnum.LANG,
         ];
         const isSoloFilter = soloFilters.includes(filter);
         if (isSoloFilter) {
-            filters.clear();
+            filters.length = 0;
         }
 
-        filters.add(payload.value);
+        filters.push(payload.value);
 
         return {
             ...state,

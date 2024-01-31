@@ -9,9 +9,12 @@ export type CardsStateT = {
         [FilterParamNameEnum.COLOR]: Array<ColorEnum>;
         [FilterParamNameEnum.LANG]: Array<LangEnum>;
         [FilterParamNameEnum.SET]: Array<string>;
+        [FilterParamNameEnum.NAME]: Array<string>;
     };
     searchValues: {
         [FilterParamNameEnum.SET]: string;
+        [FilterParamNameEnum.NAME]: string;
+
     };
     thesaurus: {
         collections: Array<string>;

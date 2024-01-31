@@ -1,6 +1,7 @@
 import { createSelector, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import size from 'lodash/size';
 import interception from 'lodash/intersection';
+import uniq from 'lodash/uniq';
 import { RootState, Thunk, Dispatch } from '../store';
 import { CardT, FilterParamNameEnum, OwnerT, SetRawT, SetListT, SetSearchT, LangEnum } from '../../models';
 import { ALL } from '../../constants';
@@ -16,6 +17,7 @@ const avalaibleTypes = createSelector([gallery], (gallery) => gallery.thesaurus.
 const avalaibleLanguages = createSelector([gallery], (gallery) => gallery.thesaurus.languages);
 const searchValues = createSelector([gallery], (gallery) => gallery.searchValues);
 const parentSetsList = createSelector([gallery], (gallery) => Object.values(gallery.thesaurus.parentSets));
+const namesSearchBase = createSelector([gallery], (gallery) => gallery.thesaurus.names);
 const cardsFiltredByCollection = createSelector([
     userCards,
     collectionFilter
@@ -37,6 +39,21 @@ const setsListSuggest = createSelector([searchValues, parentSetsList, filters], 
     });
 });
 
+const spellNameSuggest = createSelector([searchValues, namesSearchBase], (searchValues, base) => {
+    const searchValue = searchValues.name;
+
+    if (size(searchValue) < 3) {
+        return [];
+    }
+
+    const re = new RegExp(searchValue);
+    const found = base
+        .filter((name) => re.test(name.searchBase))
+        .map(item => item.name);
+    
+    return uniq(found);
+});
+
 export const selectors = {
     gallery,
     userCollections,
@@ -49,4 +66,5 @@ export const selectors = {
     avalaibleLanguages,
     searchValues,
     setsListSuggest,
+    spellNameSuggest,
 };

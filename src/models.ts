@@ -122,6 +122,7 @@ export enum FilterParamNameEnum {
     COLOR = 'color',
     LANG = 'lang',
     SET = 'set',
+    NAME = 'name',
 }
 
 export type SetRawT = {

@@ -57,7 +57,8 @@ const CollectionFilters: FC<PropsT> = ({
     const avalaibleLanguages = useSelector(s.avalaibleLanguages);
     const collections = useSelector(s.userCollections);
     const setsListSuggest = useSelector(s.setsListSuggest);
-    const { set: setSearch } = useSelector(s.searchValues);
+    const spellnameSuggest = useSelector(s.spellNameSuggest);
+    const { set: setSearch, name: spellnameSearch } = useSelector(s.searchValues);
 
     const spellTypeSearchRef = useRef(null);
     const spellNameSearchRef = useRef(null);
@@ -65,26 +66,11 @@ const CollectionFilters: FC<PropsT> = ({
 
     // const [spellTypeSearch, setSpellTypeSearch] = useState('');
 
-    const [spellNameSearch, setSpellNameSearch] = useState(defaultByNameValueFromQuery);
+    // const [spellNameSearch, setSpellNameSearch] = useState(defaultByNameValueFromQuery);
+    // const [nameSuggest, setNameSuggest] = useState<Array<string>>([]);
     const [isTypeSuggestOpen, setTypeSuggestOpen] = useState(false);
     const [isNameSuggestOpen, setNameSuggestOpen] = useState(false);
     const [isSetSuggestOpen, setSetSuggestOpen] = useState(false);
-    const [nameSuggest, setNameSuggest] = useState<Array<string>>([]);
-
-    // search by spell name
-    useEffect(() => {
-        if (!size(spellNameSearch)) {
-            handleSpellNameSet('');
-        }
-        
-        if (size(spellNameSearch) < 3) return;
-        const found = avalaibleNames
-            .filter((name) => new RegExp(spellNameSearch).test(name.searchBase))
-            .map(item => item.name);
-        
-        setNameSuggest([... new Set(found)]);                
-        setNameSuggestOpen(true);
-    }, [spellNameSearch]);
 
     // Colors and lands type handle -- start
     const checkIsColorFilterSet = (color: ColorEnum): boolean => {
@@ -217,19 +203,45 @@ const CollectionFilters: FC<PropsT> = ({
     }
     // UI handle -- end
 
-    const onSpellNameSet = (name: string) => {
-        handleSpellNameSet(name);
+    // Spell by name search -- start 
+    const onSpellNameSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const { value } = event.target;
+        setNameSuggestOpen(true);
+        dispatch(a.setSearchValue({
+            entity: FilterParamNameEnum.NAME,
+            value,
+        }))
         handleFiltersClose();
+    };
+    const onSpellnameSelect = (name: string) => {
+        dispatch(a.setFilter({
+            filter: FilterParamNameEnum.NAME,
+            value: name,
+        }));
+        dispatch(a.setSearchValue({
+            entity: FilterParamNameEnum.NAME,
+            value: '',
+        }))
+    };
+    const renderNamesSuggest = () => {
+        return spellnameSuggest.map((item) => (
+            <Menu.Item key={item} onClick={() => onSpellnameSelect(item)}>
+                 <HighlightedSubstring text={ item } substring={ spellnameSearch } color='brand' />
+            </Menu.Item>
+        ))
     }
+    // Spell by name search -- end
 
     const onFiltersFlush = () => {
         dispatch(a.flushFilters());
     };
 
+
     const renderTypesMenu = () => {
         return avalaibleTypes
             .filter((type) => {
-                return new RegExp(spellTypeSearch).test(type) && !typesFilter.includes(type)}
+                // return new RegExp(spellTypeSearch).test(type) && !typesFilter.includes(type)
+            }
             )
             .map(item => (
                 <Menu.Item key={item} onClick={() => dispatch(a.setFilter({
@@ -334,7 +346,7 @@ const CollectionFilters: FC<PropsT> = ({
                 />
             </Col>
             <Col s='6' l='1'>
-                <Text variant='subheader-2' className='filterHeader'>Card type: </Text>
+                <Text variant='subheader-2' className='filterHeader'>Card type:</Text>
                 <RadioButton
                     size={isMobile ? 'l' : 's'}
                     onUpdate={(type) => {
@@ -357,14 +369,14 @@ const CollectionFilters: FC<PropsT> = ({
                 />
             </Col>
             <Col s='12' l='2'>
-                <Text variant='subheader-2' className='filterHeader'>Spell type: </Text>
+                <Text variant='subheader-2' className='filterHeader'>Spell type:</Text>
                 <TextInput
-                    ref={spellTypeSearchRef}
+                    ref={ spellTypeSearchRef }
                     size={isMobile ? 'l' : 's'}
                     onChange={(event) => {
-                        setSpellTypeSearch(event.target.value.toLowerCase());
+                        // setSpellTypeSearch(event.target.value.toLowerCase());
                     }}
-                    value={ spellTypeSearch }
+                    // value={ spellTypeSearch }
                     onBlur={ closeTypeSuggest }
                     placeholder='instant'
                 />
@@ -386,18 +398,15 @@ const CollectionFilters: FC<PropsT> = ({
                 </Popup>
             </Col>
             <Col s='12' l='3'>
-                <Text variant='subheader-2' className='filterHeader'>Spell name: </Text>
+                <Text variant='subheader-2' className='filterHeader'>Spell name:</Text>
                 <TextInput
                     ref={spellNameSearchRef}
                     size={isMobile ? 'l' : 's'}
-                    onChange={(event) => {
-                        setSpellNameSearch(event.target.value.toLowerCase());
-                    }}
-                    value={spellNameSearch}
+                    onChange={ onSpellNameSearch }
+                    value={ spellnameSearch }
                     onBlur={closeNameSuggest}
                     placeholder='abrade'
                     hasClear
-                    
                 />
                 <Popup
                     open={isNameSuggestOpen}
@@ -405,13 +414,7 @@ const CollectionFilters: FC<PropsT> = ({
                     placement='bottom-start'
                 >
                     <Menu size='l'>
-                        {
-                            nameSuggest.map((item) => (
-                                <Menu.Item key={item} onClick={() => onSpellNameSet(item)}>
-                                    {item}
-                                </Menu.Item>
-                            ))
-                        }
+                        { renderNamesSuggest() }
                     </Menu>
                 </Popup>
             </Col>

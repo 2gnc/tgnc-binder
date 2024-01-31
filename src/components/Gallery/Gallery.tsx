@@ -243,10 +243,10 @@ const GalleryPage: React.FC<PropsT> = ({ data, owner, path }) => {
         // }
     }
 
-    const handleFilterByName = (name: string) => {
-        setNameFilter(name);
-        updateSearchURL('name', name ? [name] : []);
-    }
+    // const handleFilterByName = (name: string) => {
+    //     setNameFilter(name);
+    //     updateSearchURL('name', name ? [name] : []);
+    // }
 
     const handleSortingValueSelect = (value: SortingValsEnum) => {
         setSortingValue(value);
