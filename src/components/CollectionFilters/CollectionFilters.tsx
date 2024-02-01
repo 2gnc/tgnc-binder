@@ -1,11 +1,9 @@
-import React, { type FC, useState, useRef, useEffect } from 'react';
-import { Row, Col, Text, Select, RadioButton, TextInput, Popup, Menu, Label, Flex, Button, Modal, ControlGroupOption, Icon } from '@gravity-ui/uikit';
-import { ColorEnum, TypeEnum, PermamentTypeEnum, LangEnum, SetSearchT, FilterParamNameEnum } from '../../models';
-import { HighlightedSubstring } from '../HighlightedSubstring/HighlightedSubstring';
-import size from 'lodash/size';
-import map from 'lodash/map';
+import React, { type FC, useState, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-
+import { Row, Col, Text, Select, RadioButton, TextInput, Popup, Menu, Label, Flex, Button, Modal, ControlGroupOption } from '@gravity-ui/uikit';
+import map from 'lodash/map';
+import { ColorEnum, TypeEnum, PermamentTypeEnum, SetSearchT, FilterParamNameEnum } from '../../models';
+import { HighlightedSubstring } from '../HighlightedSubstring/HighlightedSubstring';
 import { actions as a, selectors as s } from '../../state/gallery';
 
 import redMana from '../../images/r.png';
@@ -26,23 +24,28 @@ const mapColorEnumToImage: Record<ColorEnum, any> = {
     [ColorEnum.MULTI]: undefined,
 };
 
+const permanentTypeOptions = [
+    {
+        value: PermamentTypeEnum.CARD,
+        content: 'card'
+    },
+    {
+        value: PermamentTypeEnum.TOKEN,
+        content: 'token'
+    }
+];
+
 import './styles.css';
 
 type PropsT = {
     isMobile: boolean;
     isFiltersVisible: boolean;
-    // avalaibleNames: Array<{ name: string; searchBase: string}>;
-    // defaultByNameValueFromQuery: string;
-    // handleSpellNameSet: (name: string) => void;
     handleFiltersClose: () => void;
 }
 
 const CollectionFilters: FC<PropsT> = ({
     isMobile,
     isFiltersVisible,
-    // avalaibleNames,
-    // defaultByNameValueFromQuery,
-    // handleSpellNameSet,
     handleFiltersClose,
 }) => {
     const dispatch = useDispatch();
@@ -53,21 +56,17 @@ const CollectionFilters: FC<PropsT> = ({
         lang: languageFilter,
         set: setsFilter,
     } = useSelector(s.filters);
-    const avalaibleTypes = useSelector(s.avalaibleTypes);
     const avalaibleLanguages = useSelector(s.avalaibleLanguages);
     const collections = useSelector(s.userCollections);
     const setsListSuggest = useSelector(s.setsListSuggest);
     const spellnameSuggest = useSelector(s.spellNameSuggest);
-    const { set: setSearch, name: spellnameSearch } = useSelector(s.searchValues);
+    const spellTypeSuggest = useSelector(s.spellTypeSuggest);
+    const { set: setSearch, name: spellnameSearch, type: spellTypeSearch } = useSelector(s.searchValues);
 
     const spellTypeSearchRef = useRef(null);
     const spellNameSearchRef = useRef(null);
     const setSearchRef = useRef(null);
 
-    // const [spellTypeSearch, setSpellTypeSearch] = useState('');
-
-    // const [spellNameSearch, setSpellNameSearch] = useState(defaultByNameValueFromQuery);
-    // const [nameSuggest, setNameSuggest] = useState<Array<string>>([]);
     const [isTypeSuggestOpen, setTypeSuggestOpen] = useState(false);
     const [isNameSuggestOpen, setNameSuggestOpen] = useState(false);
     const [isSetSuggestOpen, setSetSuggestOpen] = useState(false);
@@ -177,7 +176,7 @@ const CollectionFilters: FC<PropsT> = ({
         setsListSuggest.map((set) => {
             const { code, name, icon } = set;
             return (
-                <Menu.Item key={ name } onClick={ () => onSetSelect(set) } style={{ outline: '1px solid lime'}}>
+                <Menu.Item key={ name } onClick={ () => onSetSelect(set) }>
                     <div className='setSuggestItem'>
                        <img src={ icon } className='setIcon' />
                        <Text>{`(${code})`}</Text>
@@ -211,7 +210,6 @@ const CollectionFilters: FC<PropsT> = ({
             entity: FilterParamNameEnum.NAME,
             value,
         }))
-        handleFiltersClose();
     };
     const onSpellnameSelect = (name: string) => {
         dispatch(a.setFilter({
@@ -236,23 +234,24 @@ const CollectionFilters: FC<PropsT> = ({
         dispatch(a.flushFilters());
     };
 
-
-    const renderTypesMenu = () => {
-        return avalaibleTypes
-            .filter((type) => {
-                // return new RegExp(spellTypeSearch).test(type) && !typesFilter.includes(type)
-            }
-            )
-            .map(item => (
-                <Menu.Item key={item} onClick={() => dispatch(a.setFilter({
-                    filter: FilterParamNameEnum.TYPE,
-                    value: item,
-                }))}>
-                    {item}
-                </Menu.Item>
-            ))
+    // Spell type search -- start
+    const onSpellTypeSelect = (type: string) => {
+        dispatch(a.setFilter({
+            filter: FilterParamNameEnum.TYPE,
+            value: type,
+        }));
+        dispatch(a.setSearchValue({
+            entity: FilterParamNameEnum.TYPE,
+            value: '',
+        }));
+    }
+    const renderTypesSuggest = () => {
+        return spellTypeSuggest.map((item) => (
+            <Menu.Item key={item} onClick={() => onSpellTypeSelect(item)}>
+                {item}
+            </Menu.Item>
+        ));
     };
-
     const renderTypesLabels = () => map(typesFilter, (type) => (
         <Label
             key={type}
@@ -265,6 +264,28 @@ const CollectionFilters: FC<PropsT> = ({
             {type}
         </Label>
     ));
+    const onSpellTypeSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const { value } = event.target;
+        setTypeSuggestOpen(true);
+        dispatch(a.setSearchValue({
+            entity: FilterParamNameEnum.TYPE,
+            value,
+        }));
+    }; 
+    const onPermanentTypeUpdate = (type: PermamentTypeEnum) => {
+        if (type === PermamentTypeEnum.TOKEN) {
+            dispatch(a.setFilter({
+                filter: FilterParamNameEnum.TYPE,
+                value: type,
+            }));
+        } else {
+            dispatch(a.removeFilter({
+                filter: FilterParamNameEnum.TYPE,
+                value: PermamentTypeEnum.TOKEN
+            }))
+        }
+    };
+    // Spell type search -- end
 
     const renderContent = () => (
         <>
@@ -349,22 +370,8 @@ const CollectionFilters: FC<PropsT> = ({
                 <Text variant='subheader-2' className='filterHeader'>Card type:</Text>
                 <RadioButton
                     size={isMobile ? 'l' : 's'}
-                    onUpdate={(type) => {
-                        dispatch(a.setFilter({
-                            filter: FilterParamNameEnum.TYPE,
-                            value: type,
-                        }));
-                    }}
-                    options={[
-                        {
-                            value: PermamentTypeEnum.CARD,
-                            content: 'card'
-                        },
-                        {
-                            value: PermamentTypeEnum.TOKEN,
-                            content: 'token'
-                        }
-                    ]}
+                    onUpdate={ onPermanentTypeUpdate }
+                    options={ permanentTypeOptions }
                     value={ typesFilter.includes(TypeEnum.TOKEN) ? PermamentTypeEnum.TOKEN : PermamentTypeEnum.CARD }
                 />
             </Col>
@@ -373,10 +380,8 @@ const CollectionFilters: FC<PropsT> = ({
                 <TextInput
                     ref={ spellTypeSearchRef }
                     size={isMobile ? 'l' : 's'}
-                    onChange={(event) => {
-                        // setSpellTypeSearch(event.target.value.toLowerCase());
-                    }}
-                    // value={ spellTypeSearch }
+                    onChange={ onSpellTypeSearch }
+                    value={ spellTypeSearch }
                     onBlur={ closeTypeSuggest }
                     placeholder='instant'
                 />
@@ -393,7 +398,7 @@ const CollectionFilters: FC<PropsT> = ({
                     placement='bottom-start'
                 >
                     <Menu size='l'>
-                        { renderTypesMenu() }
+                        { renderTypesSuggest() }
                     </Menu>
                 </Popup>
             </Col>

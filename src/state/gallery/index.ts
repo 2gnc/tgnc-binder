@@ -1,7 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import filter from 'lodash/filter';
 import uniq from 'lodash/uniq';
-import remove from 'lodash/remove';
 import store from '../store';
 import { RootState, Thunk, Dispatch } from '../store';
 import { CardT, FilterParamNameEnum, LangEnum, PermamentTypeEnum, ColorEnum } from '../../models';
@@ -10,7 +9,7 @@ import { nonEmptyStringsArrTransformer } from '../transformers';
 import { parseRawSetsResponse } from '../../utils/parse-raw-sets-response';
 import { parseRawCardsResponse } from '../../utils/parse-raw-cards-response';
 export { selectors } from './selectors';
-import { GalleryDataReceivedActionT, SetCollectionFilterActionT, RemoveCollectionFilterActionT, SetSearchValueActionT } from './actions';
+import { GalleryDataReceivedActionT, SetCollectionFilterActionT, RemoveCollectionFilterActionT, SetSearchValueActionT, ResetCollectionFilterActionT } from './actions';
 import { CardsStateT } from './models';
 
 const initialState: CardsStateT = {
@@ -18,7 +17,7 @@ const initialState: CardsStateT = {
     cards: [],
     filters: {
         [FilterParamNameEnum.COLLECTION]: [ALL],
-        [FilterParamNameEnum.TYPE]: [PermamentTypeEnum.CARD],
+        [FilterParamNameEnum.TYPE]: [],
         [FilterParamNameEnum.COLOR]: [],
         [FilterParamNameEnum.LANG]: [ALL as LangEnum],
         [FilterParamNameEnum.SET]: [],
@@ -27,6 +26,7 @@ const initialState: CardsStateT = {
     searchValues: {
         [FilterParamNameEnum.SET]: '',
         [FilterParamNameEnum.NAME]: '',
+        [FilterParamNameEnum.TYPE]: '',
     },
     thesaurus: {
         collections : [],
@@ -103,6 +103,15 @@ const gallerySlice = createSlice({
             filters: {
                 ...state.filters,
                 [payload.filter]: filter(state.filters[payload.filter], (val) => val !== payload.value)
+            }
+        }
+    },
+    resetFilter: (state, { payload }: ResetCollectionFilterActionT): CardsStateT => {
+        return {
+            ...state,
+            filters: {
+                ...state.filters,
+                [payload]: initialState.filters[payload],
             }
         }
     },

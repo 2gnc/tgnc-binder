@@ -15,6 +15,8 @@ export type RemoveCollectionFilterActionT = PayloadAction<{
     value: string;
 }>;
 
+export type ResetCollectionFilterActionT = PayloadAction<FilterParamNameEnum>;
+
 export type SetSearchValueActionT = PayloadAction<{
     entity: FilterParamNameEnum;
     value: string;

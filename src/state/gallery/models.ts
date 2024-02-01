@@ -14,7 +14,7 @@ export type CardsStateT = {
     searchValues: {
         [FilterParamNameEnum.SET]: string;
         [FilterParamNameEnum.NAME]: string;
-
+        [FilterParamNameEnum.TYPE]: string;
     };
     thesaurus: {
         collections: Array<string>;

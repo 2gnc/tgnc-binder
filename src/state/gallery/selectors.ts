@@ -1,9 +1,9 @@
 import { createSelector, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import size from 'lodash/size';
-import interception from 'lodash/intersection';
+import intersection from 'lodash/intersection';
 import uniq from 'lodash/uniq';
 import { RootState, Thunk, Dispatch } from '../store';
-import { CardT, FilterParamNameEnum, OwnerT, SetRawT, SetListT, SetSearchT, LangEnum } from '../../models';
+import { CardT, FilterParamNameEnum, LangEnum, PermamentTypeEnum, TypeEnum } from '../../models';
 import { ALL } from '../../constants';
 
 const gallery = (state: RootState) => state.gallery;
@@ -13,8 +13,9 @@ const collectionFilter = (state: RootState) => state.gallery.filters[FilterParam
 const filters = createSelector([gallery], (gallery) => gallery.filters);
 const filtersCount = createSelector([filters], (filters) => size(filters));
 const owner = createSelector([gallery], (gallery) => gallery.owner);
-const avalaibleTypes = createSelector([gallery], (gallery) => gallery.thesaurus.setTypes);
+const avalaibleSetTypes = createSelector([gallery], (gallery) => gallery.thesaurus.setTypes);
 const avalaibleLanguages = createSelector([gallery], (gallery) => gallery.thesaurus.languages);
+const avalaibleSpellTypes = createSelector([gallery], (gallery) => gallery.thesaurus.types);
 const searchValues = createSelector([gallery], (gallery) => gallery.searchValues);
 const parentSetsList = createSelector([gallery], (gallery) => Object.values(gallery.thesaurus.parentSets));
 const namesSearchBase = createSelector([gallery], (gallery) => gallery.thesaurus.names);
@@ -25,7 +26,7 @@ const cardsFiltredByCollection = createSelector([
     if (collections.includes(ALL)) {
         return cards;
     }
-    return cards.filter((card) => size(interception(card.collections, collections)));
+    return cards.filter((card) => size(intersection(card.collections, collections)));
 });
 const setsListSuggest = createSelector([searchValues, parentSetsList, filters], (searchValues, sets, filters) => {
     const searchValue = searchValues.set;
@@ -54,6 +55,87 @@ const spellNameSuggest = createSelector([searchValues, namesSearchBase], (search
     return uniq(found);
 });
 
+const spellTypeSuggest = createSelector([searchValues, avalaibleSpellTypes], (searchValues, base) => {
+    const searchValue = searchValues.type;
+
+    if (size(searchValue) < 2) {
+        return [];
+    }
+
+    const re = new RegExp(searchValue);
+    const toExcludeFromSuggest = [
+        PermamentTypeEnum.CARD,
+        PermamentTypeEnum.TOKEN,
+        TypeEnum.LAND,
+    ] as Array<string>;
+    const found = base
+        .filter((item) => {
+            const isNotExcluded = !toExcludeFromSuggest.includes(item);
+            return isNotExcluded && re.test(item);
+        });
+    return found;
+});
+
+const cardsFiltredInSingleGallery = createSelector([cardsFiltredByCollection, filters], (cardsInCollection, filters) => {
+    const isMatchByColor = (card: CardT) => {
+        if (!size(filters.color)) {
+            return true;
+        }
+        return size(intersection(filters.color, card.colors));
+    };
+
+    const isMatchByTypes = (card: CardT) => {
+        if (!size(filters.type)) {
+            return true;
+        }
+
+        const foundTypes = intersection(filters.type, card.types);
+        return size(foundTypes) && size(foundTypes) === size(filters.type);
+    };
+
+    const isMatchByName = (card: CardT) => {
+        const re = new RegExp(filters.name[0]?.toLowerCase());
+        return re.test(card.name.toLowerCase());
+    };
+
+    const isMatchByLanguage = (card: CardT) => {
+        if (filters.lang[0] === ALL as LangEnum) {
+            return true;
+        }
+        return card.lang === filters.lang[0];
+    };
+
+    const isMatchBySetCode = (card: CardT) => {
+        if (!size(filters.set)) {
+            return true;
+        }
+        return filters.set.includes(card.setParent);
+    };
+
+    const isLandTypeIncluded = filters.type.includes(TypeEnum.LAND);
+    const isTokenTypeIncluded = filters.type.includes(TypeEnum.TOKEN);
+
+    const isNotLand = (card: CardT) => !card.types.includes(TypeEnum.LAND);
+    const isNotToken = (card: CardT) => !card.types.includes(TypeEnum.TOKEN);
+
+    const found = cardsInCollection.filter((card) => {
+        const hasColorsMatch = isMatchByColor(card);
+        const isMatchByType = isMatchByTypes(card);
+        const hasNameMatch = isMatchByName(card);
+        const hasLanguageMatch = isMatchByLanguage(card);
+        const hasSetCodeMatch = isMatchBySetCode(card);
+
+        const shouldIncludeLand = isLandTypeIncluded ? true : isNotLand(card);
+        const shouldIncludeTokens = isTokenTypeIncluded ? true : isNotToken(card);
+
+        return hasColorsMatch && isMatchByType && shouldIncludeLand && shouldIncludeTokens && hasNameMatch && hasLanguageMatch && hasSetCodeMatch;
+    });
+
+    console.log({ found })
+
+    return found;
+});
+
 export const selectors = {
     gallery,
     userCollections,
@@ -62,9 +144,11 @@ export const selectors = {
     filters,
     filtersCount,
     owner,
-    avalaibleTypes,
+    avalaibleSetTypes,
     avalaibleLanguages,
     searchValues,
     setsListSuggest,
     spellNameSuggest,
+    spellTypeSuggest,
+    cardsFiltredInSingleGallery,
 };

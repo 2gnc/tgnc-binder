@@ -48,6 +48,7 @@ type PropsT = PageProps & {
 const GalleryPage: React.FC<PropsT> = ({ data, owner, path }) => {
     const dispatch = useDispatch();
     const { collection: byCollectionFilter } = useSelector(s.filters)
+    const filtredCards = useSelector(s.cardsFiltredInSingleGallery);
     
     useEffect(() => {
         dispatch(a.galleryPageDataReceived({
@@ -68,11 +69,11 @@ const GalleryPage: React.FC<PropsT> = ({ data, owner, path }) => {
     const [isCopyPanelOpen, setCopyPanelOpen] = useState(false);
 
     // Filters
-    const [colorsFilters, setColorsFilters] = useState<Array<ColorEnum>>([]);
-    const [setCodesFilter, setSetCodesFilter] = useState<Array<string>>([]);
-    const [nameFilter, setNameFilter] = useState('');
+    // const [colorsFilters, setColorsFilters] = useState<Array<ColorEnum>>([]);
+    // const [setCodesFilter, setSetCodesFilter] = useState<Array<string>>([]);
+    // const [nameFilter, setNameFilter] = useState('');
     const [isFiltersVisible, setIsFiltersVisible] = useState(false);
-    const [languageFilter, setLanguageFilter] = useState(ALL as LangEnum)
+    // const [languageFilter, setLanguageFilter] = useState(ALL as LangEnum)
     
     const [selectedCards, setSelectedCards] = useState<Array<CardT>>([]);
 
@@ -93,7 +94,7 @@ const GalleryPage: React.FC<PropsT> = ({ data, owner, path }) => {
     }
 
     const getChunk = () => {
-        return selectedCardsToDisplay.slice(0, currentChunk * LOAD_AMOUNT + LOAD_AMOUNT);
+        return filtredCards.slice(0, currentChunk * LOAD_AMOUNT + LOAD_AMOUNT);
     }
 
     useEffect(() => {
@@ -101,74 +102,74 @@ const GalleryPage: React.FC<PropsT> = ({ data, owner, path }) => {
     }, [])
 
     // Сортировка
-    useEffect(() => {
-        const sorted = sortCards(selectedCardsToDisplay, sortingValue, sortingDirection);
-        setSelectedCardsToDisplay(sorted);
-    }, [sortingValue]);
+    // useEffect(() => {
+    //     const sorted = sortCards(selectedCardsToDisplay, sortingValue, sortingDirection);
+    //     setSelectedCardsToDisplay(sorted);
+    // }, [sortingValue]);
 
     // обновляем список карт по фильтрам
-    useEffect(() => {
-        let filtredByCollectionCards = [...byCollectionCards];
+    // useEffect(() => {
+    //     let filtredByCollectionCards = [...byCollectionCards];
 
-        const isMatchByColor = (card: CardT) => {
-            if (!size(colorsFilters)) {
-                return true;
-            }
-            return size(intersection(colorsFilters, card.colors));
-        }
+    //     const isMatchByColor = (card: CardT) => {
+    //         if (!size(colorsFilters)) {
+    //             return true;
+    //         }
+    //         return size(intersection(colorsFilters, card.colors));
+    //     }
 
-        const isMatchByTypes = (card: CardT) => {
-            return true;
-            // if (!size(typesFilter)) {
-            //     return true;
-            // }
+    //     const isMatchByTypes = (card: CardT) => {
+    //         return true;
+    //         // if (!size(typesFilter)) {
+    //         //     return true;
+    //         // }
 
-            // const foundTypes = intersection(typesFilter, card.types);
-            // return size(foundTypes) && size(foundTypes) === size(typesFilter);
-        }
+    //         // const foundTypes = intersection(typesFilter, card.types);
+    //         // return size(foundTypes) && size(foundTypes) === size(typesFilter);
+    //     }
 
-        const isMatchByName = (card: CardT) => {
-            const re = new RegExp(nameFilter.toLowerCase())
-            return re.test(card.name.toLowerCase());
-        }
+    //     const isMatchByName = (card: CardT) => {
+    //         const re = new RegExp(nameFilter.toLowerCase())
+    //         return re.test(card.name.toLowerCase());
+    //     }
 
-        const isMatchByLanguage = (card: CardT) => {
-            if (languageFilter === ALL as LangEnum) return true;
-            return card.lang === languageFilter;
-        }
+    //     const isMatchByLanguage = (card: CardT) => {
+    //         if (languageFilter === ALL as LangEnum) return true;
+    //         return card.lang === languageFilter;
+    //     }
 
-        const isMatchBySetCode = (card: CardT) => {
-            if (!size(setCodesFilter)) {
-                return true;
-            }
-            return setCodesFilter.includes(card.setParent);
-        }
+    //     const isMatchBySetCode = (card: CardT) => {
+    //         if (!size(setCodesFilter)) {
+    //             return true;
+    //         }
+    //         return setCodesFilter.includes(card.setParent);
+    //     }
 
-        // const isLandTypeIncluded = typesFilter.includes(TypeEnum.LAND);
-        // const isTokenTypeIncluded = typesFilter.includes(TypeEnum.TOKEN);
-        const isLandTypeIncluded = true; //typesFilter.includes(TypeEnum.LAND);
-        const isTokenTypeIncluded = true; //typesFilter.includes(TypeEnum.TOKEN);
+    //     // const isLandTypeIncluded = typesFilter.includes(TypeEnum.LAND);
+    //     // const isTokenTypeIncluded = typesFilter.includes(TypeEnum.TOKEN);
+    //     const isLandTypeIncluded = true; //typesFilter.includes(TypeEnum.LAND);
+    //     const isTokenTypeIncluded = true; //typesFilter.includes(TypeEnum.TOKEN);
 
-        const isNotLand = (card: CardT) => !card.types.includes(TypeEnum.LAND);
-        const isNotToken = (card: CardT) => !card.types.includes(TypeEnum.TOKEN);
+    //     const isNotLand = (card: CardT) => !card.types.includes(TypeEnum.LAND);
+    //     const isNotToken = (card: CardT) => !card.types.includes(TypeEnum.TOKEN);
 
-        filtredByCollectionCards = filtredByCollectionCards.filter((card) => {
-            const hasColorsMatch = isMatchByColor(card);
-            const isMatchByType = isMatchByTypes(card);
-            const hasNameMatch = isMatchByName(card);
-            const hasLanguageMatch = isMatchByLanguage(card);
-            const hasSetCodeMatch = isMatchBySetCode(card);
+    //     filtredByCollectionCards = filtredByCollectionCards.filter((card) => {
+    //         const hasColorsMatch = isMatchByColor(card);
+    //         const isMatchByType = isMatchByTypes(card);
+    //         const hasNameMatch = isMatchByName(card);
+    //         const hasLanguageMatch = isMatchByLanguage(card);
+    //         const hasSetCodeMatch = isMatchBySetCode(card);
 
-            const shouldIncludeLand = isLandTypeIncluded ? true : isNotLand(card);
-            const shouldIncludeTokens = isTokenTypeIncluded ? true : isNotToken(card);
+    //         const shouldIncludeLand = isLandTypeIncluded ? true : isNotLand(card);
+    //         const shouldIncludeTokens = isTokenTypeIncluded ? true : isNotToken(card);
 
-            return hasColorsMatch && isMatchByType && shouldIncludeLand && shouldIncludeTokens && hasNameMatch && hasLanguageMatch && hasSetCodeMatch;
-        });
+    //         return hasColorsMatch && isMatchByType && shouldIncludeLand && shouldIncludeTokens && hasNameMatch && hasLanguageMatch && hasSetCodeMatch;
+    //     });
 
-        const sorted = sortCards(filtredByCollectionCards, sortingValue, sortingDirection);
-        setSelectedCardsToDisplay(sorted);
-        setCurrentChunk(1);
-    }, [colorsFilters, byCollectionFilter, /*typesFilter,*/ nameFilter, languageFilter, setCodesFilter, byCollectionCards]);
+    //     const sorted = sortCards(filtredByCollectionCards, sortingValue, sortingDirection);
+    //     setSelectedCardsToDisplay(sorted);
+    //     setCurrentChunk(1);
+    // }, [colorsFilters, byCollectionFilter, /*typesFilter,*/ nameFilter, languageFilter, setCodesFilter, byCollectionCards]);
 
     const handleFilterButtonClick = () => {
         setIsFiltersVisible(true);
@@ -179,36 +180,36 @@ const GalleryPage: React.FC<PropsT> = ({ data, owner, path }) => {
         window?.scrollTo({top: 0, behavior: 'smooth'});
     }
 
-    const handleSetCodeAdd = (code: string) => {
-        const setCodesFilterVal = [...setCodesFilter, code];
-        setSetCodesFilter(setCodesFilterVal);
-        updateSearchURL('set', setCodesFilterVal);
-    }
+    // const handleSetCodeAdd = (code: string) => {
+    //     const setCodesFilterVal = [...setCodesFilter, code];
+    //     setSetCodesFilter(setCodesFilterVal);
+    //     updateSearchURL('set', setCodesFilterVal);
+    // }
 
-    const handleSetCodeRemove = (code: string) => {
-        const setCodesFilterVal = [...setCodesFilter].filter((item) => item !== code);
-        setSetCodesFilter(setCodesFilterVal);
-        updateSearchURL('set', setCodesFilterVal);
-    }
+    // const handleSetCodeRemove = (code: string) => {
+    //     const setCodesFilterVal = [...setCodesFilter].filter((item) => item !== code);
+    //     setSetCodesFilter(setCodesFilterVal);
+    //     updateSearchURL('set', setCodesFilterVal);
+    // }
 
-    const handleColorSelect = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-        const {name, checked} = event.target;
-        const filters = [...colorsFilters];
-        let updatedFilters;
-        if (checked) {
-            filters.push(name as ColorEnum);
-            updatedFilters = [...new Set(filters)];
-            setColorsFilters(updatedFilters);
-        } else {
-            updatedFilters = filters.filter(color => color !== name)
-            setColorsFilters(updatedFilters);
-        }
+    // const handleColorSelect = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    //     const {name, checked} = event.target;
+    //     const filters = [...colorsFilters];
+    //     let updatedFilters;
+    //     if (checked) {
+    //         filters.push(name as ColorEnum);
+    //         updatedFilters = [...new Set(filters)];
+    //         setColorsFilters(updatedFilters);
+    //     } else {
+    //         updatedFilters = filters.filter(color => color !== name)
+    //         setColorsFilters(updatedFilters);
+    //     }
 
-        updateSearchURL('color', updatedFilters);
-    }, [
-        colorsFilters,
-        setColorsFilters,
-    ])
+    //     updateSearchURL('color', updatedFilters);
+    // }, [
+    //     colorsFilters,
+    //     setColorsFilters,
+    // ])
 
     const openCopyPanel = () => {
         setCopyPanelOpen(true);
@@ -242,11 +243,6 @@ const GalleryPage: React.FC<PropsT> = ({ data, owner, path }) => {
         //     })
         // }
     }
-
-    // const handleFilterByName = (name: string) => {
-    //     setNameFilter(name);
-    //     updateSearchURL('name', name ? [name] : []);
-    // }
 
     const handleSortingValueSelect = (value: SortingValsEnum) => {
         setSortingValue(value);
