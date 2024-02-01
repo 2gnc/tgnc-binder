@@ -4,48 +4,49 @@ import { useSelector, useDispatch } from 'react-redux';
 import { LogoTelegram, Copy, BarsAscendingAlignLeftArrowDown, BarsAscendingAlignLeftArrowUp } from '@gravity-ui/icons';
 import { SortingDirectionEnum, SortingValsEnum, OwnerT } from '../../models';
 import { sortingMenuValues } from '../../constants';
-import { selectors as s } from '../../state/gallery';
+import { selectors as s, actions as a } from '../../state/gallery';
 
 import './styles.css';
 
 type PropsT = React.PropsWithChildren & {
     isMobile: boolean;
-    owner: OwnerT;
     selectionSize: number;
-    // filtersUsedCount: number;
-    sortingDirection: SortingDirectionEnum;
     handleOpenCopyPanel: () => void;
     handleFilterButtonClick: () => void;
-    handleSortingValueSelect: (val: SortingValsEnum) => void;
 }
 
 export const Footer: FC<PropsT> = ({
     handleOpenCopyPanel,
     handleFilterButtonClick,
-    handleSortingValueSelect,
     isMobile,
-    owner,
     selectionSize,
-    // filtersUsedCount,
-    sortingDirection,
 }) => {
+    const dispatch = useDispatch();
     const filtersCount = useSelector(s.filtersCount);
+    const owner = useSelector(s.owner);
+    const { sortingDirection } = useSelector(s.sorting);
     const buttonFiltersRef = useRef(null);
     const [isSortingMenuOpen, setSortingMenuOpen] = useState(false);
 
     const openSortingPanel = () => {
         setSortingMenuOpen(true);
-    }
+    };
     const closeSortingPanel = () => {
         setSortingMenuOpen(false);
-    }
+    };
 
     const onSortingValueSelect = (val: SortingValsEnum) => {
-        handleSortingValueSelect(val);
+        dispatch(a.setSorting(val));
         closeSortingPanel();
     };
 
-    const IconSorting = sortingDirection === SortingDirectionEnum.ASC ? BarsAscendingAlignLeftArrowUp : BarsAscendingAlignLeftArrowDown
+    const IconSorting = sortingDirection === SortingDirectionEnum.ASC ? BarsAscendingAlignLeftArrowUp : BarsAscendingAlignLeftArrowDown;
+
+    const renderSortingMenuItems = () => (
+        sortingMenuValues.map(({ text, value }) => {
+            return <Menu.Item  key={ value } onClick={ () => onSortingValueSelect(value) }>{ text }</Menu.Item>
+        })
+    );
 
     return (
         <div className='footerBox'>
@@ -63,11 +64,7 @@ export const Footer: FC<PropsT> = ({
             </Button>
             <Popup anchorRef={ buttonFiltersRef } open={ isSortingMenuOpen } onOutsideClick={ closeSortingPanel }>
                 <Menu size='xl'>
-                    {
-                        sortingMenuValues.map(({ text, value }) => {
-                            return <Menu.Item  key={ value } onClick={ () => onSortingValueSelect(value) }>{ text }</Menu.Item>
-                        })
-                    }
+                    { renderSortingMenuItems() }
                 </Menu>
             </Popup>
             <Link href={ owner.contactLink } target="_blank" className={ isMobile ? 'contactButton_mob' : ''}>

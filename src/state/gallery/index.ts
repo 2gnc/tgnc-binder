@@ -3,13 +3,21 @@ import filter from 'lodash/filter';
 import uniq from 'lodash/uniq';
 import store from '../store';
 import { RootState, Thunk, Dispatch } from '../store';
-import { CardT, FilterParamNameEnum, LangEnum, PermamentTypeEnum, ColorEnum } from '../../models';
+import { CardT, FilterParamNameEnum, LangEnum, PermamentTypeEnum, ColorEnum, SortingValsEnum } from '../../models';
 import { ALL } from '../../constants';
 import { nonEmptyStringsArrTransformer } from '../transformers';
 import { parseRawSetsResponse } from '../../utils/parse-raw-sets-response';
 import { parseRawCardsResponse } from '../../utils/parse-raw-cards-response';
 export { selectors } from './selectors';
-import { GalleryDataReceivedActionT, SetCollectionFilterActionT, RemoveCollectionFilterActionT, SetSearchValueActionT, ResetCollectionFilterActionT } from './actions';
+import {
+    GalleryDataReceivedActionT,
+    SetCollectionFilterActionT,
+    RemoveCollectionFilterActionT,
+    SetSearchValueActionT,
+    ResetCollectionFilterActionT,
+    SetSoringActionT,
+    SetLastPickedForTradeActionT,
+} from './actions';
 import { CardsStateT } from './models';
 
 const initialState: CardsStateT = {
@@ -28,6 +36,7 @@ const initialState: CardsStateT = {
         [FilterParamNameEnum.NAME]: '',
         [FilterParamNameEnum.TYPE]: '',
     },
+    sorting: SortingValsEnum.NAME_ASC,
     thesaurus: {
         collections : [],
         sets: {},
@@ -38,6 +47,7 @@ const initialState: CardsStateT = {
         names: [],
         types: [],
     },
+    lastPickedForTrade: null,
 };
 
 // Slice
@@ -48,7 +58,9 @@ const gallerySlice = createSlice({
     galleryPageDataReceived: (state, action: GalleryDataReceivedActionT): CardsStateT => {
         const { rawCards, rawSets, owner } = action.payload;
         const { sets, setTypes, setBlocks, codesParents, parentSets } = parseRawSetsResponse(rawSets);
-        const { cards, collections, types, names } = parseRawCardsResponse(rawCards, codesParents);
+        const { cards, collections, types, names, userCards } = parseRawCardsResponse(rawCards, codesParents);
+
+        console.log({ userCards })
 
         return {
             ...state,
@@ -129,6 +141,19 @@ const gallerySlice = createSlice({
                 ...state.searchValues,
                 [payload.entity]: payload.value,
             }
+        }
+    },
+    setSorting: (state, { payload }: SetSoringActionT): CardsStateT => {
+        return {
+            ...state,
+            sorting: payload,
+        }
+    },
+    addCardForTrade: (state, { payload }: SetLastPickedForTradeActionT): CardsStateT => {
+        const card = state.cards.find(card => card.id === payload);
+        return {
+            ...state,
+            lastPickedForTrade: card || null
         }
     },
   }

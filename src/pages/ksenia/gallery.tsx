@@ -3,6 +3,7 @@ import type { HeadFC, PageProps } from "gatsby";
 import { graphql } from "gatsby";
 
 import Gallery from '../../components/Gallery/Gallery';
+import DataTransport from '../../components/Loyout/Layout';
 
 export const queryCards = graphql`
     query {
@@ -55,9 +56,9 @@ const OWNER = { name: 'Ksenia', contactLink: 'https://telegram.me/KseniaPolyakov
 
 const GalleryPage: React.FC<PageProps> = (props) => {
     return (
-        <>
+        <DataTransport>
             <Gallery owner={OWNER} {...props} />
-        </>
+        </DataTransport>
     );
 }
 

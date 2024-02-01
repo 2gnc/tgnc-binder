@@ -11,7 +11,7 @@ export const sortCards = (cards: Array<CardT>, sortingValue: SortingValsEnum, di
     const isByNameSort = [SortingValsEnum.NAME_ASC, SortingValsEnum.NAME_DESC].includes(sortingValue);
 
     if (isByNameSort) {
-        return orderBy(...[cards], 'name', direction === SortingDirectionEnum.DESC ? 'desc' : 'asc');
+        return orderBy(...[cards], 'name', direction);
     }
 
     const byPriceSorter = (cardA: CardT, cardB: CardT) => {

@@ -1,23 +1,24 @@
 import React, { type FC } from 'react';
 import size from 'lodash/size';
 import find from 'lodash/find';
+import { useSelector } from 'react-redux';
 import { Row, Text, Col } from '@gravity-ui/uikit';
 import { InfiniteScroll } from '@gravity-ui/components';
 import GalleryCard from '../GalleryCard/GalleryCard';
-import { CardT, SortingValsEnum } from '../../models';
+import { CardT } from '../../models';
 import { sortingMenuValues } from '../../constants';
+import { selectors as s } from '../../state/gallery';
 
 import './styles.css';
 
 type PropsT = {
     cards: Array<CardT>;
     total: number;
-    sortingValue: SortingValsEnum;
-    handleCardClick: (id: string) => void;
     handleLoadMore: () => Promise<void>;
 }
 
-const GalleryTable: FC<PropsT> = ({ cards, handleCardClick, handleLoadMore, total, sortingValue }) => {
+const GalleryTable: FC<PropsT> = ({ cards, handleLoadMore, total }) => {
+    const { sortingValue } = useSelector(s.sorting);
     if (!size(cards)) {
         return (
             <div className='emptyBox'>
@@ -40,7 +41,7 @@ const GalleryTable: FC<PropsT> = ({ cards, handleCardClick, handleLoadMore, tota
             </Row>
             <Row space={ 5 } className='galleryTable'>
                 <InfiniteScroll onActivate={ handleLoadMore } disabled={ cards.length >= total }>
-                    { cards.map((card) => <GalleryCard card={ card } key={card.id} handleCardClick={ handleCardClick } />) }
+                    { cards.map((card) => <GalleryCard card={ card } key={card.id} />) }
                 </InfiniteScroll>
             </Row>
         </>

@@ -1,4 +1,4 @@
-import { CardT, FilterParamNameEnum, OwnerT, SetListT, SetSearchT, LangEnum, PermamentTypeEnum, ColorEnum } from '../../models';
+import { CardT, FilterParamNameEnum, OwnerT, SetListT, SetSearchT, LangEnum, PermamentTypeEnum, ColorEnum, SortingValsEnum } from '../../models';
 
 export type CardsStateT = {
     owner: Nullable<OwnerT>;
@@ -16,6 +16,7 @@ export type CardsStateT = {
         [FilterParamNameEnum.NAME]: string;
         [FilterParamNameEnum.TYPE]: string;
     };
+    sorting: SortingValsEnum,
     thesaurus: {
         collections: Array<string>;
         sets: SetListT;
@@ -29,4 +30,5 @@ export type CardsStateT = {
         }>;
         types: Array<string>;
     };
+    lastPickedForTrade: Nullable<CardT>;
 };

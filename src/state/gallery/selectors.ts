@@ -3,8 +3,9 @@ import size from 'lodash/size';
 import intersection from 'lodash/intersection';
 import uniq from 'lodash/uniq';
 import { RootState, Thunk, Dispatch } from '../store';
-import { CardT, FilterParamNameEnum, LangEnum, PermamentTypeEnum, TypeEnum } from '../../models';
+import { CardT, FilterParamNameEnum, LangEnum, PermamentTypeEnum, SortingDirectionEnum, SortingValsEnum, TypeEnum } from '../../models';
 import { ALL } from '../../constants';
+import { sortCards } from '../../utils/sort-cards';
 
 const gallery = (state: RootState) => state.gallery;
 const userCollections = (state: RootState) => state.gallery.thesaurus.collections;
@@ -76,7 +77,22 @@ const spellTypeSuggest = createSelector([searchValues, avalaibleSpellTypes], (se
     return found;
 });
 
-const cardsFiltredInSingleGallery = createSelector([cardsFiltredByCollection, filters], (cardsInCollection, filters) => {
+const sorting = createSelector([gallery], (gallery) => {
+    const sortingValue = gallery.sorting;
+    const ascSortings = [
+        SortingValsEnum.NAME_ASC,
+        SortingValsEnum.PRICE_ASC,
+    ];
+    const sortingDirection = ascSortings.includes(sortingValue) ? SortingDirectionEnum.ASC : SortingDirectionEnum.DESC;
+    return {
+        sortingValue,
+        sortingDirection
+    };
+});
+
+const cardsFiltredInSingleGallery = createSelector([cardsFiltredByCollection, filters, sorting], (cardsInCollection, filters, sorting) => {
+    const { sortingDirection, sortingValue } = sorting;
+
     const isMatchByColor = (card: CardT) => {
         if (!size(filters.color)) {
             return true;
@@ -131,9 +147,7 @@ const cardsFiltredInSingleGallery = createSelector([cardsFiltredByCollection, fi
         return hasColorsMatch && isMatchByType && shouldIncludeLand && shouldIncludeTokens && hasNameMatch && hasLanguageMatch && hasSetCodeMatch;
     });
 
-    console.log({ found })
-
-    return found;
+    return sortCards(found, sortingValue, sortingDirection);
 });
 
 export const selectors = {
@@ -151,4 +165,5 @@ export const selectors = {
     spellNameSuggest,
     spellTypeSuggest,
     cardsFiltredInSingleGallery,
+    sorting,
 };

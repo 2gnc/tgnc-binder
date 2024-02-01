@@ -1,31 +1,37 @@
 import map from 'lodash/map';
-import { RarityEnum, type CardT, ConditionEnum, TypeEnum, LangEnum } from '../models';
+import { RarityEnum, type CardT, ConditionEnum, TypeEnum, LangEnum, CardThesaurusT, UserCardsT } from '../models';
 import { mapCardColorToEnum } from './map-card-color-to-enum';
 import { mapCardLangToEnum } from './map-card-lang-to-enum';
 import { buildPeculiarities } from './build-peculiarities';
 import { safeNumParse  } from './safe-parse';
+import uniq from 'lodash/uniq';
 
-export function parseRawCardsResponse(cards: Array<Record<string, string>>, parents: Record<string, string>): {
+export function parseRawCardsResponse(cards: Array<Record<string, string>>, parents: Record<string, string>, owner = ''): {
     cards: Array<CardT>;
     collections: Array<string>;
     types: Array<string>;
     names: Array<{ name: string; searchBase: string}>;
+    cardsThesaurus: CardThesaurusT;
+    userCards: UserCardsT;
 } {
+    const cardsThesaurus: CardThesaurusT = {};
+    const userCards: UserCardsT = {};
+
     const allCollections: Array<string> = [];
     const allTypes: Array<string> = [];
     const allNames: Array<{ name: string;searchBase: string}> = [];
 
     const allCards = map(cards, card => {
         const quantity = safeNumParse(card.quantity);
-        const types = [...new Set(
+        const types = card.types ? [...new Set(
             card.types.split(' ')
                 .filter(item => item.trim() !== '—' && item.trim() !== '//')
                 .map(item => item.toLowerCase())
-            )] as Array<TypeEnum>;
-        const keywords = card.keywords.split(',').filter((word) => word.length).map(keyword => keyword.trim());
+            )] as Array<TypeEnum> : [];
+        const keywords = card.keywords ? card.keywords.split(',').filter((word) => word.length).map(keyword => keyword.trim()) : [];
         const isFoil = card.is_foil === 'true';
         const perticularities = buildPeculiarities(isFoil, card.frame);
-        const frameEffects = card.frame.split(',').map(effect => effect.trim());
+        const frameEffects = card.frame ? card.frame.split(',').map(effect => effect.trim()) : [];
         const rarity = card.rarity as RarityEnum;
         const lang = mapCardLangToEnum(card.lang);
         const usdNonFoil = safeNumParse(card.price_usd);
@@ -34,7 +40,7 @@ export function parseRawCardsResponse(cards: Array<Record<string, string>>, pare
         const eurNonFoil = safeNumParse(card.price_eur);
         const eurFoil = safeNumParse(card.price_eur_foil);
         const eurEtched = safeNumParse(card.price_eur_etched);
-        const collections = card.collection.split(',').map(col => col.trim().toLowerCase());
+        const collections = card.collection ? card.collection.split(',').map(col => col.trim().toLowerCase()) : [];
         allCollections.push(...collections);
         allTypes.push(...types);
         allNames.push({
@@ -42,28 +48,65 @@ export function parseRawCardsResponse(cards: Array<Record<string, string>>, pare
             searchBase: `${card.name.toLowerCase()} ${card.ru_name?.toLowerCase()}`
         });
         const promoTypes = card.promo_types?.split(',').filter((word) => word.length && word !== 'undefined').map(keyword => keyword.trim()) || [];
+        const number = parseInt(card.number, 10);
+        const condition = card.condition as ConditionEnum;
+        const ruName = card.ru_name !== 'undefined' ? card.ru_name : card.name;
+        const edhRank = parseInt(card.edhrec_rank, 10);
+        const colors = mapCardColorToEnum(card.colors);
+        const isEtched = frameEffects.includes('etched');
+        const isList = card.is_list === 'true';
+        const isToken = types.includes(TypeEnum.TOKEN);
+        const isLand = types.includes(TypeEnum.LAND);
+        const imageUrl = card.image_url;
+        const setName = card.set_name;
+        const set = card.set;
+        const setParent = parents[card.set];
+        const name = card.name;
+        const artist = card.artist;
+        const id = card.id;
+        const tradable = collections.includes('binder');
 
+        const uniqKey = `${card.set}${number}${isFoil}${lang}${condition}`;
+
+        cardsThesaurus[uniqKey] = { name, set, setParent, setName, number, edhRank, colors, isEtched, isFoil, isLand, isList, isToken, lang, rarity, usdEtched, usdFoil, usdNonFoil, eurEtched, eurFoil, eurNonFoil, types, keywords, imageUrl, id, perticularities, frameEffects, artist, promoTypes };
+        
+        if (!userCards[uniqKey]) {
+            userCards[uniqKey] = {};
+            userCards[uniqKey][owner] = {
+                userName: owner,
+                key: uniqKey,
+                quantity,
+                condition,
+                collections,
+                tradable,
+            }
+        } else {
+            const updatedCollections = uniq(userCards[uniqKey][owner].collections.concat(collections));
+            userCards[uniqKey][owner].quantity += quantity;
+            userCards[uniqKey][owner].collections = updatedCollections;
+        }
+    
         const parsed: CardT = {
-            name: card.name,
-            set: card.set,
-            setName: card.set_name,
-            number: parseInt(card.number, 10),
-            edhRank: parseInt(card.edhrec_rank, 10),
-            colors: mapCardColorToEnum(card.colors),
+            name,
+            set,
+            setName,
+            number,
+            edhRank,
+            colors,
             isFoil,
-            isEtched: frameEffects.includes('etched'),
-            isList: card.is_list === 'true',
-            isToken: types.includes(TypeEnum.TOKEN),
-            isLand: types.includes(TypeEnum.LAND),
+            isEtched,
+            isList,
+            isToken,
+            isLand,
             lang,
             rarity,
             quantity,
-            condition: card.condition as ConditionEnum,
-            collections: collections,
+            condition,
+            collections,
             types,
             keywords,
-            imageUrl: card.image_url,
-            id: card.id,
+            imageUrl,
+            id,
             perticularities,
             usdNonFoil,
             usdFoil, 
@@ -72,10 +115,10 @@ export function parseRawCardsResponse(cards: Array<Record<string, string>>, pare
             eurFoil, 
             eurEtched,
             frameEffects,
-            artist: card.artist,
-            ruName: card.ru_name !== 'undefined' ? card.ru_name : card.name,
+            artist,
+            ruName,
             promoTypes,
-            setParent: parents[card.set],
+            setParent,
         }
 
         return parsed;
@@ -86,5 +129,7 @@ export function parseRawCardsResponse(cards: Array<Record<string, string>>, pare
         collections: [...new Set(allCollections)],
         types: [...new Set(allTypes)],
         names: [...new Set(allNames)],
+        cardsThesaurus,
+        userCards,
     }
 }

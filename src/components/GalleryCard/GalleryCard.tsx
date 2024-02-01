@@ -1,4 +1,6 @@
 import React, { type FC } from 'react';
+import { toaster } from '@gravity-ui/uikit/toaster-singleton';
+import { useSelector, useDispatch } from 'react-redux';
 import { CardT, LangEnum } from '../../models';
 import { Row, Col, Card, Text, Label } from '@gravity-ui/uikit';
 import { tunePrice } from '../../utils/tune-price';
@@ -11,12 +13,12 @@ import flagSp from '../../images/flag_sp.png';
 import flagPt from '../../images/flag_portu.png';
 import flagDe from '../../images/flag_de.png';
 import flagIt from '../../images/flag_it.png';
+import { selectors as s, actions as a } from '../../state/gallery';
 
 import './styles.css';
 
 type PropsT = {
     card: CardT;
-    handleCardClick: (id: string) => void;
 }
 
 const mapLangEnumToIcon = {
@@ -29,15 +31,28 @@ const mapLangEnumToIcon = {
     [LangEnum.IT]: flagIt,
 }
 
-const GalleryCard: FC<PropsT> = ({ card, handleCardClick }) => {
+const GalleryCard: FC<PropsT> = ({ card }) => {
     const { edhRank, imageUrl, name, id, setName, keywords, lang, isFoil, isEtched, condition, quantity, number, ruName, promoTypes } = card;
     const calculatedPrice = tunePrice(card);
+    const dispatch = useDispatch();
+
+    const onCardClick = () => {
+        dispatch(a.addCardForTrade(id));
+        toaster.add({
+            name: id,
+            title: 'Added to exchange',
+            autoHiding: 1000,
+            type: 'success',
+            content: name
+        });
+    }
+
     return (
         <>
             <Col s="12" m="4" l='3' key={id}>
                 <Card type='container' theme='normal' view='raised'  className='box'>
                     <div className='card'>
-                        <CopyButton id={ id } onClick={() => handleCardClick(id)} className='cardCopyButton' />
+                        <CopyButton id={ id } onClick={ onCardClick } className='cardCopyButton' />
                         <img src={imageUrl} style={{
                             width: '100%',
                             height: '100%',

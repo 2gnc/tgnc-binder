@@ -34,6 +34,53 @@ export type CardT = {
     promoTypes: Array<string>;
 }
 
+export type CardThesaurusItemT = {
+    name: string;
+    set: string;
+    setParent: string;
+    setName: string;
+    number: number;
+    edhRank: number;
+    colors: Array<ColorEnum>;
+    isFoil: boolean;
+    isEtched: boolean;
+    isList: boolean;
+    isToken: boolean;
+    isLand: boolean;
+    lang: LangEnum;
+    rarity: RarityEnum;
+    usdFoil: number;
+    usdNonFoil: number;
+    usdEtched: number;
+    eurFoil: number;
+    eurNonFoil: number;
+    eurEtched: number;
+    types: Array<TypeEnum>;
+    keywords: Array<string>;
+    imageUrl: string;
+    id: string;
+    perticularities: string;
+    frameEffects: Array<string>;
+    artist: string;
+    ruName?: string;
+    promoTypes: Array<string>;
+}
+export type CardThesaurusT = Record<CardUniqKey, CardThesaurusItemT>;
+
+export type CardUniqKey = string;
+export type OwnerName = string;
+
+export type UserCardT = {
+    userName: string;
+    key: string;
+    quantity: number;
+    condition: ConditionEnum;
+    collections: Array<string>;
+    tradable: boolean;
+}
+
+export type UserCardsT = Record<CardUniqKey, Record<OwnerName, UserCardT>>;
+
 export enum FramePerticularitiesEnum {
     SHOWCASE = 'showcase',
     MIRACLE = 'miracle',
@@ -144,3 +191,14 @@ export type SetT = {
     type: string;
     block: string;
 };
+
+export type TradeCartT = {
+    deals: Array<DealT>;
+    errorAdding: boolean;
+};
+
+export type DealT = {
+    seller: OwnerT;
+    buyer: Nullable<OwnerT>;
+    cards: Array<CardT>;
+}

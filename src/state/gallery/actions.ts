@@ -1,5 +1,5 @@
 import { PayloadAction } from '@reduxjs/toolkit';
-import { FilterParamNameEnum, OwnerT, SetRawT } from '../../models';
+import { FilterParamNameEnum, OwnerT, SetRawT, SortingValsEnum } from '../../models';
 
 export type GalleryDataReceivedActionT = PayloadAction<{
     rawSets: Array<SetRawT>;
@@ -20,4 +20,8 @@ export type ResetCollectionFilterActionT = PayloadAction<FilterParamNameEnum>;
 export type SetSearchValueActionT = PayloadAction<{
     entity: FilterParamNameEnum;
     value: string;
-}>
+}>;
+
+export type SetSoringActionT = PayloadAction<SortingValsEnum>;
+
+export type SetLastPickedForTradeActionT = PayloadAction<string>;

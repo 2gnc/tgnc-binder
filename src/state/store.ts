@@ -4,7 +4,7 @@ import isNil from 'lodash/isNil';
 import { FilterParamNameEnum, ColorEnum } from '../models';
 import { updateSearchURL } from './utils/update-search-url';
 
-import cardsReducer from './cards'; // todo
+import cardsReducer from './cards';
 import galleryReducer, { actions as a} from './gallery';
 
 const filtersChangeMiddleware = createListenerMiddleware();
