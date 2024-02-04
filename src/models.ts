@@ -34,6 +34,13 @@ export type CardT = {
     promoTypes: Array<string>;
 }
 
+export type GalleryCardMetaT = Partial<Record<ConditionEnum, UserCardMetaT>>;
+
+export type GalleryCardT = {
+    card: CardThesaurusItemT,
+    meta: GalleryCardMetaT;
+}
+
 export type CardThesaurusItemT = {
     name: string;
     set: string;
@@ -70,7 +77,7 @@ export type CardThesaurusT = Record<CardUniqKey, CardThesaurusItemT>;
 export type CardUniqKey = string;
 export type OwnerName = string;
 
-export type UserCardT = {
+export type UserCardMetaT = {
     userName: string;
     key: string;
     quantity: number;
@@ -79,7 +86,7 @@ export type UserCardT = {
     tradable: boolean;
 }
 
-export type UserCardsT = Record<CardUniqKey, Record<OwnerName, UserCardT>>;
+export type UserCardsT = Record<CardUniqKey, Record<OwnerName, UserCardMetaT>>;
 
 export enum FramePerticularitiesEnum {
     SHOWCASE = 'showcase',

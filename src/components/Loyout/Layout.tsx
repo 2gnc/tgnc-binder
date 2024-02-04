@@ -5,7 +5,7 @@ import { graphql } from 'gatsby';
 import { actions as a } from '../../state/cards';
 import { selectors as s } from '../../state/cards/selectors';
 
-interface LayoutProptT extends Omit<PageProps, 'children'> {
+interface LayoutProptT {
     children: React.ReactNode;
 }
 
@@ -13,7 +13,6 @@ const Layout: React.FC<LayoutProptT> = memo(({ children }) => {
     const dispatch = useDispatch();
     const data = useStaticQuery(queryCards);
     const rawSets = data['sets'].nodes;
-    const isLoaded = useSelector(s.isDataLoaded);
     Object.entries(data).forEach((item) => {
         if (item[0] === 'sets') return;
         dispatch(a.popullateCards({
@@ -24,7 +23,7 @@ const Layout: React.FC<LayoutProptT> = memo(({ children }) => {
     });
     dispatch(a.setIsLoading(true));
 
-    return isLoaded ? (children) : 'Loading...';
+    return children;
 });
 
 export default Layout;

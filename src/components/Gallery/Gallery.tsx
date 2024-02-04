@@ -14,6 +14,7 @@ import { GoUpButton } from '../GoUpButton/GoUpButton';
 
 import { useSelector, useDispatch } from 'react-redux';
 import { actions as a, selectors as s } from '../../state/gallery';
+import { newGallerySelectors } from '../../state/gallery/selectors';
 
 import './gallery.css';
 
@@ -37,6 +38,17 @@ const GalleryPage: React.FC<PropsT> = ({ data, owner, path }) => {
             rawCards: data.cards.nodes,
         }));
     }, []);
+    
+    // demo
+    // const usercards = useSelector(newGallerySelectors.galleryOwnerCards);
+    const newFiltredCards = useSelector(newGallerySelectors.galleryFiltredCards)
+    // useEffect(() => {
+    //     console.log(usercards)
+    // }, [usercards]);
+    useEffect(() => {
+        console.log({newFiltredCards})
+    }, [newFiltredCards])
+    // demo end
 
     // Client side rendering guarantee
     const [isRendered, setIsRendered] = useState(false);
