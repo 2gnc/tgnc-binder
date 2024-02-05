@@ -6,11 +6,13 @@ export const selectCardsByUser = (state: RootState, name: string) => {
 
 };
 export const isDataLoaded = (state: RootState) => state.cards.isLoaded;
+export const cardsThesaurus = (state: RootState) => state.cards.thesaurus; 
 
 export const selectors = {
     allCardsSelector,
     selectCardsByUser,
     isDataLoaded,
+    cardsThesaurus,
 };
 
 

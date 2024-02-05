@@ -5,14 +5,14 @@ import { useSelector } from 'react-redux';
 import { Row, Text, Col } from '@gravity-ui/uikit';
 import { InfiniteScroll } from '@gravity-ui/components';
 import GalleryCard from '../GalleryCard/GalleryCard';
-import { CardT } from '../../models';
+import { GalleryCardT } from '../../models';
 import { sortingMenuValues } from '../../constants';
 import { selectors as s } from '../../state/gallery';
 
 import './styles.css';
 
 type PropsT = {
-    cards: Array<CardT>;
+    cards: Array<GalleryCardT>;
     total: number;
     handleLoadMore: () => Promise<void>;
 }
@@ -41,7 +41,7 @@ const GalleryTable: FC<PropsT> = ({ cards, handleLoadMore, total }) => {
             </Row>
             <Row space={ 5 } className='galleryTable'>
                 <InfiniteScroll onActivate={ handleLoadMore } disabled={ cards.length >= total }>
-                    { cards.map((card) => <GalleryCard card={ card } key={card.id} />) }
+                    { cards.map((card) => <GalleryCard card={ card } key={card.card.id} />) }
                 </InfiniteScroll>
             </Row>
         </>

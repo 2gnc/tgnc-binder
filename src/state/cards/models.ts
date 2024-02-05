@@ -1,8 +1,8 @@
-import { CardThesaurusT, SetListT, LangEnum, CardUniqKey, OwnerName, UserCardT, SetSearchT } from '../../models';
+import { CardThesaurusT, SetListT, LangEnum, CardUniqKey, OwnerName, UserCardMetaT, SetSearchT } from '../../models'; // TODO
 
 export type CardsStateT = {
     isLoaded: boolean;
-    cards: Record<CardUniqKey, Record<OwnerName, UserCardT>>;
+    cards: Record<CardUniqKey, Record<OwnerName, UserCardMetaT>>;
     thesaurus: {
         cards: CardThesaurusT;
         sets: SetListT;
@@ -15,5 +15,6 @@ export type CardsStateT = {
             searchBase: string;
         }>;
         types: Array<string>;
+        usersCollections: Record<string, Array<string>>;
     }
 }

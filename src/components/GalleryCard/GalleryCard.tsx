@@ -1,9 +1,14 @@
 import React, { type FC } from 'react';
 import { toaster } from '@gravity-ui/uikit/toaster-singleton';
+import map from 'lodash/map';
+import flatMap from 'lodash/flatMap';
+import filter from 'lodash/filter';
+import isNil from 'lodash/isNil';
+import uniq from 'lodash/uniq';
 import { useSelector, useDispatch } from 'react-redux';
-import { CardT, LangEnum } from '../../models';
-import { Row, Col, Card, Text, Label } from '@gravity-ui/uikit';
-import { tunePrice } from '../../utils/tune-price';
+import { GalleryCardT, LangEnum } from '../../models';
+import { Row, Col, Card, Text, Label, Table } from '@gravity-ui/uikit';
+import { calculatePrice } from '../../utils/tune-price';
 import { CopyButton } from '../CopyButton/CopyButton';
 import foilCover from '../../images/foil-cover.png';
 import flagRu from '../../images/flag_ru.png';
@@ -13,12 +18,13 @@ import flagSp from '../../images/flag_sp.png';
 import flagPt from '../../images/flag_portu.png';
 import flagDe from '../../images/flag_de.png';
 import flagIt from '../../images/flag_it.png';
-import { selectors as s, actions as a } from '../../state/gallery';
+import { selectors as s } from '../../state/gallery';
+import { actions as a } from '../../state/trade';
 
 import './styles.css';
 
 type PropsT = {
-    card: CardT;
+    card: GalleryCardT;
 }
 
 const mapLangEnumToIcon = {
@@ -32,19 +38,80 @@ const mapLangEnumToIcon = {
 }
 
 const GalleryCard: FC<PropsT> = ({ card }) => {
-    const { edhRank, imageUrl, name, id, setName, keywords, lang, isFoil, isEtched, condition, quantity, number, ruName, promoTypes } = card;
-    const calculatedPrice = tunePrice(card);
+    const { edhRank, imageUrl, name, id, setName, keywords, lang, isFoil, isEtched, number, ruName, promoTypes } = card.card;
+    const meta = card.meta;
+    const owner = useSelector(s.owner);
+    
+    const cardCollections = flatMap(map(meta, (metaItem) => {
+        return metaItem?.collections
+    }));
+    
+    const calculatedPrice = calculatePrice(card);
     const dispatch = useDispatch();
 
-    const onCardClick = () => {
-        dispatch(a.addCardForTrade(id));
-        toaster.add({
-            name: id,
-            title: 'Added to exchange',
-            autoHiding: 1000,
-            type: 'success',
-            content: name
+    const renderMeta = () => {
+
+        const columns = [
+            {
+                id: 'condition',
+                name: 'Condition'
+            },
+            {
+                id: 'quantity',
+                name: 'Quantity'
+            },
+            {
+                id: 'price',
+                name: 'Price'
+            },
+            {
+                id: 'action',
+                name: 'To trade',
+                width: 50,
+                align: 'right',
+                template: (params: typeof data[0]) => {
+                    const onCardClick = () => {
+                        if (!owner) return;
+                
+                        dispatch(a.addCardToDeal({
+                            owner,
+                            cardCode: params.key,
+                        }));
+
+                        toaster.add({
+                            name: id,
+                            title: 'Added to exchange',
+                            autoHiding: 1000,
+                            type: 'success',
+                            content: name
+                        });
+                    };
+                    if (!params.tradable) {
+                        return (
+                            <div className='cardCopyBlock'>N/A</div>
+                        );
+                    }
+                    return (
+                        <div className='cardCopyBlock'>
+                            <CopyButton id={ id } onClick={ onCardClick } className='cardCopyButton' />
+                        </div>
+                    );
+                }
+            }
+        ];
+
+        const data = map(meta, (metaItem) => {
+            return {
+                condition: metaItem!.condition,
+                quantity: metaItem!.quantity,
+                price: `${calculatedPrice} ₽`,
+                tradable: metaItem!.tradable,
+                id: card.card.id,
+                key: metaItem!.key
+            }
         });
+
+        return <Table data={ data} columns={ columns } />
     }
 
     return (
@@ -52,7 +119,7 @@ const GalleryCard: FC<PropsT> = ({ card }) => {
             <Col s="12" m="4" l='3' key={id}>
                 <Card type='container' theme='normal' view='raised'  className='box'>
                     <div className='card'>
-                        <CopyButton id={ id } onClick={ onCardClick } className='cardCopyButton' />
+                        
                         <img src={imageUrl} style={{
                             width: '100%',
                             height: '100%',
@@ -107,24 +174,15 @@ const GalleryCard: FC<PropsT> = ({ card }) => {
                     </Row>
                     <Row space={5}>
                         <Col>
-                            
+                            <>
+                                <Text variant='caption-2'>Collections: </Text>
+                                {
+                                    map(cardCollections, (collection) => <Text key={ collection } variant='caption-2'>{ collection }</Text>)
+                                }
+                            </>
                         </Col>
                     </Row>
-                    <Row space={5} className='priceRow'>
-                        <Col>
-                            <Text variant='body-1'>
-                                { condition }
-                            </Text>
-                        </Col>
-                        <Col>
-                            <Text variant='body-1'>
-                                {`в наличии: ${quantity}`}
-                            </Text>
-                        </Col>
-                        <Col className='priceCol'>
-                            <Text variant='subheader-2'>{`${calculatedPrice} руб.`}</Text>
-                        </Col>
-                    </Row>
+                    { renderMeta() }
                 </Card>
             </Col>
         </>

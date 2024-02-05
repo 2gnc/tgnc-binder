@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import UAParser from 'ua-parser-js';
-import type { HeadFC, PageProps } from "gatsby";
+import type { HeadFC, PageProps } from 'gatsby';
 import { Container, ThemeProvider, Modal } from '@gravity-ui/uikit';
-import { CardT, OwnerT } from '../../models';
+import { OwnerT } from '../../models';
 import { SelectedCardsView  } from '../SelectedCadsView/SelectedCadsView';
-import size from 'lodash/size';
 
 import CollectionHeader from '../../components/CollectionHeader/CollectionHeader';
 import CollectionFilters from '../../components/CollectionFilters/CollectionFilters';
@@ -14,7 +13,6 @@ import { GoUpButton } from '../GoUpButton/GoUpButton';
 
 import { useSelector, useDispatch } from 'react-redux';
 import { actions as a, selectors as s } from '../../state/gallery';
-import { newGallerySelectors } from '../../state/gallery/selectors';
 
 import './gallery.css';
 
@@ -27,28 +25,16 @@ type PropsT = PageProps & {
     owner: OwnerT;
 }
 
-const GalleryPage: React.FC<PropsT> = ({ data, owner, path }) => {
+const GalleryPage: React.FC<PropsT> = ({ owner, path }) => {
     const dispatch = useDispatch();
-    const filtredCards = useSelector(s.cardsFiltredInSingleGallery);
     
     useEffect(() => {
-        dispatch(a.galleryPageDataReceived({
+        dispatch(a.galleryPageLoaded({
             owner,
-            rawSets: data.sets.nodes,
-            rawCards: data.cards.nodes,
         }));
     }, []);
     
-    // demo
-    // const usercards = useSelector(newGallerySelectors.galleryOwnerCards);
-    const newFiltredCards = useSelector(newGallerySelectors.galleryFiltredCards)
-    // useEffect(() => {
-    //     console.log(usercards)
-    // }, [usercards]);
-    useEffect(() => {
-        console.log({newFiltredCards})
-    }, [newFiltredCards])
-    // demo end
+    const newFiltredCards = useSelector(s.galleryFiltredCards)
 
     // Client side rendering guarantee
     const [isRendered, setIsRendered] = useState(false);
@@ -59,7 +45,7 @@ const GalleryPage: React.FC<PropsT> = ({ data, owner, path }) => {
     // Filters
     const [isFiltersVisible, setIsFiltersVisible] = useState(false);
     
-    const [selectedCards, setSelectedCards] = useState<Array<CardT>>([]);
+    // const [selectedCards, setSelectedCards] = useState<Array<CardT>>([]);
 
     // Infinite scroll
     const [currentChunk, setCurrentChunk] = useState(0);
@@ -74,7 +60,7 @@ const GalleryPage: React.FC<PropsT> = ({ data, owner, path }) => {
     }
 
     const getChunk = () => {
-        return filtredCards.slice(0, currentChunk * LOAD_AMOUNT + LOAD_AMOUNT);
+        return newFiltredCards.slice(0, currentChunk * LOAD_AMOUNT + LOAD_AMOUNT);
     }
 
     useEffect(() => {
@@ -97,16 +83,16 @@ const GalleryPage: React.FC<PropsT> = ({ data, owner, path }) => {
         setCopyPanelOpen(false);
     }
 
-    const flushSelected = () => {
-        setSelectedCards([]);
-    }
+    // const flushSelected = () => {
+    //     setSelectedCards([]);
+    // }
 
-    const removeOneSelectedCard = (id: string) => {
-        const candidat = selectedCards.findIndex(card => card.id === id);
-        const arr = [...selectedCards];
-        arr.splice(candidat, 1)
-        setSelectedCards(arr);
-    }
+    // const removeOneSelectedCard = (id: string) => {
+    //     const candidat = selectedCards.findIndex(card => card.id === id);
+    //     const arr = [...selectedCards];
+    //     arr.splice(candidat, 1)
+    //     setSelectedCards(arr);
+    // }
 
     if (!isRendered) {
         return null;
@@ -130,12 +116,12 @@ const GalleryPage: React.FC<PropsT> = ({ data, owner, path }) => {
                 <GalleryTable
                     cards={ getChunk() }
                     handleLoadMore={ handleLoadMore }
-                    total={ filtredCards.length }
+                    total={ newFiltredCards.length }
                 />
                 <Footer
                     isMobile={ IS_MOBILE }
                     handleOpenCopyPanel={ openCopyPanel}
-                    selectionSize={ size(selectedCards) }
+                    // selectionSize={ size(selectedCards) }
                     handleFilterButtonClick={ handleFilterButtonClick }
                 />
             </Container>
@@ -146,10 +132,10 @@ const GalleryPage: React.FC<PropsT> = ({ data, owner, path }) => {
                 contentClassName='copyModal'
             >
                 <SelectedCardsView
-                    cards={ selectedCards }
+                    // cards={ selectedCards }
                     handleClose={ closeCopyPanel }
-                    handleClear={ flushSelected }
-                    handleRemoveItem={ removeOneSelectedCard }
+                    // handleClear={ flushSelected }
+                    // handleRemoveItem={ removeOneSelectedCard }
                 />
             </Modal>
         </ThemeProvider>

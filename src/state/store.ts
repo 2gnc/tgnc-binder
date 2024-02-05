@@ -6,9 +6,10 @@ import { updateSearchURL } from './utils/update-search-url';
 
 import cardsReducer from './cards';
 import galleryReducer, { actions as a} from './gallery';
+import tradeReducer from './trade';
 
 const filtersChangeMiddleware = createListenerMiddleware();
-const galleryPageDataReceivedMiddleware = createListenerMiddleware();
+const galleryPageLoadedMiddleware = createListenerMiddleware();
 const filtersRemoveMiddleware  = createListenerMiddleware();
 
 filtersChangeMiddleware.startListening({
@@ -27,8 +28,8 @@ filtersRemoveMiddleware.startListening({
     }
 })
 
-galleryPageDataReceivedMiddleware.startListening({
-    actionCreator: a.galleryPageDataReceived,
+galleryPageLoadedMiddleware.startListening({
+    actionCreator: a.galleryPageLoaded,
     effect: (_action, { dispatch }) => {
         const urlParams = new URLSearchParams(window.location.search);
         const byColorsSearch = urlParams.get(FilterParamNameEnum.COLOR);
@@ -88,7 +89,8 @@ galleryPageDataReceivedMiddleware.startListening({
 
 const rootReducer = combineReducers({
     cards: cardsReducer,
-    gallery: galleryReducer
+    gallery: galleryReducer,
+    trade: tradeReducer,
 });
 
 const store = configureStore({
@@ -97,7 +99,7 @@ const store = configureStore({
     middleware: (getDefaultMiddleware) => getDefaultMiddleware().prepend([
         filtersChangeMiddleware.middleware,
         filtersRemoveMiddleware.middleware,
-        galleryPageDataReceivedMiddleware.middleware,
+        galleryPageLoadedMiddleware.middleware,
     ])
 });
 

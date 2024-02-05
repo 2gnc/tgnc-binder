@@ -198,14 +198,3 @@ export type SetT = {
     type: string;
     block: string;
 };
-
-export type TradeCartT = {
-    deals: Array<DealT>;
-    errorAdding: boolean;
-};
-
-export type DealT = {
-    seller: OwnerT;
-    buyer: Nullable<OwnerT>;
-    cards: Array<CardT>;
-}

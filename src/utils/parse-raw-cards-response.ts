@@ -66,7 +66,7 @@ export function parseRawCardsResponse(cards: Array<Record<string, string>>, pare
         const id = card.id;
         const tradable = collections.includes('binder');
 
-        const uniqKey = `${card.set}${number}${isFoil}${lang}${condition}`;
+        const uniqKey = `${card.set}-${number}-${isFoil}-${lang}-${condition}`;
 
         cardsThesaurus[uniqKey] = { name, set, setParent, setName, number, edhRank, colors, isEtched, isFoil, isLand, isList, isToken, lang, rarity, usdEtched, usdFoil, usdNonFoil, eurEtched, eurFoil, eurNonFoil, types, keywords, imageUrl, id, perticularities, frameEffects, artist, promoTypes };
         

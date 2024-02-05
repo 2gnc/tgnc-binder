@@ -21,6 +21,7 @@ const initialState: CardsStateT = {
         types: [],
         languages: [...Object.values(LangEnum), ALL as LangEnum],
         parentSets: {},
+        usersCollections: {},
     }
 };
 
@@ -38,15 +39,20 @@ const cardsSlice = createSlice({
         popullateCards: (state, { payload }: PopullateCardsActionT): CardsStateT => {
             const { rawCards, rawSets, owner} = payload;
             const { sets, setTypes, setBlocks, codesParents, parentSets } = parseRawSetsResponse(rawSets);
-            const { types, names, userCards, cardsThesaurus } = parseRawCardsResponse(rawCards, codesParents, owner);
+            const { types, names, userCards, cardsThesaurus, collections } = parseRawCardsResponse(rawCards, codesParents, owner);
             const unitedThesausus = {
                 ...state.thesaurus.cards,
                 ...cardsThesaurus,
             };
 
+            const unitedCollections = {
+                ...state.thesaurus.usersCollections,
+                [owner]: collections
+            }
             const unitedCards = {
                 ...state.cards,
             };
+
             Object.values(userCards).forEach((card) => {
                 const cardData = Object.values(card)[0];
                 unitedCards[cardData.key] = {
@@ -64,6 +70,7 @@ const cardsSlice = createSlice({
                 thesaurus: {
                     ...state.thesaurus,
                     cards: unitedThesausus,
+                    usersCollections: unitedCollections,
                 }
             };
 

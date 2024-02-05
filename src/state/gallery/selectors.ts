@@ -6,11 +6,10 @@ import compact from 'lodash/compact';
 import map from 'lodash/map';
 import values from 'lodash/values';
 import forEach from 'lodash/forEach';
-import find from 'lodash/find';
 import isEmpty from 'lodash/isEmpty';
+import flatMap from 'lodash/flatMap';
 import { RootState, Thunk, Dispatch } from '../store';
-import { CardT,
-    FilterParamNameEnum,
+import {
     LangEnum,
     PermamentTypeEnum,
     SortingDirectionEnum,
@@ -22,31 +21,22 @@ import { CardT,
     GalleryCardMetaT,
 } from '../../models';
 import { ALL } from '../../constants';
-import { sortCards, sortGalleryCards } from '../../utils/sort-cards';
-import { flatMap } from 'lodash';
+import { sortGalleryCards } from '../../utils/sort-cards';
 
 const gallery = (state: RootState) => state.gallery;
-const userCollections = (state: RootState) => state.gallery.thesaurus.collections;
-const userCards = (state: RootState) => state.gallery.cards;
-const collectionFilter = (state: RootState) => state.gallery.filters[FilterParamNameEnum.COLLECTION];
+const thesaurus = (state: RootState) => state.cards.thesaurus;
 const filters = createSelector([gallery], (gallery) => gallery.filters);
 const filtersCount = createSelector([filters], (filters) => size(filters));
 const owner = createSelector([gallery], (gallery) => gallery.owner);
-const avalaibleSetTypes = createSelector([gallery], (gallery) => gallery.thesaurus.setTypes);
-const avalaibleLanguages = createSelector([gallery], (gallery) => gallery.thesaurus.languages);
-const avalaibleSpellTypes = createSelector([gallery], (gallery) => gallery.thesaurus.types);
+
+const avalaibleSetTypes = createSelector([thesaurus], (thesaurus) => thesaurus.setTypes);
+const avalaibleLanguages = createSelector([thesaurus], (thesaurus) => thesaurus.languages);
+const avalaibleSpellTypes = createSelector([thesaurus], (thesaurus) => thesaurus.types);
+const parentSetsList = createSelector([thesaurus], (thesaurus) => Object.values(thesaurus.parentSets));
+const namesSearchBase = createSelector([thesaurus], (thesaurus) => thesaurus.names);
+
 const searchValues = createSelector([gallery], (gallery) => gallery.searchValues);
-const parentSetsList = createSelector([gallery], (gallery) => Object.values(gallery.thesaurus.parentSets));
-const namesSearchBase = createSelector([gallery], (gallery) => gallery.thesaurus.names);
-const cardsFiltredByCollection = createSelector([
-    userCards,
-    collectionFilter
-], (cards, collections) => {
-    if (collections.includes(ALL)) {
-        return cards;
-    }
-    return cards.filter((card) => size(intersection(card.collections, collections)));
-});
+
 const setsListSuggest = createSelector([searchValues, parentSetsList, filters], (searchValues, sets, filters) => {
     const searchValue = searchValues.set;
     if (size(searchValue) < 3) {
@@ -108,86 +98,14 @@ const sorting = createSelector([gallery], (gallery) => {
     };
 });
 
-const cardsFiltredInSingleGallery = createSelector([cardsFiltredByCollection, filters, sorting], (cardsInCollection, filters, sorting) => {
-    const { sortingDirection, sortingValue } = sorting;
-
-    const isMatchByColor = (card: CardT) => {
-        if (!size(filters.color)) {
-            return true;
-        }
-        return size(intersection(filters.color, card.colors));
-    };
-
-    const isMatchByTypes = (card: CardT) => {
-        if (!size(filters.type)) {
-            return true;
-        }
-
-        const foundTypes = intersection(filters.type, card.types);
-        return size(foundTypes) && size(foundTypes) === size(filters.type);
-    };
-
-    const isMatchByName = (card: CardT) => {
-        const re = new RegExp(filters.name[0]?.toLowerCase());
-        return re.test(card.name.toLowerCase());
-    };
-
-    const isMatchByLanguage = (card: CardT) => {
-        if (filters.lang[0] === ALL as LangEnum) {
-            return true;
-        }
-        return card.lang === filters.lang[0];
-    };
-
-    const isMatchBySetCode = (card: CardT) => {
-        if (!size(filters.set)) {
-            return true;
-        }
-        return filters.set.includes(card.setParent);
-    };
-
-    const isLandTypeIncluded = filters.type.includes(TypeEnum.LAND);
-    const isTokenTypeIncluded = filters.type.includes(TypeEnum.TOKEN);
-
-    const isNotLand = (card: CardT) => !card.types.includes(TypeEnum.LAND);
-    const isNotToken = (card: CardT) => !card.types.includes(TypeEnum.TOKEN);
-
-    const found = cardsInCollection.filter((card) => {
-        const hasColorsMatch = isMatchByColor(card);
-        const isMatchByType = isMatchByTypes(card);
-        const hasNameMatch = isMatchByName(card);
-        const hasLanguageMatch = isMatchByLanguage(card);
-        const hasSetCodeMatch = isMatchBySetCode(card);
-
-        const shouldIncludeLand = isLandTypeIncluded ? true : isNotLand(card);
-        const shouldIncludeTokens = isTokenTypeIncluded ? true : isNotToken(card);
-
-        return hasColorsMatch && isMatchByType && shouldIncludeLand && shouldIncludeTokens && hasNameMatch && hasLanguageMatch && hasSetCodeMatch;
-    });
-
-    return sortCards(found, sortingValue, sortingDirection);
-});
-
-export const selectors = {
-    gallery,
-    userCollections,
-    userCards,
-    cardsFiltredByCollection,
-    filters,
-    filtersCount,
-    owner,
-    avalaibleSetTypes,
-    avalaibleLanguages,
-    searchValues,
-    setsListSuggest,
-    spellNameSuggest,
-    spellTypeSuggest,
-    cardsFiltredInSingleGallery,
-    sorting,
-};
-
 const galleryOwner = (state: RootState) => state.gallery.owner;
 const cardsThesaurus = (state: RootState) => state.cards.thesaurus.cards;
+const userCollections = createSelector([galleryOwner, thesaurus], (owner, thesaurus) => {
+    if (!owner) {
+        return [ALL];
+    }
+    return thesaurus.usersCollections[owner.name].concat([ALL]) || [ALL];
+});
 const usersCards = (state: RootState) => state.cards.cards;
 const galleryOwnerCards = createSelector([usersCards, galleryOwner, cardsThesaurus], (cards, owner, thesaurus) => {
     const ownername = owner?.name;
@@ -207,7 +125,7 @@ const galleryOwnerCards = createSelector([usersCards, galleryOwner, cardsThesaur
     forEach(userCards, (card) => {
         const { set, number, lang, isFoil } = card.card;
         const { condition } = card.meta;
-        const uniqKey = `${set}${number}${isFoil}${lang}`;
+        const uniqKey = `${set}-${number}-${isFoil}-${lang}`;
 
         if (!hash[uniqKey]) {
             hash[uniqKey] = {
@@ -265,6 +183,9 @@ const galleryFiltredCards = createSelector([galleryOwnerCards, filters, sorting]
         if (!size(filters.collection)) {
             return true;
         }
+        if (size(filters.collection) === 1 && filters.collection[0] === ALL) {
+            return true;
+        }
         const metas = values(card.meta);
         const collections = uniq(flatMap(map(metas, meta => meta.collections)));
 
@@ -294,7 +215,18 @@ const galleryFiltredCards = createSelector([galleryOwnerCards, filters, sorting]
     return sortGalleryCards(found, sortingValue, sortingDirection);
 });
 
-export const newGallerySelectors = {
+export const selectors = {
+    userCollections,
+    filters,
+    filtersCount,
+    owner,
+    avalaibleSetTypes,
+    avalaibleLanguages,
+    searchValues,
+    setsListSuggest,
+    spellNameSuggest,
+    spellTypeSuggest,
+    sorting,
     galleryOwner,
     galleryOwnerCards,
     galleryFiltredCards,

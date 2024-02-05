@@ -1,28 +1,21 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit';
 import filter from 'lodash/filter';
 import uniq from 'lodash/uniq';
-import store from '../store';
-import { RootState, Thunk, Dispatch } from '../store';
-import { CardT, FilterParamNameEnum, LangEnum, PermamentTypeEnum, ColorEnum, SortingValsEnum } from '../../models';
+import { FilterParamNameEnum, LangEnum, PermamentTypeEnum, SortingValsEnum } from '../../models';
 import { ALL } from '../../constants';
-import { nonEmptyStringsArrTransformer } from '../transformers';
-import { parseRawSetsResponse } from '../../utils/parse-raw-sets-response';
-import { parseRawCardsResponse } from '../../utils/parse-raw-cards-response';
 export { selectors } from './selectors';
 import {
-    GalleryDataReceivedActionT,
+    GalleryPageLoadedActionT,
     SetCollectionFilterActionT,
     RemoveCollectionFilterActionT,
     SetSearchValueActionT,
     ResetCollectionFilterActionT,
     SetSoringActionT,
-    SetLastPickedForTradeActionT,
 } from './actions';
 import { CardsStateT } from './models';
 
 const initialState: CardsStateT = {
     owner: null,
-    cards: [],
     filters: {
         [FilterParamNameEnum.COLLECTION]: [ALL],
         [FilterParamNameEnum.TYPE]: [],
@@ -37,17 +30,6 @@ const initialState: CardsStateT = {
         [FilterParamNameEnum.TYPE]: '',
     },
     sorting: SortingValsEnum.NAME_ASC,
-    thesaurus: {
-        collections : [],
-        sets: {},
-        setTypes: [],
-        setBlocks: [],
-        parentSets: {},
-        languages: [...Object.values(LangEnum), ALL as LangEnum],
-        names: [],
-        types: [],
-    },
-    lastPickedForTrade: null,
 };
 
 // Slice
@@ -55,27 +37,12 @@ const gallerySlice = createSlice({
   name: 'ownerGallery',
   initialState,
   reducers: {
-    galleryPageDataReceived: (state, action: GalleryDataReceivedActionT): CardsStateT => {
-        const { rawCards, rawSets, owner } = action.payload;
-        const { sets, setTypes, setBlocks, codesParents, parentSets } = parseRawSetsResponse(rawSets);
-        const { cards, collections, types, names, userCards } = parseRawCardsResponse(rawCards, codesParents);
-
-        console.log({ userCards })
+    galleryPageLoaded: (state, action: GalleryPageLoadedActionT): CardsStateT => {
+        const { owner } = action.payload;
 
         return {
             ...state,
             owner,
-            cards,
-            thesaurus: {
-                ...state.thesaurus,
-                collections: [...nonEmptyStringsArrTransformer(collections), ALL],
-                sets,
-                setTypes: [...setTypes],
-                setBlocks: [...setBlocks],
-                parentSets,
-                names,
-                types,
-            }
         }
 
     },
@@ -149,13 +116,6 @@ const gallerySlice = createSlice({
             sorting: payload,
         }
     },
-    addCardForTrade: (state, { payload }: SetLastPickedForTradeActionT): CardsStateT => {
-        const card = state.cards.find(card => card.id === payload);
-        return {
-            ...state,
-            lastPickedForTrade: card || null
-        }
-    },
   }
 });
 
@@ -164,5 +124,3 @@ export default gallerySlice.reducer;
 
 // Actions
 export const actions = gallerySlice.actions;
-
-// Thunks

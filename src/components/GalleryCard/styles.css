@@ -1,8 +1,11 @@
 .cardCopyButton {
-    position: absolute;
-    top: 35px;
-    right: 60px;
-    transform: translate(50%, 50%);
+    border: 1px solid silver;
+}
+
+.cardCopyBlock {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
 }
 
 .card {
