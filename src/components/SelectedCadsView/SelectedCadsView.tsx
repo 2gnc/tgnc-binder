@@ -28,7 +28,7 @@ export const SelectedCardsView: FC<PropsT> = ({ handleClose, /*handleClear, card
 
     const deals = useSelector(s.cardsInDeals);
     console.log({ deals })
-
+    // тут сгруппированный по вендору список 
     return (
         <h1>foo</h1>
         // <div className='selectedCardsView__box'>
