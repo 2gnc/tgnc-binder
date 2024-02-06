@@ -1,9 +1,5 @@
 import { OwnerName, UserCardMetaT } from '../../models';
-
-export type TradeItemT = {
-    key: string;
-    quantity: number;
-}
+import { CardThesaurusItemT, TradeItemT } from '../../models';
 
 export type TradeStateT = {
     deals: Record<OwnerName, Array<TradeItemT>>;

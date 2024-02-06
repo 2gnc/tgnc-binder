@@ -45,8 +45,6 @@ const GalleryPage: React.FC<PropsT> = ({ owner, path }) => {
     // Filters
     const [isFiltersVisible, setIsFiltersVisible] = useState(false);
     
-    // const [selectedCards, setSelectedCards] = useState<Array<CardT>>([]);
-
     // Infinite scroll
     const [currentChunk, setCurrentChunk] = useState(0);
 
@@ -83,17 +81,6 @@ const GalleryPage: React.FC<PropsT> = ({ owner, path }) => {
         setCopyPanelOpen(false);
     }
 
-    // const flushSelected = () => {
-    //     setSelectedCards([]);
-    // }
-
-    // const removeOneSelectedCard = (id: string) => {
-    //     const candidat = selectedCards.findIndex(card => card.id === id);
-    //     const arr = [...selectedCards];
-    //     arr.splice(candidat, 1)
-    //     setSelectedCards(arr);
-    // }
-
     if (!isRendered) {
         return null;
     }
@@ -121,7 +108,6 @@ const GalleryPage: React.FC<PropsT> = ({ owner, path }) => {
                 <Footer
                     isMobile={ IS_MOBILE }
                     handleOpenCopyPanel={ openCopyPanel}
-                    // selectionSize={ size(selectedCards) }
                     handleFilterButtonClick={ handleFilterButtonClick }
                 />
             </Container>
@@ -129,13 +115,10 @@ const GalleryPage: React.FC<PropsT> = ({ owner, path }) => {
             <Modal
                 open={isCopyPanelOpen}
                 onOutsideClick={ closeCopyPanel }
-                contentClassName='copyModal'
+                contentClassName='selectedCardsView'
             >
                 <SelectedCardsView
-                    // cards={ selectedCards }
                     handleClose={ closeCopyPanel }
-                    // handleClear={ flushSelected }
-                    // handleRemoveItem={ removeOneSelectedCard }
                 />
             </Modal>
         </ThemeProvider>

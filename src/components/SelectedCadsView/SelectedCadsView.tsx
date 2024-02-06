@@ -1,69 +1,104 @@
-import React, { type FC } from 'react';
+import React, { type FC, useState } from 'react';
+import map from 'lodash/map';
 import { useSelector, useDispatch } from 'react-redux';
 import { Button, Text, Flex, Icon } from '@gravity-ui/uikit';
-import { TrashBin } from '@gravity-ui/icons';
+import { TrashBin, Minus } from '@gravity-ui/icons';
 import copy from 'copy-to-clipboard';
+import { calculatePrice, tunePrice } from '../../utils/tune-price';
 
-import { CardT } from '../../models';
-import { tunePrice, calculatePrice } from '../../utils/tune-price';
-// import { selectors as s } from '../../state/gallery';
+import {
+    Accordion,
+    AccordionItem,
+    AccordionItemHeading,
+    AccordionItemButton,
+    AccordionItemPanel,
+} from 'react-accessible-accordion';
+
+import { CardInDealT } from '../../models';
 import { selectors as s, actions as a} from '../../state/trade';
 
 import './styles.css';
+import { forEach } from 'lodash';
 
 type PropsT = {
-    // cards: Array<CardT>;
     handleClose: () => void;
-    // handleClear: () => void;
-    // handleRemoveItem: (id: string) => void;
 }
 
-export const SelectedCardsView: FC<PropsT> = ({ handleClose, /*handleClear, cards, handleRemoveItem*/ }) => {
+export const SelectedCardsView: FC<PropsT> = ({ handleClose }) => {
     let TEXT = '';
     let TOTAL = 0;
+
     const handleCopyList = () => {
         copy(`${TEXT}\n Total: ${TOTAL} rub`);
         handleClose();
     };
 
-    const deals = useSelector(s.cardsInDeals);
-    console.log({ deals })
-    // тут сгруппированный по вендору список 
-    return (
-        <h1>foo</h1>
-        // <div className='selectedCardsView__box'>
-        //     <Text variant='header-2' className='selectedCardsView__header' as='div'>Cards in order:</Text>
-        //     <div className='selectedCardsView__list' id='input'>
-        //     {
-        //         cards.map((card, i) => {
-        //             const price = tunePrice(card);
-        //             TOTAL += price;
+    const buildDealString = (item: CardInDealT) => {
+        const { card, quantity } = item;
+        return `${quantity}: ${card.name} (${card.colors.join(',')}) ${card.set}#${card.number} ${card.isFoil ? 'foil' : card.isEtched ? 'etched' : 'non foil'} ${card.lang} - ${tunePrice(card)} rub.`;
+    };
 
-        //             const rowText = `${card.name} (${card.colors.join(',')}) ${card.set}#${card.number} ${card.isFoil ? 'foil' : card.isEtched ? 'etched' : 'non foil'} ${card.lang} - ${price} rub.`
-        //             TEXT += `${rowText}\n`
-        //             return (
-        //                 <div className='selectedCardsView__row' key={i}>
-        //                     <Flex space='10' alignItems='center'>
-        //                         { rowText }
-        //                         <Button onClick={ () => handleRemoveItem(card.id) } size="m" view="outlined">
-        //                             <Icon data={ TrashBin } size={ 16 } />
-        //                         </Button>
-        //                     </Flex>
-        //                 </div>
-        //             )
-        //         })
-        //     }
-        //     </div>
-        //     <div className='selectedCardsView__totalRow'>
-        //         <Text variant='subheader-2'>{`Total: ${TOTAL} rub.`}</Text>
-        //     </div>
-        //     <div className='selectedCardsView__buttons'>
-        //         <Flex space='3' justifyContent='center'>
-        //             <Button view='normal' onClick={ handleClose }>Close</Button>
-        //             <Button view='outlined-danger' onClick={ handleClear }>Clear</Button>
-        //             <Button view='action' onClick={ handleCopyList }>Copy</Button>
-        //         </Flex>
-        //     </div>
-        // </div>
+    const handleRemoveItemFromDeal = (card: CardInDealT) => {
+
+    }
+
+    const deals = useSelector(s.cardsInDeals);
+
+    const dealsUuids = map(deals, (deal, i) => `${deal.owner}${i}`);
+    const renderTabContent = (cards: Array<CardInDealT>) => map(cards, (item) => {
+        return (
+            <Flex alignItems='center' justifyContent='space-between' className='dealRow'>
+                <Text>{ buildDealString(item) }</Text>
+                <Button onClick={ () => handleRemoveItemFromDeal(item) } size="m" view="outlined">
+                    <Icon data={ item.quantity > 1 ? Minus : TrashBin } size={ 16 } />
+                </Button>
+            </Flex>
+        );
+    });
+    const rendertabs = () => map([...deals, ...deals, ...deals, ...deals, ...deals, ...deals, ...deals, ...deals, ...deals, ...deals, ...deals,...deals], (deal, i) => {
+        const uuid = `${deal.owner}${i}`;
+        const total = deal.cards.reduce((acc, val) => {
+            return {
+                cards: acc.cards + val.quantity,
+                summ: acc.summ + val.quantity * tunePrice(val.card)
+            }
+        }, { cards: 0, summ: 0 });
+
+        forEach(deal.cards, (item) => {
+            const rowText = buildDealString(item);
+            TEXT += `${rowText}\n`;
+        });
+
+        TOTAL += total.summ;
+
+        return (
+            <AccordionItem uuid={ uuid } className=''>
+                <AccordionItemHeading>
+                    <AccordionItemButton>
+                        <div>
+                            <Text variant='subheader-1' className='dealTotalPart'>{ `${deal.owner}:` }</Text>
+                            <Text className='dealTotalPart'>{ `${total.cards} card(s) picked, ` }</Text>
+                            <Text className='dealTotalPart'>{ `total amount ${total.summ} rub.` }</Text>
+                        </div>
+                        <button onClick={ handleCopyList }>Copy trade offer to clipboard</button>
+                    </AccordionItemButton>
+                </AccordionItemHeading>
+                <AccordionItemPanel>
+                    { renderTabContent(deal.cards) }
+                </AccordionItemPanel>
+            </AccordionItem>
+        );
+    });
+    return (
+        <div className='selectedCardsView__box'>
+            <Text variant='header-2' className='selectedCardsView__header' as='div'>Cards picked for trade</Text>
+            <Accordion allowZeroExpanded preExpanded={ dealsUuids.slice(0, 1) }>
+                { rendertabs() }
+            </Accordion>
+            <Flex space='3' justifyContent='center' className='selectedCardsView__buttons'>
+                <Button view='outlined-danger' onClick={ () => false }>Clear</Button>
+                <Button view='normal' onClick={ handleClose }>Close</Button>
+            </Flex>
+        </div>
     )
 }

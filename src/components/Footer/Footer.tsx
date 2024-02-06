@@ -5,12 +5,12 @@ import { LogoTelegram, Copy, BarsAscendingAlignLeftArrowDown, BarsAscendingAlign
 import { SortingDirectionEnum, SortingValsEnum, OwnerT } from '../../models';
 import { sortingMenuValues } from '../../constants';
 import { selectors as s, actions as a } from '../../state/gallery';
+import { selectors as ts } from '../../state/trade';
 
 import './styles.css';
 
 type PropsT = React.PropsWithChildren & {
     isMobile: boolean;
-    selectionSize: number;
     handleOpenCopyPanel: () => void;
     handleFilterButtonClick: () => void;
 }
@@ -19,12 +19,12 @@ export const Footer: FC<PropsT> = ({
     handleOpenCopyPanel,
     handleFilterButtonClick,
     isMobile,
-    selectionSize,
 }) => {
     const dispatch = useDispatch();
     const filtersCount = useSelector(s.filtersCount);
     const owner = useSelector(s.owner);
     const { sortingDirection } = useSelector(s.sorting);
+    const selectionSize = useSelector(ts.pickedCardsCount);
     const buttonFiltersRef = useRef(null);
     const [isSortingMenuOpen, setSortingMenuOpen] = useState(false);
 
@@ -67,7 +67,7 @@ export const Footer: FC<PropsT> = ({
                     { renderSortingMenuItems() }
                 </Menu>
             </Popup>
-            <Link href={ owner.contactLink } target="_blank" className={ isMobile ? 'contactButton_mob' : ''}>
+            <Link href={ owner!.contactLink } target="_blank" className={ isMobile ? 'contactButton_mob' : ''}>
                 <Button size="l" view='action'>
                     <Icon data={ LogoTelegram } />
                     {!isMobile && <Text>Contact Owner</Text>}
@@ -75,7 +75,7 @@ export const Footer: FC<PropsT> = ({
             </Link>
             <Button size='l' view='action' onClick={ handleOpenCopyPanel } className={ isMobile ? 'collectionButton_mob' : ''} >
                 <Icon data={ Copy } />
-                <Text>{`${!isMobile ? 'Selected cards:' : ''} ${ selectionSize }`}</Text>
+                <Text>{`${!isMobile ? 'Picked cards:' : ''} ${ selectionSize }`}</Text>
             </Button>
         </div>
     )

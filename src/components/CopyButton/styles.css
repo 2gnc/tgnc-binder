@@ -10,3 +10,7 @@
     z-index: 3;
     background-color: #fff;
 }
+
+.copyButton.disabled {
+    opacity: 0.2;
+}

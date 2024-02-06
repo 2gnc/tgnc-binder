@@ -1,30 +1,96 @@
+.selectedCardsView {
+    width: 88vw;
+    height: 80vh;
+}
 .selectedCardsView__box {
     padding: 24px 16px;
     position: relative;
+    box-sizing: border-box;
     height: 100%;
 }
 
 .selectedCardsView__buttons {
     position: absolute;
     bottom: 32px;
-    transform: translateY(-100%);
+    left: 50%;
+    transform: translateX(-50%);
 }
 
-.selectedCardsView__header {
-    padding-bottom: 16px;
+.dealRow:hover {
+    background-color: rgba(0, 0, 0, 0.05);
 }
 
-.selectedCardsView__totalRow {
-    margin-top: 16px;
+.dealRow {
+    margin: 8px 0;
 }
 
-.selectedCardsView__row {
-    padding: 4px 0;
+.dealTotalPart {
+    margin-right: 6px;
 }
 
-.selectedCardsView__list {
-    max-height: 55vh;
-    overflow-y: scroll;
-    border: 1px solid silver;
-    padding: 0 8px 0 16px;
+.accordion {
+    border-radius: 2px;
+    overflow: scroll;
+    max-height: calc(100% - 96px);
+}
+
+.accordion__item + .accordion__item {
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.accordion__button {
+    background-color: #f4f4f4;
+    color: #444;
+    cursor: pointer;
+    padding: 18px;
+    text-align: left;
+    border: none;
+    display: grid;
+    grid-template-columns: 50px auto 200px;
+}
+
+.accordion__button:hover {
+    background-color: #ddd;
+}
+
+.accordion__button:before {
+    display: inline-block;
+    content: '';
+    height: 10px;
+    width: 10px;
+    margin-right: 12px;
+    border-bottom: 2px solid currentColor;
+    border-right: 2px solid currentColor;
+    transform: rotate(-45deg);
+}
+
+.accordion__button[aria-expanded='true']::before,
+.accordion__button[aria-selected='true']::before {
+    transform: rotate(45deg);
+}
+
+[hidden] {
+    display: none;
+}
+
+.accordion__panel {
+    animation: fadein 0.35s ease-in;
+    overflow: scroll;
+    max-height: 50vh;
+    border: 1px solid rgba(0, 0, 1, 0.1);
+    padding: 0 16px;
+}
+
+/* -------------------------------------------------- */
+/* ---------------- Animation part ------------------ */
+/* -------------------------------------------------- */
+
+@keyframes fadein {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
 }

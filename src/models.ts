@@ -198,3 +198,18 @@ export type SetT = {
     type: string;
     block: string;
 };
+
+export type CardInDealT = {
+    card: CardThesaurusItemT;
+    quantity: number;
+};
+
+export type UsersDealsT = Array<{
+    owner: string;
+    cards: Array<CardInDealT>;
+}>
+
+export type TradeItemT = {
+    key: string;
+    quantity: number;
+}

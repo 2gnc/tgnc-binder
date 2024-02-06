@@ -1,7 +1,7 @@
 import max from 'lodash/max';
-import { CardT, RarityEnum, LangEnum, GalleryCardT } from '../models';
+import { CardT, RarityEnum, LangEnum, GalleryCardT, CardThesaurusItemT } from '../models';
 
-export function tunePrice(card: CardT): number {
+export function tunePrice(card: CardT | CardThesaurusItemT): number {
     const USD = 90;
     const EUR = 100;
 
