@@ -95,7 +95,6 @@ const rootReducer = combineReducers({
 
 const store = configureStore({
     reducer: rootReducer,
-    devTools: true,
     middleware: (getDefaultMiddleware) => getDefaultMiddleware().prepend([
         filtersChangeMiddleware.middleware,
         filtersRemoveMiddleware.middleware,
@@ -107,4 +106,7 @@ export type RootState = ReturnType<typeof rootReducer>;
 export type Dispatch = typeof store.dispatch;
 export type Thunk = ThunkAction<void, RootState, null, Action<string>>;
 
+if (typeof window !== 'undefined') {
+    window.store = store;
+}
 export default store;

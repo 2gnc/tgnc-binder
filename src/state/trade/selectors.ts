@@ -22,8 +22,8 @@ import {
     GalleryCardMetaT,
 } from '../../models';
 
-const deals = (state: RootState) => state.trade.deals;
-const cardsInDeals = createSelector([deals, cardsThesaurus], (deals, thesaurus) => {
+const dealsByOwners = (state: RootState) => state.trade.dealsByOwners;
+const cardsInDeals = createSelector([dealsByOwners, cardsThesaurus], (deals, thesaurus) => {
     const dealCardsKeys = entries(deals);
     const usersDeals: UsersDealsT = [];
 

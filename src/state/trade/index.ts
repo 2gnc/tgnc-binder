@@ -1,21 +1,17 @@
 import { createSlice } from '@reduxjs/toolkit';
-import filter from 'lodash/filter';
-import uniq from 'lodash/uniq';
 import find from 'lodash/find';
-import isNil from 'lodash/isNil';
-import entries from 'lodash/entries';
-import { FilterParamNameEnum, LangEnum, PermamentTypeEnum, SortingValsEnum, OwnerT, TradeItemT } from '../../models';
-import { ALL } from '../../constants';
+import isEmpty from 'lodash/isEmpty';
 export { selectors } from './selectors';
 import {
     AddCardToDealActionT,
     RemoveCardFromDealActionT
 } from './actions';
 import { TradeStateT } from './models';
-import { buildCardThesaurusKey, buildCardDealKey } from '../helpers';
+import { buildCardThesaurusKey } from '../helpers';
 
 const initialState: TradeStateT = {
-    deals: {}
+    dealsByOwners: {},
+    dealsByCards: {},
 }
 
 // Slice
@@ -32,11 +28,11 @@ const tradeSlice = createSlice({
                 condition,
             }];
 
-            const ownerDeals = state.deals[owner.name] ? state.deals[owner.name]?.concat(data) : data;
+            const ownerDeals = state.dealsByOwners[owner.name] ? state.dealsByOwners[owner.name]?.concat(data) : data;
             return {
                 ...state,
-                deals: {
-                    ...state.deals,
+                dealsByOwners: {
+                    ...state.dealsByOwners,
                     [owner.name]: ownerDeals
                 }
             }
@@ -44,23 +40,51 @@ const tradeSlice = createSlice({
         flushDeals: (state): TradeStateT => {
             return {
                 ...state,
-                deals: initialState.deals,
+                dealsByOwners: initialState.dealsByOwners,
+                dealsByCards: initialState.dealsByCards,
             }
         },
 
         removeCardFromDeal: (state, { payload }: RemoveCardFromDealActionT): TradeStateT => {
-            // const { owner, tradeItem } = payload;
-            // const { key, quantity } = tradeItem;
-            // const ownerDealToUpdate = find(entries(state.deals), ([trader]) => trader === owner);
-            // if (isNil(ownerDealToUpdate)) {
-            //     return state;
-            // }
 
-            // const dealItemToUpdate = find(entries(ownerDealToUpdate), ([,item]) => item.key)
+            const { owner, card } = payload;
+            const { condition } = card;
 
-            return {
-                ...state,
+
+            const dealCardKey = buildCardThesaurusKey(card.card);
+            let foundIndex = -1;
+            const ownerDeals = [...state.dealsByOwners[owner]];
+
+            const tradeItem = find(ownerDeals, (deal, i) => {
+                const match = deal.key === dealCardKey && deal.condition === condition;
+                if (match) {
+                    foundIndex = i;
+                }
+                return match;
+            });
+
+            if (!tradeItem) {
+                return state;
             }
+
+            if (ownerDeals[foundIndex].quantity > 1) {
+                ownerDeals[foundIndex].quantity -= 1;
+            } else {
+                ownerDeals.splice(foundIndex, 1);
+            }
+            const updatedState = {
+                ...state,
+                deals: {
+                    ...state.dealsByOwners,
+                    [owner]: ownerDeals,
+                }
+            };
+
+            if (isEmpty(updatedState.deals[owner])) {
+                delete updatedState.deals[owner];
+            }
+
+            return updatedState;
         }
     },
 });

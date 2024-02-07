@@ -1,6 +1,8 @@
-import { OwnerName, UserCardMetaT } from '../../models';
-import { CardThesaurusItemT, TradeItemT } from '../../models';
+import { ConditionEnum, OwnerName, UserCardMetaT } from '../../models';
+import { CardThesaurusItemT, TradeItemT, CardUniqKey } from '../../models';
 
+export type DealByCardT = Record<ConditionEnum, Record<string, number>>;
 export type TradeStateT = {
-    deals: Record<OwnerName, Array<TradeItemT>>;
+    dealsByOwners: Record<OwnerName, Array<TradeItemT>>;
+    dealsByCards: Record<CardUniqKey, DealByCardT>;
 }

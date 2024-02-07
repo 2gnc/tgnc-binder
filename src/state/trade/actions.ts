@@ -1,5 +1,5 @@
 import { PayloadAction } from '@reduxjs/toolkit';
-import { FilterParamNameEnum, OwnerT, SetRawT, ConditionEnum, TradeItemT, CardThesaurusItemT, CardUniqKey } from '../../models';
+import { FilterParamNameEnum, OwnerT, SetRawT, ConditionEnum, TradeItemT, CardThesaurusItemT, CardUniqKey, CardInDealT } from '../../models';
 
 export type AddCardToDealActionT = PayloadAction<{
     cardKey: CardUniqKey;
@@ -8,6 +8,6 @@ export type AddCardToDealActionT = PayloadAction<{
 }>;
 
 export type RemoveCardFromDealActionT = PayloadAction<{
-    tradeItem: TradeItemT,
+    card: CardInDealT,
     owner: string;
 }>;
