@@ -1,13 +1,18 @@
 import { createSlice } from '@reduxjs/toolkit';
 import filter from 'lodash/filter';
 import uniq from 'lodash/uniq';
-import { FilterParamNameEnum, LangEnum, PermamentTypeEnum, SortingValsEnum, OwnerT } from '../../models';
+import find from 'lodash/find';
+import isNil from 'lodash/isNil';
+import entries from 'lodash/entries';
+import { FilterParamNameEnum, LangEnum, PermamentTypeEnum, SortingValsEnum, OwnerT, TradeItemT } from '../../models';
 import { ALL } from '../../constants';
 export { selectors } from './selectors';
 import {
-    AddCardToDealActionT
+    AddCardToDealActionT,
+    RemoveCardFromDealActionT
 } from './actions';
 import { TradeStateT } from './models';
+import { buildCardThesaurusKey, buildCardDealKey } from '../helpers';
 
 const initialState: TradeStateT = {
     deals: {}
@@ -19,11 +24,12 @@ const tradeSlice = createSlice({
     initialState,
     reducers: {
         addCardToDeal: (state, { payload }: AddCardToDealActionT): TradeStateT => {
-            const { owner, cardCode} = payload;
+            const { owner, cardKey, condition } = payload;
 
             const data = [{
-                key: cardCode,
+                key: cardKey,
                 quantity: 1,
+                condition,
             }];
 
             const ownerDeals = state.deals[owner.name] ? state.deals[owner.name]?.concat(data) : data;
@@ -35,6 +41,27 @@ const tradeSlice = createSlice({
                 }
             }
         },
+        flushDeals: (state): TradeStateT => {
+            return {
+                ...state,
+                deals: initialState.deals,
+            }
+        },
+
+        removeCardFromDeal: (state, { payload }: RemoveCardFromDealActionT): TradeStateT => {
+            // const { owner, tradeItem } = payload;
+            // const { key, quantity } = tradeItem;
+            // const ownerDealToUpdate = find(entries(state.deals), ([trader]) => trader === owner);
+            // if (isNil(ownerDealToUpdate)) {
+            //     return state;
+            // }
+
+            // const dealItemToUpdate = find(entries(ownerDealToUpdate), ([,item]) => item.key)
+
+            return {
+                ...state,
+            }
+        }
     },
 });
 

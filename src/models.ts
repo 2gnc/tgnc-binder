@@ -133,7 +133,7 @@ export enum RarityEnum {
 }
 
 export enum ConditionEnum {
-    NM = 'mn',
+    NM = 'nm',
     SP = 'sp',
     MP = 'mp',
     PL = 'pl',
@@ -201,6 +201,7 @@ export type SetT = {
 
 export type CardInDealT = {
     card: CardThesaurusItemT;
+    condition: ConditionEnum;
     quantity: number;
 };
 
@@ -212,4 +213,5 @@ export type UsersDealsT = Array<{
 export type TradeItemT = {
     key: string;
     quantity: number;
+    condition: ConditionEnum;
 }

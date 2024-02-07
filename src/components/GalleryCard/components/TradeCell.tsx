@@ -17,7 +17,7 @@ type PropsT = {
     cardCode: string;
 }
 
-export const TradeCell: FC<PropsT> = ({ id, cardCode, tradable, quantity }) => {
+export const TradeCell: FC<PropsT> = ({ id, cardCode, tradable, quantity, condition }) => {
     const dispatch = useDispatch();
     const owner = useSelector(s.owner);
 
@@ -29,7 +29,8 @@ export const TradeCell: FC<PropsT> = ({ id, cardCode, tradable, quantity }) => {
 
         dispatch(a.addCardToDeal({
             owner,
-            cardCode,
+            cardKey: cardCode,
+            condition,
         }));
 
         toaster.add({

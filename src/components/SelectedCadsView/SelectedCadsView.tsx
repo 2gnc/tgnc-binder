@@ -14,7 +14,7 @@ import {
     AccordionItemPanel,
 } from 'react-accessible-accordion';
 
-import { CardInDealT } from '../../models';
+import { CardInDealT, OwnerT, ConditionEnum, UsersDealsT } from '../../models';
 import { selectors as s, actions as a} from '../../state/trade';
 
 import './styles.css';
@@ -28,34 +28,40 @@ export const SelectedCardsView: FC<PropsT> = ({ handleClose }) => {
     let TEXT = '';
     let TOTAL = 0;
 
+    const dispatch = useDispatch();
+    const deals = useSelector(s.cardsInDeals);
+
     const handleCopyList = () => {
         copy(`${TEXT}\n Total: ${TOTAL} rub`);
         handleClose();
     };
 
-    const buildDealString = (item: CardInDealT) => {
-        const { card, quantity } = item;
-        return `${quantity}: ${card.name} (${card.colors.join(',')}) ${card.set}#${card.number} ${card.isFoil ? 'foil' : card.isEtched ? 'etched' : 'non foil'} ${card.lang} - ${tunePrice(card)} rub.`;
+    const handleClear = () => {
+        dispatch(a.flushDeals());
     };
 
-    const handleRemoveItemFromDeal = (card: CardInDealT) => {
+    const buildDealString = (item: CardInDealT) => {
+        const { card, quantity, condition } = item;
+        return `${quantity}: ${card.name} (${card.colors.join(',')}) ${card.set}#${card.number} ${card.isFoil ? 'foil' : card.isEtched ? 'etched' : 'non foil'} ${card.lang} ${condition} - ${tunePrice(card)} rub.`;
+    };
 
+    const handleRemoveItemFromDeal = (card: CardInDealT, owner: string) => {
+        console.log(card);
+        console.log(deals);
     }
 
-    const deals = useSelector(s.cardsInDeals);
-
     const dealsUuids = map(deals, (deal, i) => `${deal.owner}${i}`);
-    const renderTabContent = (cards: Array<CardInDealT>) => map(cards, (item) => {
+    const renderTabContent = (cards: Array<CardInDealT>, owner: string) => map(cards, (item) => {
         return (
             <Flex alignItems='center' justifyContent='space-between' className='dealRow'>
                 <Text>{ buildDealString(item) }</Text>
-                <Button onClick={ () => handleRemoveItemFromDeal(item) } size="m" view="outlined">
+                <Button onClick={ () => handleRemoveItemFromDeal(item, owner) } size="m" view="outlined">
                     <Icon data={ item.quantity > 1 ? Minus : TrashBin } size={ 16 } />
                 </Button>
             </Flex>
         );
     });
-    const rendertabs = () => map([...deals, ...deals, ...deals, ...deals, ...deals, ...deals, ...deals, ...deals, ...deals, ...deals, ...deals,...deals], (deal, i) => {
+    const rendertabs = () => map(deals, (deal, i) => {
         const uuid = `${deal.owner}${i}`;
         const total = deal.cards.reduce((acc, val) => {
             return {
@@ -84,7 +90,7 @@ export const SelectedCardsView: FC<PropsT> = ({ handleClose }) => {
                     </AccordionItemButton>
                 </AccordionItemHeading>
                 <AccordionItemPanel>
-                    { renderTabContent(deal.cards) }
+                    { renderTabContent(deal.cards, deal.owner) }
                 </AccordionItemPanel>
             </AccordionItem>
         );
@@ -96,7 +102,7 @@ export const SelectedCardsView: FC<PropsT> = ({ handleClose }) => {
                 { rendertabs() }
             </Accordion>
             <Flex space='3' justifyContent='center' className='selectedCardsView__buttons'>
-                <Button view='outlined-danger' onClick={ () => false }>Clear</Button>
+                <Button view='outlined-danger' onClick={ handleClear }>Clear</Button>
                 <Button view='normal' onClick={ handleClose }>Close</Button>
             </Flex>
         </div>

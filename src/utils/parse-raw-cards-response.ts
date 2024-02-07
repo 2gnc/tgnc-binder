@@ -1,5 +1,5 @@
-import map from 'lodash/map';
-import { RarityEnum, type CardT, ConditionEnum, TypeEnum, LangEnum, CardThesaurusT, UserCardsT } from '../models';
+import forEach from 'lodash/forEach';
+import { RarityEnum, ConditionEnum, TypeEnum, LangEnum, CardThesaurusT, UserCardsT } from '../models';
 import { mapCardColorToEnum } from './map-card-color-to-enum';
 import { mapCardLangToEnum } from './map-card-lang-to-enum';
 import { buildPeculiarities } from './build-peculiarities';
@@ -7,7 +7,6 @@ import { safeNumParse  } from './safe-parse';
 import uniq from 'lodash/uniq';
 
 export function parseRawCardsResponse(cards: Array<Record<string, string>>, parents: Record<string, string>, owner = ''): {
-    cards: Array<CardT>;
     collections: Array<string>;
     types: Array<string>;
     names: Array<{ name: string; searchBase: string}>;
@@ -21,7 +20,7 @@ export function parseRawCardsResponse(cards: Array<Record<string, string>>, pare
     const allTypes: Array<string> = [];
     const allNames: Array<{ name: string;searchBase: string}> = [];
 
-    const allCards = map(cards, card => {
+    forEach(cards, card => {
         const quantity = safeNumParse(card.quantity);
         const types = card.types ? [...new Set(
             card.types.split(' ')
@@ -66,9 +65,9 @@ export function parseRawCardsResponse(cards: Array<Record<string, string>>, pare
         const id = card.id;
         const tradable = collections.includes('binder');
 
-        const uniqKey = `${card.set}-${number}-${isFoil}-${lang}-${condition}`;
+        const uniqKey = `${card.set}-${number}-${isFoil}-${lang}`;
 
-        cardsThesaurus[uniqKey] = { name, set, setParent, setName, number, edhRank, colors, isEtched, isFoil, isLand, isList, isToken, lang, rarity, usdEtched, usdFoil, usdNonFoil, eurEtched, eurFoil, eurNonFoil, types, keywords, imageUrl, id, perticularities, frameEffects, artist, promoTypes };
+        cardsThesaurus[uniqKey] = { ruName, name, set, setParent, setName, number, edhRank, colors, isEtched, isFoil, isLand, isList, isToken, lang, rarity, usdEtched, usdFoil, usdNonFoil, eurEtched, eurFoil, eurNonFoil, types, keywords, imageUrl, id, perticularities, frameEffects, artist, promoTypes };
         
         if (!userCards[uniqKey]) {
             userCards[uniqKey] = {};
@@ -85,47 +84,9 @@ export function parseRawCardsResponse(cards: Array<Record<string, string>>, pare
             userCards[uniqKey][owner].quantity += quantity;
             userCards[uniqKey][owner].collections = updatedCollections;
         }
-    
-        const parsed: CardT = {
-            name,
-            set,
-            setName,
-            number,
-            edhRank,
-            colors,
-            isFoil,
-            isEtched,
-            isList,
-            isToken,
-            isLand,
-            lang,
-            rarity,
-            quantity,
-            condition,
-            collections,
-            types,
-            keywords,
-            imageUrl,
-            id,
-            perticularities,
-            usdNonFoil,
-            usdFoil, 
-            usdEtched,
-            eurNonFoil,
-            eurFoil, 
-            eurEtched,
-            frameEffects,
-            artist,
-            ruName,
-            promoTypes,
-            setParent,
-        }
-
-        return parsed;
     });
 
     return {
-        cards: allCards,
         collections: [...new Set(allCollections)],
         types: [...new Set(allTypes)],
         names: [...new Set(allNames)],
