@@ -1,4 +1,5 @@
 import React, { type FC } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import map from 'lodash/map';
 import flatMap from 'lodash/flatMap';
 import compact from 'lodash/compact'
@@ -6,6 +7,9 @@ import { Row, Col, Card, Text, Label, Table } from '@gravity-ui/uikit';
 import { TradeCell } from './components/TradeCell';
 import { GalleryCardT, LangEnum } from '../../models';
 import { calculatePrice } from '../../utils/tune-price';
+import { selectors as s } from '../../state/trade';
+import { actions as a } from '../../state/trade';
+import { buildCardThesaurusKey } from '../../state/helpers';
 import foilCover from '../../images/foil-cover.png';
 import flagRu from '../../images/flag_ru.png';
 import flagEn from '../../images/flag_en.png';
@@ -34,7 +38,11 @@ const mapLangEnumToIcon = {
 const GalleryCard: FC<PropsT> = ({ card }) => {
     const { edhRank, imageUrl, name, id, setName, keywords, lang, isFoil, isEtched, number, ruName, promoTypes } = card.card;
     const meta = card.meta;
-    
+
+    const dealKey = buildCardThesaurusKey(card.card)
+    const inDealsQyantity = useSelector(s.addedInDealsQuantity);
+    const thisCardInDeals = inDealsQyantity[dealKey];
+
     const cardCollections = flatMap(map(meta, (metaItem) => {
         return metaItem?.collections
     }));
@@ -59,7 +67,11 @@ const GalleryCard: FC<PropsT> = ({ card }) => {
         },
         {
             id: 'quantity',
-            name: 'Quantity'
+            name: 'Quantity',
+            template: (params: typeof data[0]) => {
+                const inDeal = thisCardInDeals ? thisCardInDeals[params.condition] || 0 : 0;
+                return `${params.quantity - inDeal}`
+            }
         },
         {
             id: 'price',
@@ -70,7 +82,13 @@ const GalleryCard: FC<PropsT> = ({ card }) => {
             name: 'To trade',
             width: 50,
             align: 'right',
-            template: (params: typeof data[0]) => <TradeCell { ...params } />
+            template: (params: typeof data[0]) => {
+                const inDeal = thisCardInDeals ? thisCardInDeals[params.condition] || 0 : 0;
+                const isAvalaible = inDeal < params.quantity;
+                return (
+                    <TradeCell { ...params } avalaible={ isAvalaible } />
+                )
+            }
         }
     ];
 

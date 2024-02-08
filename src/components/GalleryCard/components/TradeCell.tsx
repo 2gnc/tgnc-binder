@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { CopyButton } from '../../CopyButton/CopyButton';
 import { ConditionEnum } from '../../../models';
 import { selectors as s } from '../../../state/gallery';
-import { actions as a } from '../../../state/trade';
+import { actions as a,  selectors as st } from '../../../state/trade';
 
 import './styles.css';
 
@@ -15,17 +15,21 @@ type PropsT = {
     tradable: boolean;
     id: string;
     cardCode: string;
+    avalaible: boolean;
 }
 
-export const TradeCell: FC<PropsT> = ({ id, cardCode, tradable, quantity, condition }) => {
+export const TradeCell: FC<PropsT> = ({ id, cardCode, tradable, condition, avalaible }) => {
     const dispatch = useDispatch();
     const owner = useSelector(s.owner);
 
-    const [avalaibleItems, setAvalaibleItems] = useState(quantity);
+    const inDealsQyantity = useSelector(st.addedInDealsQuantity);
+    const thisCardInDeals = inDealsQyantity[cardCode];
+
+    // const [avalaibleItems, setAvalaibleItems] = useState(quantity);
     
     const onCardClick = () => {
         if (!owner) return;
-        if (!avalaibleItems) return;
+        // if (!avalaibleItems) return;
 
         dispatch(a.addCardToDeal({
             owner,
@@ -40,7 +44,7 @@ export const TradeCell: FC<PropsT> = ({ id, cardCode, tradable, quantity, condit
             content: 'Added to exchange'
         });
 
-        setAvalaibleItems(avalaibleItems - 1);
+        // setAvalaibleItems(avalaibleItems - 1);
     };
 
     if (!tradable) {
@@ -51,7 +55,7 @@ export const TradeCell: FC<PropsT> = ({ id, cardCode, tradable, quantity, condit
 
     return (
         <div className='cardCopyBlock'>
-            <CopyButton id={ id } onClick={ onCardClick } className='cardCopyButton' disabled={ !avalaibleItems } />
+            <CopyButton id={ id } onClick={ onCardClick } className='cardCopyButton' disabled={ !avalaible } />
         </div>
     );
 }

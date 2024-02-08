@@ -1,6 +1,8 @@
 import { createSlice } from '@reduxjs/toolkit';
 import find from 'lodash/find';
 import isEmpty from 'lodash/isEmpty';
+import forEach from 'lodash/forEach';
+import values from 'lodash/values';
 export { selectors } from './selectors';
 import {
     AddCardToDealActionT,
@@ -8,6 +10,7 @@ import {
 } from './actions';
 import { TradeStateT } from './models';
 import { buildCardThesaurusKey } from '../helpers';
+import { ConditionEnum } from '../../models';
 
 const initialState: TradeStateT = {
     dealsByOwners: {},
@@ -29,11 +32,31 @@ const tradeSlice = createSlice({
             }];
 
             const ownerDeals = state.dealsByOwners[owner.name] ? state.dealsByOwners[owner.name]?.concat(data) : data;
+
+            const cardDeals = {...state.dealsByCards[cardKey]};
+            if (isEmpty(cardDeals)) {
+                forEach(values(ConditionEnum), (cond) => {
+                    cardDeals[cond] = {};
+                });
+                cardDeals[condition] = { [owner.name]: 1 }
+            } else {
+                cardDeals[condition] = {
+                    ...state.dealsByCards[cardKey][condition],
+                    [owner.name]: state.dealsByCards[cardKey][condition] ? state.dealsByCards[cardKey][condition][owner.name] + 1 : 1
+                }
+            }
+
             return {
                 ...state,
                 dealsByOwners: {
                     ...state.dealsByOwners,
                     [owner.name]: ownerDeals
+                },
+                dealsByCards: {
+                    ...state.dealsByCards,
+                    [cardKey]: {
+                        ...cardDeals
+                    }
                 }
             }
         },
@@ -46,10 +69,8 @@ const tradeSlice = createSlice({
         },
 
         removeCardFromDeal: (state, { payload }: RemoveCardFromDealActionT): TradeStateT => {
-
             const { owner, card } = payload;
             const { condition } = card;
-
 
             const dealCardKey = buildCardThesaurusKey(card.card);
             let foundIndex = -1;
@@ -72,16 +93,33 @@ const tradeSlice = createSlice({
             } else {
                 ownerDeals.splice(foundIndex, 1);
             }
-            const updatedState = {
+
+            const updatedCradDeals = {
+                ...state.dealsByCards[dealCardKey],
+                [condition]: {
+                    ...state.dealsByCards[dealCardKey][condition]
+                }
+            }
+            if (updatedCradDeals[condition][owner] === 1) {
+                delete updatedCradDeals[condition][owner];
+            } else {
+                updatedCradDeals[condition][owner] -= 1;
+            }
+
+            const updatedState: TradeStateT = {
                 ...state,
-                deals: {
+                dealsByOwners: {
                     ...state.dealsByOwners,
                     [owner]: ownerDeals,
-                }
+                },
+                dealsByCards: {
+                    ...state.dealsByCards,
+                    [dealCardKey]: updatedCradDeals,
+                },
             };
 
-            if (isEmpty(updatedState.deals[owner])) {
-                delete updatedState.deals[owner];
+            if (isEmpty(updatedState.dealsByOwners[owner])) {
+                delete updatedState.dealsByOwners[owner];
             }
 
             return updatedState;

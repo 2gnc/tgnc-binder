@@ -23,6 +23,8 @@ import {
 } from '../../models';
 
 const dealsByOwners = (state: RootState) => state.trade.dealsByOwners;
+const dealsbyCards = (state: RootState) => state.trade.dealsByCards;
+
 const cardsInDeals = createSelector([dealsByOwners, cardsThesaurus], (deals, thesaurus) => {
     const dealCardsKeys = entries(deals);
     const usersDeals: UsersDealsT = [];
@@ -66,9 +68,27 @@ const pickedCardsCount = createSelector([cardsInDeals], (inDeals) => {
     return inDeals.reduce((acc, val) => {
         return acc + val.cards.reduce((acc, val) => acc + val.quantity, 0);
     }, 0);
-})
+});
+
+const addedInDealsQuantity = createSelector([dealsbyCards], (cards) => {
+    const result = {} as Record<string, Record<ConditionEnum, number>>;
+    forEach(entries(cards), ([cardKey, conditions]) => {
+        forEach(entries(conditions), ([condition, deals]) => {
+            let counter = 0;
+            forEach(values(deals), (quantity) => {
+                counter += quantity;
+            });
+            if(!result[cardKey]) {
+                result[cardKey] = {} as Record<ConditionEnum, number>;
+            }
+            result[cardKey][condition as ConditionEnum] = counter;
+        });
+    });
+    return result;
+});
 
 export const selectors = {
     cardsInDeals,
     pickedCardsCount,
+    addedInDealsQuantity,
 };
