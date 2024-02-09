@@ -2,10 +2,11 @@ import React, { type FC, useRef, useState } from 'react';
 import { Text, Button, Link, Icon, Menu, Popup } from '@gravity-ui/uikit';
 import { useSelector, useDispatch } from 'react-redux';
 import { LogoTelegram, Copy, BarsAscendingAlignLeftArrowDown, BarsAscendingAlignLeftArrowUp } from '@gravity-ui/icons';
-import { SortingDirectionEnum, SortingValsEnum, OwnerT } from '../../models';
+import { SortingDirectionEnum, SortingValsEnum } from '../../models';
 import { sortingMenuValues } from '../../constants';
-import { selectors as s, actions as a } from '../../state/gallery';
-import { selectors as ts } from '../../state/trade';
+import { selectors as galleryS } from '../../state/gallery';
+import { selectors as tradeS } from '../../state/trade';
+import { selectors as filtersS, actions as filtersA } from '../../state/filters';
 
 import './styles.css';
 
@@ -21,10 +22,10 @@ export const Footer: FC<PropsT> = ({
     isMobile,
 }) => {
     const dispatch = useDispatch();
-    const filtersCount = useSelector(s.filtersCount);
-    const owner = useSelector(s.owner);
-    const { sortingDirection } = useSelector(s.sorting);
-    const selectionSize = useSelector(ts.pickedCardsCount);
+    const filtersCount = useSelector(filtersS.filtersCount);
+    const owner = useSelector(galleryS.galleryOwner);
+    const { sortingDirection } = useSelector(filtersS.sorting);
+    const selectionSize = useSelector(tradeS.pickedCardsCount);
     const buttonFiltersRef = useRef(null);
     const [isSortingMenuOpen, setSortingMenuOpen] = useState(false);
 
@@ -36,7 +37,7 @@ export const Footer: FC<PropsT> = ({
     };
 
     const onSortingValueSelect = (val: SortingValsEnum) => {
-        dispatch(a.setSorting(val));
+        dispatch(filtersA.setSorting(val));
         closeSortingPanel();
     };
 

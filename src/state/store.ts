@@ -5,7 +5,8 @@ import { FilterParamNameEnum, ColorEnum } from '../models';
 import { updateSearchURL } from './utils/update-search-url';
 
 import cardsReducer from './cards';
-import galleryReducer, { actions as a} from './gallery';
+import filtersReducer, { actions as af} from './filters';
+import galleryReducer, { actions as ag} from './gallery';
 import tradeReducer from './trade';
 
 const filtersChangeMiddleware = createListenerMiddleware();
@@ -13,23 +14,23 @@ const galleryPageLoadedMiddleware = createListenerMiddleware();
 const filtersRemoveMiddleware  = createListenerMiddleware();
 
 filtersChangeMiddleware.startListening({
-    actionCreator: a.setFilter,
+    actionCreator: af.setFilter,
     effect: (action, listenerApi) => {
         const store = listenerApi.getState() as RootState;
-        updateSearchURL(action.payload.filter, store.gallery.filters[action.payload.filter])
+        updateSearchURL(action.payload.filter, store.filters.filters[action.payload.filter])
     },
 });
 
 filtersRemoveMiddleware.startListening({
-    actionCreator: a.removeFilter,
+    actionCreator: af.removeFilter,
     effect: (action, listenerApi) => {
         const store = listenerApi.getState() as RootState;
-        updateSearchURL(action.payload.filter, store.gallery.filters[action.payload.filter])
+        updateSearchURL(action.payload.filter, store.filters.filters[action.payload.filter])
     }
 })
 
 galleryPageLoadedMiddleware.startListening({
-    actionCreator: a.galleryPageLoaded,
+    actionCreator: ag.galleryPageLoaded,
     effect: (_action, { dispatch }) => {
         const urlParams = new URLSearchParams(window.location.search);
         const byColorsSearch = urlParams.get(FilterParamNameEnum.COLOR);
@@ -42,7 +43,7 @@ galleryPageLoadedMiddleware.startListening({
         if (!isNil(byColorsSearch)) {
             const colorFilters = byColorsSearch.split(',') as Array<ColorEnum>;
             colorFilters.forEach((color) => {
-                dispatch(a.setFilter({
+                dispatch(af.setFilter({
                     filter: FilterParamNameEnum.COLOR,
                     value: color
                 }));
@@ -51,7 +52,7 @@ galleryPageLoadedMiddleware.startListening({
         if (!isNil(byTypeSearch)) {
             const typesFilter = byTypeSearch.split(',');
             typesFilter.forEach((value) => {
-                dispatch(a.setFilter({
+                dispatch(af.setFilter({
                     filter: FilterParamNameEnum.TYPE,
                     value
                 }))
@@ -60,26 +61,26 @@ galleryPageLoadedMiddleware.startListening({
         if (!isNil(bySetsSearch)) {
             const setsFilter = bySetsSearch.split(',');
             setsFilter.forEach((value) => {
-                dispatch(a.setFilter({
+                dispatch(af.setFilter({
                     filter: FilterParamNameEnum.SET,
                     value
                 }))
             });
         }
         if (!isNil(byCollectionSearch)) {
-            dispatch(a.setFilter({
+            dispatch(af.setFilter({
                 filter: FilterParamNameEnum.COLLECTION,
                 value: byCollectionSearch,
             }));
         }
         if (!isNil(byLanguageSearch)) {
-            dispatch(a.setFilter({
+            dispatch(af.setFilter({
                 filter: FilterParamNameEnum.LANG,
                 value: byLanguageSearch,
             }));
         }
         if (!isNil(byNameSearch)) {
-            dispatch(a.setFilter({
+            dispatch(af.setFilter({
                 filter: FilterParamNameEnum.NAME,
                 value: byNameSearch,
             }))
@@ -89,6 +90,7 @@ galleryPageLoadedMiddleware.startListening({
 
 const rootReducer = combineReducers({
     cards: cardsReducer,
+    filters: filtersReducer,
     gallery: galleryReducer,
     trade: tradeReducer,
 });
@@ -110,3 +112,9 @@ if (typeof window !== 'undefined') {
     window.store = store;
 }
 export default store;
+
+declare global {
+    interface Window {
+        store: typeof store;
+    }
+}

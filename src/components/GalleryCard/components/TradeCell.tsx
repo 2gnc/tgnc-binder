@@ -3,7 +3,7 @@ import { toaster } from '@gravity-ui/uikit/toaster-singleton';
 import { useSelector, useDispatch } from 'react-redux';
 import { CopyButton } from '../../CopyButton/CopyButton';
 import { ConditionEnum } from '../../../models';
-import { selectors as s } from '../../../state/gallery';
+import { selectors as galleryS } from '../../../state/gallery';
 import { actions as a,  selectors as st } from '../../../state/trade';
 
 import './styles.css';
@@ -20,16 +20,13 @@ type PropsT = {
 
 export const TradeCell: FC<PropsT> = ({ id, cardCode, tradable, condition, avalaible }) => {
     const dispatch = useDispatch();
-    const owner = useSelector(s.owner);
+    const owner = useSelector(galleryS.galleryOwner);
 
     const inDealsQyantity = useSelector(st.addedInDealsQuantity);
     const thisCardInDeals = inDealsQyantity[cardCode];
 
-    // const [avalaibleItems, setAvalaibleItems] = useState(quantity);
-    
     const onCardClick = () => {
         if (!owner) return;
-        // if (!avalaibleItems) return;
 
         dispatch(a.addCardToDeal({
             owner,
@@ -43,8 +40,6 @@ export const TradeCell: FC<PropsT> = ({ id, cardCode, tradable, condition, avala
             type: 'success',
             content: 'Added to exchange'
         });
-
-        // setAvalaibleItems(avalaibleItems - 1);
     };
 
     if (!tradable) {

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import UAParser from 'ua-parser-js';
 import type { HeadFC, PageProps } from 'gatsby';
 import { Container, ThemeProvider, Modal } from '@gravity-ui/uikit';
-import { OwnerT } from '../../models';
+import { FilterParamNameEnum, OwnerT } from '../../models';
 import { SelectedCardsView  } from '../SelectedCadsView/SelectedCadsView';
 
 import CollectionHeader from '../../components/CollectionHeader/CollectionHeader';
@@ -12,7 +12,8 @@ import { Footer } from '../Footer/Footer';
 import { GoUpButton } from '../GoUpButton/GoUpButton';
 
 import { useSelector, useDispatch } from 'react-redux';
-import { actions as a, selectors as s } from '../../state/gallery';
+import { actions as af, selectors as sf } from '../../state/filters';
+import { actions as ag } from '../../state/gallery';
 
 import './gallery.css';
 
@@ -29,12 +30,15 @@ const GalleryPage: React.FC<PropsT> = ({ owner, path }) => {
     const dispatch = useDispatch();
     
     useEffect(() => {
-        dispatch(a.galleryPageLoaded({
-            owner,
+        dispatch(af.setFilter({
+            filter: FilterParamNameEnum.OWNER,
+            value: owner.name,
         }));
+        dispatch(ag.galleryPageLoaded());
+        dispatch(ag.setOwner({ owner }));
     }, []);
     
-    const newFiltredCards = useSelector(s.galleryFiltredCards)
+    const newFiltredCards = useSelector(sf.filtredCards)
 
     // Client side rendering guarantee
     const [isRendered, setIsRendered] = useState(false);

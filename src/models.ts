@@ -177,6 +177,7 @@ export enum FilterParamNameEnum {
     LANG = 'lang',
     SET = 'set',
     NAME = 'name',
+    OWNER = 'owner',
 }
 
 export type SetRawT = {

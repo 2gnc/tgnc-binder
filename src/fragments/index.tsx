@@ -28,6 +28,7 @@ export const IjaCardsQuery = graphql`
         condition
         number
         promo_types
+        ru_name
     }
 `
 
@@ -59,6 +60,7 @@ export const KaplyaCardsQuery = graphql`
         condition
         number
         promo_types
+        ru_name
     }
 `
 
@@ -90,6 +92,7 @@ export const KseniaCardsQuery = graphql`
         condition
         number
         promo_types
+        ru_name
     }
 `
 
@@ -121,6 +124,7 @@ export const MrCardholderCardsQuery = graphql`
         condition
         number
         promo_types
+        ru_name
     }
 `
 
@@ -152,5 +156,6 @@ export const TwoBlueCatsCardsQuery = graphql`
         condition
         number
         promo_types
+        ru_name
     }
 `

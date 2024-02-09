@@ -2,10 +2,10 @@ import React, { type FC } from 'react';
 import { Link } from 'gatsby';
 import { Breadcrumbs, Icon, Button } from '@gravity-ui/uikit';
 import { Receipt } from '@gravity-ui/icons';
-import { OwnerT, SortingValsEnum } from '../../models';
 import logo from '../../images/logo.png';
-import { useSelector, useDispatch } from 'react-redux';
-import { selectors as s } from '../../state/gallery';
+import { useSelector } from 'react-redux';
+import { selectors as sg } from '../../state/gallery';
+import { selectors as filtersSelectors } from '../../state/filters';
 
 import './styles.css';
 
@@ -17,8 +17,8 @@ const CollectionHeader:FC<PropsT> = ({
     isMobile,
     path,
 }) => {
-    const { collection } = useSelector(s.filters);
-    const owner = useSelector(s.owner)
+    const { collection } = useSelector(filtersSelectors.filters);
+    const owner = useSelector(sg.galleryOwner)
     const items = owner ? [
         {
             text: owner.name,
@@ -42,7 +42,7 @@ const CollectionHeader:FC<PropsT> = ({
                     <img src={ logo } className='logoLink' />
                 </Link>
                 <Breadcrumbs
-                    items={items}
+                    items={ items }
                     firstDisplayedItemsCount={0}
                     lastDisplayedItemsCount={2}
                     renderItemDivider={() => '>'}

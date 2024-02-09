@@ -68,7 +68,9 @@ export function parseRawCardsResponse(cards: Array<Record<string, string>>, pare
         const uniqKey = `${card.set}-${number}-${isFoil}-${lang}`;
 
         cardsThesaurus[uniqKey] = { ruName, name, set, setParent, setName, number, edhRank, colors, isEtched, isFoil, isLand, isList, isToken, lang, rarity, usdEtched, usdFoil, usdNonFoil, eurEtched, eurFoil, eurNonFoil, types, keywords, imageUrl, id, perticularities, frameEffects, artist, promoTypes };
-        
+        if (uniqKey === 'iko-39-false-ru') {
+            console.log(card)
+        }
         if (!userCards[uniqKey]) {
             userCards[uniqKey] = {};
             userCards[uniqKey][owner] = {

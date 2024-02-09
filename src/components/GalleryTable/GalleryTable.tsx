@@ -7,7 +7,7 @@ import { InfiniteScroll } from '@gravity-ui/components';
 import GalleryCard from '../GalleryCard/GalleryCard';
 import { GalleryCardT } from '../../models';
 import { sortingMenuValues } from '../../constants';
-import { selectors as s } from '../../state/gallery';
+import { selectors as filtersS } from '../../state/filters';
 
 import './styles.css';
 
@@ -18,7 +18,7 @@ type PropsT = {
 }
 
 const GalleryTable: FC<PropsT> = ({ cards, handleLoadMore, total }) => {
-    const { sortingValue } = useSelector(s.sorting);
+    const { sortingValue } = useSelector(filtersS.sorting);
     if (!size(cards)) {
         return (
             <div className='emptyBox'>

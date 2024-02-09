@@ -4,7 +4,7 @@ import { Row, Col, Text, Select, RadioButton, TextInput, Popup, Menu, Label, Fle
 import map from 'lodash/map';
 import { ColorEnum, TypeEnum, PermamentTypeEnum, SetSearchT, FilterParamNameEnum } from '../../models';
 import { HighlightedSubstring } from '../HighlightedSubstring/HighlightedSubstring';
-import { actions as a, selectors as s } from '../../state/gallery';
+import { actions as filtersA, selectors as filtersS } from '../../state/filters';
 
 import redMana from '../../images/r.png';
 import blackMana from '../../images/b.png';
@@ -55,13 +55,13 @@ const CollectionFilters: FC<PropsT> = ({
         color: colorFilter,
         lang: languageFilter,
         set: setsFilter,
-    } = useSelector(s.filters);
-    const avalaibleLanguages = useSelector(s.avalaibleLanguages);
-    const collections = useSelector(s.userCollections);
-    const setsListSuggest = useSelector(s.setsListSuggest);
-    const spellnameSuggest = useSelector(s.spellNameSuggest);
-    const spellTypeSuggest = useSelector(s.spellTypeSuggest);
-    const { set: setSearch, name: spellnameSearch, type: spellTypeSearch } = useSelector(s.searchValues);
+    } = useSelector(filtersS.filters);
+    const avalaibleLanguages = useSelector(filtersS.avalaibleLanguages);
+    const collections = useSelector(filtersS.userCollections);
+    const setsListSuggest = useSelector(filtersS.setsListSuggest);
+    const spellnameSuggest = useSelector(filtersS.spellNameSuggest);
+    const spellTypeSuggest = useSelector(filtersS.spellTypeSuggest);
+    const { set: setSearch, name: spellnameSearch, type: spellTypeSearch } = useSelector(filtersS.searchValues);
 
     const spellTypeSearchRef = useRef(null);
     const spellNameSearchRef = useRef(null);
@@ -82,9 +82,9 @@ const CollectionFilters: FC<PropsT> = ({
             value: color,
         };
         if (!checked) {
-            dispatch(a.setFilter(payload));
+            dispatch(filtersA.setFilter(payload));
         } else {
-            dispatch(a.removeFilter(payload));
+            dispatch(filtersA.removeFilter(payload));
         }
 
     };
@@ -95,9 +95,9 @@ const CollectionFilters: FC<PropsT> = ({
             value: TypeEnum.LAND,
         }
         if (!checked) {
-            dispatch(a.setFilter(payload));
+            dispatch(filtersA.setFilter(payload));
         } else {
-            dispatch(a.removeFilter(payload));
+            dispatch(filtersA.removeFilter(payload));
         }
     };
     const renderColorCheckboxesList = () => (
@@ -125,7 +125,7 @@ const CollectionFilters: FC<PropsT> = ({
 
     // Language handle -- start
     const handleFilterByLanguage = ([value]: Array<string>) => {
-        dispatch(a.setFilter({
+        dispatch(filtersA.setFilter({
             filter: FilterParamNameEnum.LANG,
             value
         }))
@@ -140,23 +140,23 @@ const CollectionFilters: FC<PropsT> = ({
     const handleSetSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
         const { value } = event.target;
         setSetSuggestOpen(true);
-        dispatch(a.setSearchValue({
+        dispatch(filtersA.setSearchValue({
             entity: FilterParamNameEnum.SET,
             value: value,
         }));
     };
     const onSetSelect = (set: SetSearchT) => {
-        dispatch(a.setSearchValue({
+        dispatch(filtersA.setSearchValue({
             entity: FilterParamNameEnum.SET,
             value: '',
         }));
-        dispatch(a.setFilter({
+        dispatch(filtersA.setFilter({
             filter: FilterParamNameEnum.SET,
             value: set.code,
         }));
     };
     const onSetRemove = (setCode: string) => {
-        dispatch(a.removeFilter({
+        dispatch(filtersA.removeFilter({
             filter: FilterParamNameEnum.SET,
             value: setCode,
         }))
@@ -206,17 +206,17 @@ const CollectionFilters: FC<PropsT> = ({
     const onSpellNameSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
         const { value } = event.target;
         setNameSuggestOpen(true);
-        dispatch(a.setSearchValue({
+        dispatch(filtersA.setSearchValue({
             entity: FilterParamNameEnum.NAME,
             value,
         }))
     };
     const onSpellnameSelect = (name: string) => {
-        dispatch(a.setFilter({
+        dispatch(filtersA.setFilter({
             filter: FilterParamNameEnum.NAME,
             value: name,
         }));
-        dispatch(a.setSearchValue({
+        dispatch(filtersA.setSearchValue({
             entity: FilterParamNameEnum.NAME,
             value: '',
         }))
@@ -231,16 +231,16 @@ const CollectionFilters: FC<PropsT> = ({
     // Spell by name search -- end
 
     const onFiltersFlush = () => {
-        dispatch(a.flushFilters());
+        dispatch(filtersA.flushFilters());
     };
 
     // Spell type search -- start
     const onSpellTypeSelect = (type: string) => {
-        dispatch(a.setFilter({
+        dispatch(filtersA.setFilter({
             filter: FilterParamNameEnum.TYPE,
             value: type,
         }));
-        dispatch(a.setSearchValue({
+        dispatch(filtersA.setSearchValue({
             entity: FilterParamNameEnum.TYPE,
             value: '',
         }));
@@ -256,7 +256,7 @@ const CollectionFilters: FC<PropsT> = ({
         <Label
             key={type}
             type='close'
-            onClose={() => dispatch(a.removeFilter({
+            onClose={() => dispatch(filtersA.removeFilter({
                 filter: FilterParamNameEnum.TYPE,
                 value: type
             }))}
@@ -267,19 +267,19 @@ const CollectionFilters: FC<PropsT> = ({
     const onSpellTypeSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
         const { value } = event.target;
         setTypeSuggestOpen(true);
-        dispatch(a.setSearchValue({
+        dispatch(filtersA.setSearchValue({
             entity: FilterParamNameEnum.TYPE,
             value,
         }));
     }; 
     const onPermanentTypeUpdate = (type: PermamentTypeEnum) => {
         if (type === PermamentTypeEnum.TOKEN) {
-            dispatch(a.setFilter({
+            dispatch(filtersA.setFilter({
                 filter: FilterParamNameEnum.TYPE,
                 value: type,
             }));
         } else {
-            dispatch(a.removeFilter({
+            dispatch(filtersA.removeFilter({
                 filter: FilterParamNameEnum.TYPE,
                 value: PermamentTypeEnum.TOKEN
             }))
@@ -357,7 +357,7 @@ const CollectionFilters: FC<PropsT> = ({
                         }))
                     }
                     onUpdate={([nextValue]) => {
-                        dispatch(a.setFilter({
+                        dispatch(filtersA.setFilter({
                             filter: FilterParamNameEnum.COLLECTION,
                             value: nextValue,
                         }));

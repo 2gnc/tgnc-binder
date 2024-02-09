@@ -5,122 +5,33 @@ import { FilterParamNameEnum, LangEnum, PermamentTypeEnum, SortingValsEnum } fro
 import { ALL } from '../../constants';
 export { selectors } from './selectors';
 import {
-    GalleryPageLoadedActionT,
-    SetCollectionFilterActionT,
-    RemoveCollectionFilterActionT,
-    SetSearchValueActionT,
-    ResetCollectionFilterActionT,
-    SetSoringActionT,
+    SetOwnerActionT,
 } from './actions';
-import { CardsStateT } from './models';
+import { GalleryStateT } from './models';
 
-const initialState: CardsStateT = {
+const initialState: GalleryStateT = {
     owner: null,
-    filters: {
-        [FilterParamNameEnum.COLLECTION]: [ALL],
-        [FilterParamNameEnum.TYPE]: [],
-        [FilterParamNameEnum.COLOR]: [],
-        [FilterParamNameEnum.LANG]: [ALL as LangEnum],
-        [FilterParamNameEnum.SET]: [],
-        [FilterParamNameEnum.NAME]: []
-    },
-    searchValues: {
-        [FilterParamNameEnum.SET]: '',
-        [FilterParamNameEnum.NAME]: '',
-        [FilterParamNameEnum.TYPE]: '',
-    },
-    sorting: SortingValsEnum.NAME_ASC,
 };
 
 // Slice
-const gallerySlice = createSlice({
-  name: 'ownerGallery',
+const filtersSlice = createSlice({
+  name: 'gallery',
   initialState,
   reducers: {
-    galleryPageLoaded: (state, action: GalleryPageLoadedActionT): CardsStateT => {
-        const { owner } = action.payload;
-
+    setOwner: (state, { payload }: SetOwnerActionT): GalleryStateT => {
         return {
             ...state,
-            owner,
-        }
-
-    },
-    setFilter: (state, { payload }: SetCollectionFilterActionT): CardsStateT => {
-        const { filter, value } = payload;
-        let filters = uniq(state.filters[payload.filter]);
-
-        // spell type: card - token
-        const spellTypeValues = Object.values(PermamentTypeEnum);
-        const isSpellTypeFilter = filter === FilterParamNameEnum.TYPE && spellTypeValues.includes(value as PermamentTypeEnum);
-        if (isSpellTypeFilter) {
-            filters = filters.filter((item) => item !== PermamentTypeEnum.CARD && item !== PermamentTypeEnum.TOKEN)
-        };
-
-        const soloFilters = [
-            FilterParamNameEnum.COLLECTION,
-            FilterParamNameEnum.LANG,
-        ];
-        const isSoloFilter = soloFilters.includes(filter);
-        if (isSoloFilter) {
-            filters.length = 0;
-        }
-
-        filters.push(payload.value);
-
-        return {
-            ...state,
-            filters: {
-                ...state.filters,
-                [payload.filter]: [...filters],
-            }
+            owner: payload.owner
         }
     },
-    removeFilter: (state, { payload }: RemoveCollectionFilterActionT): CardsStateT => {
-        return {
-            ...state,
-            filters: {
-                ...state.filters,
-                [payload.filter]: filter(state.filters[payload.filter], (val) => val !== payload.value)
-            }
-        }
-    },
-    resetFilter: (state, { payload }: ResetCollectionFilterActionT): CardsStateT => {
-        return {
-            ...state,
-            filters: {
-                ...state.filters,
-                [payload]: initialState.filters[payload],
-            }
-        }
-    },
-    flushFilters: (state): CardsStateT => {
-        return {
-            ...state,
-            filters: initialState.filters,
-            searchValues: initialState.searchValues,
-        }
-    },
-    setSearchValue: (state, { payload }: SetSearchValueActionT): CardsStateT => {
-        return {
-            ...state,
-            searchValues: {
-                ...state.searchValues,
-                [payload.entity]: payload.value,
-            }
-        }
-    },
-    setSorting: (state, { payload }: SetSoringActionT): CardsStateT => {
-        return {
-            ...state,
-            sorting: payload,
-        }
-    },
+    galleryPageLoaded: (state): GalleryStateT => {
+        return state
+    }
   }
 });
 
 // Reducers
-export default gallerySlice.reducer;
+export default filtersSlice.reducer;
 
 // Actions
-export const actions = gallerySlice.actions;
+export const actions = filtersSlice.actions;

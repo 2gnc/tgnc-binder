@@ -22,8 +22,13 @@ const initialState: CardsStateT = {
         languages: [...Object.values(LangEnum), ALL as LangEnum],
         parentSets: {},
         usersCollections: {},
-    }
+    },
 };
+
+// TODO
+// переименовать в Filters
+// добавить фильтр по пользователю (передавать его в экшенах со страницы галереи)
+// Gallery filters сделать общим, для страницы галереи скрывать или дизейблить фильтр по пользователю
 
 // Slice
 const cardsSlice = createSlice({

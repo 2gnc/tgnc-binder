@@ -8,7 +8,6 @@ import { TradeCell } from './components/TradeCell';
 import { GalleryCardT, LangEnum } from '../../models';
 import { calculatePrice } from '../../utils/tune-price';
 import { selectors as s } from '../../state/trade';
-import { actions as a } from '../../state/trade';
 import { buildCardThesaurusKey } from '../../state/helpers';
 import foilCover from '../../images/foil-cover.png';
 import flagRu from '../../images/flag_ru.png';
