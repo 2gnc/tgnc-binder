@@ -5,6 +5,7 @@ import map from 'lodash/map';
 import { ColorEnum, TypeEnum, PermamentTypeEnum, SetSearchT, FilterParamNameEnum } from '../../models';
 import { HighlightedSubstring } from '../HighlightedSubstring/HighlightedSubstring';
 import { actions as filtersA, selectors as filtersS } from '../../state/filters';
+import { actions as uiA, selectors as uiS } from '../../state/ui';
 
 import redMana from '../../images/r.png';
 import blackMana from '../../images/b.png';
@@ -39,14 +40,10 @@ import './styles.css';
 
 type PropsT = {
     isMobile: boolean;
-    isFiltersVisible: boolean;
-    handleFiltersClose: () => void;
 }
 
 const CollectionFilters: FC<PropsT> = ({
     isMobile,
-    isFiltersVisible,
-    handleFiltersClose,
 }) => {
     const dispatch = useDispatch();
     const {
@@ -56,6 +53,7 @@ const CollectionFilters: FC<PropsT> = ({
         lang: languageFilter,
         set: setsFilter,
     } = useSelector(filtersS.filters);
+    const isFiltersModalOpen = useSelector(uiS.isFiltersModalOpen);
     const avalaibleLanguages = useSelector(filtersS.avalaibleLanguages);
     const collections = useSelector(filtersS.userCollections);
     const setsListSuggest = useSelector(filtersS.setsListSuggest);
@@ -191,15 +189,20 @@ const CollectionFilters: FC<PropsT> = ({
     // UI handle -- start
     const closeTypeSuggest = () => {
         setTypeSuggestOpen(false);
-    }
+    };
 
     const closeSetSuggest = () => {
         setSetSuggestOpen(false);
-    }
+    };
 
     const closeNameSuggest = () => {
         setNameSuggestOpen(false);
-    }
+    };
+
+    const handleFiltersClose = () => {
+        dispatch(uiA.setFiltersModalOpen(false));
+        window?.scrollTo({top: 0, behavior: 'smooth'});
+    };
     // UI handle -- end
 
     // Spell by name search -- start 
@@ -446,7 +449,7 @@ const CollectionFilters: FC<PropsT> = ({
 
     if (isMobile) {
         return (
-            <Modal open={ isFiltersVisible } contentClassName='filtersModal' onClose={ handleFiltersClose }>
+            <Modal open={ isFiltersModalOpen } contentClassName='filtersModal' onClose={ handleFiltersClose }>
                 { renderContent() }
             </Modal>
         )

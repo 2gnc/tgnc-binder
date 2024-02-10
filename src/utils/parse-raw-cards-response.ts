@@ -4,6 +4,7 @@ import { mapCardColorToEnum } from './map-card-color-to-enum';
 import { mapCardLangToEnum } from './map-card-lang-to-enum';
 import { buildPeculiarities } from './build-peculiarities';
 import { safeNumParse  } from './safe-parse';
+import uniqBy from 'lodash/uniqBy';
 import uniq from 'lodash/uniq';
 
 export function parseRawCardsResponse(cards: Array<Record<string, string>>, parents: Record<string, string>, owner = ''): {
@@ -18,7 +19,10 @@ export function parseRawCardsResponse(cards: Array<Record<string, string>>, pare
 
     const allCollections: Array<string> = [];
     const allTypes: Array<string> = [];
-    const allNames: Array<{ name: string;searchBase: string}> = [];
+    const allNames: Array<{
+        name: string;
+        searchBase: string;
+    }> = [];
 
     forEach(cards, card => {
         const quantity = safeNumParse(card.quantity);
@@ -42,10 +46,6 @@ export function parseRawCardsResponse(cards: Array<Record<string, string>>, pare
         const collections = card.collection ? card.collection.split(',').map(col => col.trim().toLowerCase()) : [];
         allCollections.push(...collections);
         allTypes.push(...types);
-        allNames.push({
-            name: card.name,
-            searchBase: `${card.name.toLowerCase()} ${card.ru_name?.toLowerCase()}`
-        });
         const promoTypes = card.promo_types?.split(',').filter((word) => word.length && word !== 'undefined').map(keyword => keyword.trim()) || [];
         const number = parseInt(card.number, 10);
         const condition = card.condition as ConditionEnum;
@@ -65,12 +65,15 @@ export function parseRawCardsResponse(cards: Array<Record<string, string>>, pare
         const id = card.id;
         const tradable = collections.includes('binder');
 
+        allNames.push({
+            name: card.name,
+            searchBase: `${card.name.toLowerCase()} ${ruName.toLowerCase()}`
+        });
+
         const uniqKey = `${card.set}-${number}-${isFoil}-${lang}`;
 
         cardsThesaurus[uniqKey] = { ruName, name, set, setParent, setName, number, edhRank, colors, isEtched, isFoil, isLand, isList, isToken, lang, rarity, usdEtched, usdFoil, usdNonFoil, eurEtched, eurFoil, eurNonFoil, types, keywords, imageUrl, id, perticularities, frameEffects, artist, promoTypes };
-        if (uniqKey === 'iko-39-false-ru') {
-            console.log(card)
-        }
+
         if (!userCards[uniqKey]) {
             userCards[uniqKey] = {};
             userCards[uniqKey][owner] = {
@@ -91,7 +94,7 @@ export function parseRawCardsResponse(cards: Array<Record<string, string>>, pare
     return {
         collections: [...new Set(allCollections)],
         types: [...new Set(allTypes)],
-        names: [...new Set(allNames)],
+        names: uniqBy(allNames, 'name'),
         cardsThesaurus,
         userCards,
     }

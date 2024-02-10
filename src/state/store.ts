@@ -5,9 +5,10 @@ import { FilterParamNameEnum, ColorEnum } from '../models';
 import { updateSearchURL } from './utils/update-search-url';
 
 import cardsReducer from './cards';
+import tradeReducer from './trade';
 import filtersReducer, { actions as af} from './filters';
 import galleryReducer, { actions as ag} from './gallery';
-import tradeReducer from './trade';
+import uiReducer from './ui';
 
 const filtersChangeMiddleware = createListenerMiddleware();
 const galleryPageLoadedMiddleware = createListenerMiddleware();
@@ -93,6 +94,7 @@ const rootReducer = combineReducers({
     filters: filtersReducer,
     gallery: galleryReducer,
     trade: tradeReducer,
+    ui: uiReducer,
 });
 
 const store = configureStore({

@@ -7,18 +7,15 @@ import { sortingMenuValues } from '../../constants';
 import { selectors as galleryS } from '../../state/gallery';
 import { selectors as tradeS } from '../../state/trade';
 import { selectors as filtersS, actions as filtersA } from '../../state/filters';
+import { actions as uiA } from '../../state/ui';
 
 import './styles.css';
 
 type PropsT = React.PropsWithChildren & {
     isMobile: boolean;
-    handleOpenCopyPanel: () => void;
-    handleFilterButtonClick: () => void;
 }
 
 export const Footer: FC<PropsT> = ({
-    handleOpenCopyPanel,
-    handleFilterButtonClick,
     isMobile,
 }) => {
     const dispatch = useDispatch();
@@ -28,6 +25,10 @@ export const Footer: FC<PropsT> = ({
     const selectionSize = useSelector(tradeS.pickedCardsCount);
     const buttonFiltersRef = useRef(null);
     const [isSortingMenuOpen, setSortingMenuOpen] = useState(false);
+
+    const handleTradePanelOpen = () => {
+        dispatch(uiA.setIsTradeModalOpen(true));
+    };
 
     const openSortingPanel = () => {
         setSortingMenuOpen(true);
@@ -48,6 +49,10 @@ export const Footer: FC<PropsT> = ({
             return <Menu.Item  key={ value } onClick={ () => onSortingValueSelect(value) }>{ text }</Menu.Item>
         })
     );
+
+    const handleFilterButtonClick = () => {
+        dispatch(uiA.setFiltersModalOpen(true));
+    }
 
     return (
         <div className='footerBox'>
@@ -74,7 +79,8 @@ export const Footer: FC<PropsT> = ({
                     {!isMobile && <Text>Contact Owner</Text>}
                 </Button>
             </Link>
-            <Button size='l' view='action' onClick={ handleOpenCopyPanel } className={ isMobile ? 'collectionButton_mob' : ''} >
+
+            <Button size='l' view='action' onClick={ handleTradePanelOpen } className={ isMobile ? 'collectionButton_mob' : ''} >
                 <Icon data={ Copy } />
                 <Text>{`${!isMobile ? 'Picked cards:' : ''} ${ selectionSize }`}</Text>
             </Button>

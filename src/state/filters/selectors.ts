@@ -28,7 +28,15 @@ const thesaurus = (state: RootState) => state.cards.thesaurus;
 const filters = (state: RootState) => state.filters.filters;
 const searchValues = (state: RootState) => state.filters.searchValues;
 const sortings = (state: RootState) => state.filters.sorting;
-const filtersCount = createSelector([filters], (filters) => size(filters));
+const filtersCount = createSelector([filters], (filters) => {
+    let count = 0;
+    forEach(filters, (filter) => {
+        if (size(filter) && filter[0] !== ALL) {
+            count += 1;
+        }
+    });
+    return count;
+});
 
 const avalaibleSetTypes = createSelector([thesaurus], (thesaurus) => thesaurus.setTypes);
 const avalaibleLanguages = createSelector([thesaurus], (thesaurus) => thesaurus.languages);

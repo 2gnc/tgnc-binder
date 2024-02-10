@@ -12,8 +12,9 @@ import { Footer } from '../Footer/Footer';
 import { GoUpButton } from '../GoUpButton/GoUpButton';
 
 import { useSelector, useDispatch } from 'react-redux';
-import { actions as af, selectors as sf } from '../../state/filters';
+import { actions as filtersA, selectors as filtersS } from '../../state/filters';
 import { actions as ag } from '../../state/gallery';
+import { actions as uiA, selectors as uiS } from '../../state/ui';
 
 import './gallery.css';
 
@@ -28,9 +29,14 @@ type PropsT = PageProps & {
 
 const GalleryPage: React.FC<PropsT> = ({ owner, path }) => {
     const dispatch = useDispatch();
-    
+    const isTradeModalOpen = useSelector(uiS.isTradeModalOpen);
+
+    const handleCloseTradeModal = () => {
+        dispatch(uiA.setIsTradeModalOpen(false));
+    };
+
     useEffect(() => {
-        dispatch(af.setFilter({
+        dispatch(filtersA.setFilter({
             filter: FilterParamNameEnum.OWNER,
             value: owner.name,
         }));
@@ -38,16 +44,10 @@ const GalleryPage: React.FC<PropsT> = ({ owner, path }) => {
         dispatch(ag.setOwner({ owner }));
     }, []);
     
-    const newFiltredCards = useSelector(sf.filtredCards)
+    const filtredCards = useSelector(filtersS.filtredCards)
 
     // Client side rendering guarantee
     const [isRendered, setIsRendered] = useState(false);
-
-    // Interface state
-    const [isCopyPanelOpen, setCopyPanelOpen] = useState(false);
-
-    // Filters
-    const [isFiltersVisible, setIsFiltersVisible] = useState(false);
     
     // Infinite scroll
     const [currentChunk, setCurrentChunk] = useState(0);
@@ -62,28 +62,12 @@ const GalleryPage: React.FC<PropsT> = ({ owner, path }) => {
     }
 
     const getChunk = () => {
-        return newFiltredCards.slice(0, currentChunk * LOAD_AMOUNT + LOAD_AMOUNT);
+        return filtredCards.slice(0, currentChunk * LOAD_AMOUNT + LOAD_AMOUNT);
     }
 
     useEffect(() => {
         setIsRendered(true);
     }, [])
-
-    const handleFilterButtonClick = () => {
-        setIsFiltersVisible(true);
-    }
-
-    const handleFiltersClose = () => {
-        setIsFiltersVisible(false);
-        window?.scrollTo({top: 0, behavior: 'smooth'});
-    }
-
-    const openCopyPanel = () => {
-        setCopyPanelOpen(true);
-    }
-    const closeCopyPanel = () => {
-        setCopyPanelOpen(false);
-    }
 
     if (!isRendered) {
         return null;
@@ -101,28 +85,24 @@ const GalleryPage: React.FC<PropsT> = ({ owner, path }) => {
                 />
                 <CollectionFilters
                     isMobile={ IS_MOBILE }
-                    handleFiltersClose={ handleFiltersClose }
-                    isFiltersVisible={ isFiltersVisible }
                 />
                 <GalleryTable
                     cards={ getChunk() }
                     handleLoadMore={ handleLoadMore }
-                    total={ newFiltredCards.length }
+                    total={ filtredCards.length }
                 />
                 <Footer
                     isMobile={ IS_MOBILE }
-                    handleOpenCopyPanel={ openCopyPanel}
-                    handleFilterButtonClick={ handleFilterButtonClick }
                 />
             </Container>
             <GoUpButton />
             <Modal
-                open={isCopyPanelOpen}
-                onOutsideClick={ closeCopyPanel }
+                open={ isTradeModalOpen }
+                onOutsideClick={ handleCloseTradeModal }
                 contentClassName='selectedCardsView'
             >
                 <SelectedCardsView
-                    handleClose={ closeCopyPanel }
+                    handleClose={ handleCloseTradeModal }
                 />
             </Modal>
         </ThemeProvider>

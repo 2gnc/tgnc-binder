@@ -1,6 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 import size from 'lodash/size';
 import uniq from 'lodash/uniq';
+import uniqBy from 'lodash/uniqBy';
 import { PopullateCardsActionT, SetIsLoadingActionT } from './actions';
 import { CardsStateT } from './models';
 import { LangEnum } from '../../models';
@@ -24,11 +25,6 @@ const initialState: CardsStateT = {
         usersCollections: {},
     },
 };
-
-// TODO
-// переименовать в Filters
-// добавить фильтр по пользователю (передавать его в экшенах со страницы галереи)
-// Gallery filters сделать общим, для страницы галереи скрывать или дизейблить фильтр по пользователю
 
 // Slice
 const cardsSlice = createSlice({
@@ -79,7 +75,7 @@ const cardsSlice = createSlice({
                 }
             };
 
-            popullapedState.thesaurus.names = uniq(popullapedState.thesaurus.names.concat(names));
+            popullapedState.thesaurus.names = uniqBy(popullapedState.thesaurus.names.concat(names), 'name');
             popullapedState.thesaurus.types = uniq(popullapedState.thesaurus.types.concat(types));
 
             if (!size(popullapedState.thesaurus.setBlocks)) {
