@@ -23,6 +23,7 @@ import {
 import { ALL } from '../../constants';
 import { sortGalleryCards } from '../../utils/sort-cards';
 import { selectors as gallerySelectors } from '../gallery'
+import { buildCardThesaurusKey } from '../helpers';
 
 const thesaurus = (state: RootState) => state.cards.thesaurus;
 const filters = (state: RootState) => state.filters.filters;
@@ -104,8 +105,6 @@ const sorting = createSelector([sortings], (sortings) => {
     };
 });
 
-// const galleryOwner = (state: RootState) => state.gallery.owner;
-
 const cardsThesaurus = (state: RootState) => state.cards.thesaurus.cards;
 const userCollections = createSelector([gallerySelectors.galleryOwner, thesaurus], (owner, thesaurus) => {
     if (!owner) {
@@ -115,45 +114,61 @@ const userCollections = createSelector([gallerySelectors.galleryOwner, thesaurus
 });
 const allCards = (state: RootState) => state.cards.cards;
 
-const ownerCards = createSelector([allCards, gallerySelectors.galleryOwner, cardsThesaurus], (cards, owner, thesaurus) => {
-    const ownername = owner?.name;
-    if (!ownername) return [];
+const ownersCards = createSelector([allCards, cardsThesaurus, filters], (cards, thesaurus, filters) => {
+    const owners = filters.owner;
+    const allUsersCards: Array<{
+        card: CardThesaurusItemT;
+        meta: UserCardMetaT;
+    }> = [];
+
+    if (!size(owners)) {
+        forEach(values(cards), (card, i) => {
+            forEach(values(card), (meta) => {
+                allUsersCards.push({
+                    card: thesaurus[meta.key],
+                    meta
+                })
+            })
+        })
+    } else {
+        forEach(owners, (ownerName) => {
+            const ownerCards = compact(map(values(cards), (item) => {
+                const meta: UserCardMetaT = item[ownerName];
+                if (!meta) return;
+                return {
+                    card: thesaurus[meta.key],
+                    meta,
+                }
+            }));
+            allUsersCards.push(...ownerCards);
+        });
+    }
 
     const hash = {} as Record<string, GalleryCardT>;
 
-    const userCards = compact(map(values(cards), (item) => {
-        const meta: UserCardMetaT = item[ownername];
-        if (!meta) return;
-        return {
-            card: thesaurus[meta.key],
-            meta,
-        }
-    }));
-
-    forEach(userCards, (card) => {
-        const { set, number, lang, isFoil } = card.card;
+    forEach(allUsersCards, (card) => {
         const { condition } = card.meta;
-        const uniqKey = `${set}-${number}-${isFoil}-${lang}`;
+        const uniqKey = buildCardThesaurusKey(card.card);
 
         if (!hash[uniqKey]) {
             hash[uniqKey] = {
                 card: card.card,
                 meta: {
-                    [condition]: card.meta
+                    [condition]: [card.meta]
                 } as GalleryCardMetaT
             }
+        } else if (!hash[uniqKey].meta[condition]) {
+            hash[uniqKey].meta[condition] = [card.meta];
         } else {
-            hash[uniqKey].meta[condition] = card.meta;
+            hash[uniqKey].meta[condition]!.push(card.meta);
         }
     });
 
     return values(hash);
 });
 
-const filtredCards = createSelector([ownerCards, filters, sorting], (ownerCards, filters, sorting) => {
-    // учесть если в фильтрах указан пользователь 
+const filtredCards = createSelector([ownersCards, filters, sorting], (ownerCards, filters, sorting) => {
     const { sortingDirection, sortingValue } = sorting;
-
     const isMatchByColor = (card: GalleryCardT) => {
         if (!size(filters.color)) {
             return true;
@@ -197,7 +212,11 @@ const filtredCards = createSelector([ownerCards, filters, sorting], (ownerCards,
             return true;
         }
         const metas = values(card.meta);
-        const collections = uniq(flatMap(map(metas, meta => meta.collections)));
+        // тут учесть, что это массив
+        const collections: Array<string> = [];
+        forEach(flatMap(metas), (metaItm) => {
+            collections.push(...metaItm.collections);
+        })
 
         return !isEmpty(intersection(collections, filters.collection));
     }
@@ -236,6 +255,6 @@ export const selectors = {
     spellNameSuggest,
     spellTypeSuggest,
     sorting,
-    ownerCards,
+    ownersCards,
     filtredCards,
 };

@@ -1,8 +1,10 @@
 import React, { type FC } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import map from 'lodash/map';
-import flatMap from 'lodash/flatMap';
-import compact from 'lodash/compact'
+import forEach from 'lodash/forEach';
+import entries from 'lodash/entries';
+import compact from 'lodash/compact';
+import uniq from 'lodash/uniq';
 import { Row, Col, Card, Text, Label, Table } from '@gravity-ui/uikit';
 import { TradeCell } from './components/TradeCell';
 import { GalleryCardT, LangEnum } from '../../models';
@@ -35,27 +37,33 @@ const mapLangEnumToIcon = {
 }
 
 const GalleryCard: FC<PropsT> = ({ card }) => {
-    const { edhRank, imageUrl, name, id, setName, keywords, lang, isFoil, isEtched, number, ruName, promoTypes } = card.card;
+    const { edhRank, imageUrl, name, id, setName, keywords, lang, isFoil, isEtched, number, ruName, promoTypes, set } = card.card;
     const meta = card.meta;
 
     const dealKey = buildCardThesaurusKey(card.card)
     const inDealsQyantity = useSelector(s.addedInDealsQuantity);
     const thisCardInDeals = inDealsQyantity[dealKey];
 
-    const cardCollections = flatMap(map(meta, (metaItem) => {
-        return metaItem?.collections
-    }));
+    const cardCollections: Array<string> = [];
+    forEach(entries(meta), ([, usersMetas]) => {
+        forEach(usersMetas, (singleUserMeta) => {
+            cardCollections.push(...singleUserMeta.collections)
+        })
+    });
     
     const calculatedPrice = calculatePrice(card);
 
+    if (set === 'c17' && number === 35) {
+        console.log(meta)
+    }
     const data = map(meta, (metaItem) => {
         return {
-            condition: metaItem!.condition,
-            quantity: metaItem!.quantity,
+            condition: metaItem![0].condition,
+            quantity: metaItem![0].quantity,
             price: `${calculatedPrice} ₽`,
-            tradable: metaItem!.tradable,
+            tradable: metaItem![0].tradable,
             id: card.card.id,
-            cardCode: metaItem!.key
+            cardCode: metaItem![0].key
         }
     });
 
@@ -92,7 +100,7 @@ const GalleryCard: FC<PropsT> = ({ card }) => {
     ];
 
     const renderBinders = () => {
-        const binders = compact(cardCollections).join(', ');
+        const binders = compact(uniq(cardCollections)).join(', ');
         return <Text variant='caption-2'>{ binders }</Text>
     };
 

@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import UAParser from 'ua-parser-js';
 import type { HeadFC, PageProps } from 'gatsby';
 import { Container, ThemeProvider, Modal } from '@gravity-ui/uikit';
 import { FilterParamNameEnum, OwnerT } from '../../models';
@@ -15,11 +14,9 @@ import { useSelector, useDispatch } from 'react-redux';
 import { actions as filtersA, selectors as filtersS } from '../../state/filters';
 import { actions as ag } from '../../state/gallery';
 import { actions as uiA, selectors as uiS } from '../../state/ui';
+import { IS_MOBILE } from '../../utils/is-mobile';
 
 import './gallery.css';
-
-const { device } = new UAParser().getResult();
-const IS_MOBILE = device.type === 'mobile';
 
 const LOAD_AMOUNT = 20;
 
@@ -83,17 +80,13 @@ const GalleryPage: React.FC<PropsT> = ({ owner, path }) => {
                     isMobile={ IS_MOBILE }
                     path={ path }
                 />
-                <CollectionFilters
-                    isMobile={ IS_MOBILE }
-                />
+                <CollectionFilters />
                 <GalleryTable
                     cards={ getChunk() }
                     handleLoadMore={ handleLoadMore }
                     total={ filtredCards.length }
                 />
-                <Footer
-                    isMobile={ IS_MOBILE }
-                />
+                <Footer />
             </Container>
             <GoUpButton />
             <Modal

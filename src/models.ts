@@ -34,7 +34,7 @@ export type CardT = {
     promoTypes: Array<string>;
 }
 
-export type GalleryCardMetaT = Partial<Record<ConditionEnum, UserCardMetaT>>;
+export type GalleryCardMetaT = Partial<Record<ConditionEnum, Array<UserCardMetaT>>>;
 
 export type GalleryCardT = {
     card: CardThesaurusItemT,

@@ -6,6 +6,7 @@ import { ColorEnum, TypeEnum, PermamentTypeEnum, SetSearchT, FilterParamNameEnum
 import { HighlightedSubstring } from '../HighlightedSubstring/HighlightedSubstring';
 import { actions as filtersA, selectors as filtersS } from '../../state/filters';
 import { actions as uiA, selectors as uiS } from '../../state/ui';
+import { IS_MOBILE } from '../../utils/is-mobile';
 
 import redMana from '../../images/r.png';
 import blackMana from '../../images/b.png';
@@ -38,13 +39,9 @@ const permanentTypeOptions = [
 
 import './styles.css';
 
-type PropsT = {
-    isMobile: boolean;
-}
+type PropsT = {}
 
-const CollectionFilters: FC<PropsT> = ({
-    isMobile,
-}) => {
+const CollectionFilters: FC<PropsT> = ({}) => {
     const dispatch = useDispatch();
     const {
         collection: currentCollection,
@@ -292,8 +289,8 @@ const CollectionFilters: FC<PropsT> = ({
 
     const renderContent = () => (
         <>
-        <Row space={isMobile ? '2' : '5'} style={{
-            marginTop: !isMobile ? '45px' : '0'
+        <Row space={IS_MOBILE ? '2' : '5'} style={{
+            marginTop: !IS_MOBILE ? '45px' : '0'
         }}>
             <Col s='12' l='3' className='colorsCol_desktop'>
                 <div className='hidden'>
@@ -315,7 +312,7 @@ const CollectionFilters: FC<PropsT> = ({
                     value={[(languageFilter as unknown as string)]}
                     options={ languageOptions }
                     onUpdate={ handleFilterByLanguage }
-                    size={isMobile ? 'l' : 's'}
+                    size={IS_MOBILE ? 'l' : 's'}
                     className='languagePopup'
                 />
             </Col>
@@ -323,7 +320,7 @@ const CollectionFilters: FC<PropsT> = ({
                 <Text variant='subheader-2' className='filterHeader'>Sets:</Text>
                 <TextInput
                     ref={ setSearchRef }
-                    size={ isMobile ? 'l' : 's' }
+                    size={ IS_MOBILE ? 'l' : 's' }
                     value={ setSearch }
                     onChange={ handleSetSearch }
                     onBlur={ closeSetSuggest }
@@ -365,14 +362,14 @@ const CollectionFilters: FC<PropsT> = ({
                             value: nextValue,
                         }));
                     }}
-                    size={isMobile ? 'l' : 's'}
+                    size={IS_MOBILE ? 'l' : 's'}
                     className='collectionPopup'
                 />
             </Col>
             <Col s='6' l='1'>
                 <Text variant='subheader-2' className='filterHeader'>Card type:</Text>
                 <RadioButton
-                    size={isMobile ? 'l' : 's'}
+                    size={IS_MOBILE ? 'l' : 's'}
                     onUpdate={ onPermanentTypeUpdate }
                     options={ permanentTypeOptions }
                     value={ typesFilter.includes(TypeEnum.TOKEN) ? PermamentTypeEnum.TOKEN : PermamentTypeEnum.CARD }
@@ -382,7 +379,7 @@ const CollectionFilters: FC<PropsT> = ({
                 <Text variant='subheader-2' className='filterHeader'>Spell type:</Text>
                 <TextInput
                     ref={ spellTypeSearchRef }
-                    size={isMobile ? 'l' : 's'}
+                    size={IS_MOBILE ? 'l' : 's'}
                     onChange={ onSpellTypeSearch }
                     value={ spellTypeSearch }
                     onBlur={ closeTypeSuggest }
@@ -409,7 +406,7 @@ const CollectionFilters: FC<PropsT> = ({
                 <Text variant='subheader-2' className='filterHeader'>Spell name:</Text>
                 <TextInput
                     ref={spellNameSearchRef}
-                    size={isMobile ? 'l' : 's'}
+                    size={IS_MOBILE ? 'l' : 's'}
                     onChange={ onSpellNameSearch }
                     value={ spellnameSearch }
                     onBlur={closeNameSuggest}
@@ -428,7 +425,7 @@ const CollectionFilters: FC<PropsT> = ({
             </Col>
         </Row>
         {
-            isMobile && (
+            IS_MOBILE && (
                 <Row space={5}>
                     <Col s={12}>
                         <Flex justifyContent='center' className='buttonRow' >
@@ -447,7 +444,7 @@ const CollectionFilters: FC<PropsT> = ({
         </>
     );
 
-    if (isMobile) {
+    if (IS_MOBILE) {
         return (
             <Modal open={ isFiltersModalOpen } contentClassName='filtersModal' onClose={ handleFiltersClose }>
                 { renderContent() }

@@ -8,16 +8,13 @@ import { selectors as galleryS } from '../../state/gallery';
 import { selectors as tradeS } from '../../state/trade';
 import { selectors as filtersS, actions as filtersA } from '../../state/filters';
 import { actions as uiA } from '../../state/ui';
+import { IS_MOBILE } from '../../utils/is-mobile';
 
 import './styles.css';
 
-type PropsT = React.PropsWithChildren & {
-    isMobile: boolean;
-}
+type PropsT = React.PropsWithChildren & {};
 
-export const Footer: FC<PropsT> = ({
-    isMobile,
-}) => {
+export const Footer: FC<PropsT> = () => {
     const dispatch = useDispatch();
     const filtersCount = useSelector(filtersS.filtersCount);
     const owner = useSelector(galleryS.galleryOwner);
@@ -57,7 +54,7 @@ export const Footer: FC<PropsT> = ({
     return (
         <div className='footerBox'>
             {
-                isMobile && (
+                IS_MOBILE && (
                     <Button size='l' width='auto' view='action' className='filtersButton_mob'
                         onClick={ handleFilterButtonClick }
                     >
@@ -73,16 +70,17 @@ export const Footer: FC<PropsT> = ({
                     { renderSortingMenuItems() }
                 </Menu>
             </Popup>
-            <Link href={ owner!.contactLink } target="_blank" className={ isMobile ? 'contactButton_mob' : ''}>
+            { owner && (
+                <Link href={ owner.contactLink } target="_blank" className={ IS_MOBILE ? 'contactButton_mob' : ''}>
                 <Button size="l" view='action'>
                     <Icon data={ LogoTelegram } />
-                    {!isMobile && <Text>Contact Owner</Text>}
+                    {!IS_MOBILE && <Text>Contact Owner</Text>}
                 </Button>
             </Link>
-
-            <Button size='l' view='action' onClick={ handleTradePanelOpen } className={ isMobile ? 'collectionButton_mob' : ''} >
+            )}
+            <Button size='l' view='action' onClick={ handleTradePanelOpen } className={ IS_MOBILE ? 'collectionButton_mob' : ''} >
                 <Icon data={ Copy } />
-                <Text>{`${!isMobile ? 'Picked cards:' : ''} ${ selectionSize }`}</Text>
+                <Text>{`${!IS_MOBILE ? 'Picked cards:' : ''} ${ selectionSize }`}</Text>
             </Button>
         </div>
     )

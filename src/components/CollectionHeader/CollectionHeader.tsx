@@ -48,14 +48,18 @@ const CollectionHeader:FC<PropsT> = ({
                     renderItemDivider={() => '>'}
                 />
             </div>
-            <a href={`/${owner?.name.toLowerCase()}/trade?collection=${collection}`} target='_blank' className='tradeListLink'>
-                <Button view='raised'>
-                    <Icon data={Receipt} size={16} />
-                </Button>
-            </a>
+            {
+                owner && (
+                <a href={`/${owner?.name.toLowerCase()}/trade?collection=${collection}`} target='_blank' className='tradeListLink'>
+                    <Button view='raised'>
+                        <Icon data={Receipt} size={16} />
+                    </Button>
+                </a>
+                )
+            }
+            
         </div>
     )
-
 }
 
 export default CollectionHeader;
