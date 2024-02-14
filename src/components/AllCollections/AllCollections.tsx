@@ -6,20 +6,33 @@ import CollectionHeader from '../../components/CollectionHeader/CollectionHeader
 import { Footer } from '../Footer/Footer';
 import { IS_MOBILE } from '../../utils/is-mobile';
 import { selectors as filtersS } from '../../state/filters';
+import { AllCollectionsTable } from './components/AllCollectionsTable/AllCollectionsTable';
 
 import './styles.css';
 
 type PropsT = {}
+
+const LOAD_AMOUNT = 10;
 
 export const AllCollections: FC<PropsT> = () => {
     const [isRendered, setIsRendered] = useState(false);
     useEffect(() => {
         setIsRendered(true);
     }, [])
-
     const cards = useSelector(filtersS.filtredCards);
-    const ff = cards.filter(card => card.card.number === 105 && card.card.set === 'ltr')
-    console.log({ff})
+    const [currentChunk, setCurrentChunk] = useState(0);
+    const handleLoadMore = () => {
+        return new Promise<void>((resolve) => {
+            setTimeout(() => {
+                setCurrentChunk(currentChunk +1);
+                resolve();
+            }, 500);
+        })
+    }
+    const getChunk = () => {
+        return cards.slice(0, currentChunk * LOAD_AMOUNT + LOAD_AMOUNT);
+    }
+
     if (!isRendered) {
         return null;
     }
@@ -33,6 +46,7 @@ export const AllCollections: FC<PropsT> = () => {
                 path={ '' }
             />
             <CollectionFilters />
+            <AllCollectionsTable cards={ getChunk() } handleLoadMore={ handleLoadMore } total={cards.length} />
             <Footer />
         </Container>
     )
