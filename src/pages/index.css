@@ -5,4 +5,5 @@
 .g-root {
     --g-color-base-brand: #FF8008;
     --g-color-text-brand-contrast: #fff;
+    --g-color-base-float-heavy: #fff;
 }

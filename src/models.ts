@@ -120,6 +120,7 @@ export enum LangEnum {
     IT = 'it',
     FR = 'fr', // лобавить иконку
     JP = 'jp', // добавить иконку
+    CH = 'ch', 
     OTH = 'oth',
 }
 

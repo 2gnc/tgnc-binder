@@ -12,28 +12,11 @@ import { calculatePrice } from '../../utils/tune-price';
 import { selectors as s } from '../../state/trade';
 import { buildCardThesaurusKey } from '../../state/helpers';
 import foilCover from '../../images/foil-cover.png';
-import flagRu from '../../images/flag_ru.png';
-import flagEn from '../../images/flag_en.png';
-import flagOth from '../../images/flag_oth.png';
-import flagSp from '../../images/flag_sp.png';
-import flagPt from '../../images/flag_portu.png';
-import flagDe from '../../images/flag_de.png';
-import flagIt from '../../images/flag_it.png';
-
+import { Flag } from '../Flag/Flag';
 import './styles.css';
 
 type PropsT = {
     card: GalleryCardT;
-}
-
-const mapLangEnumToIcon = {
-    [LangEnum.EN]: flagEn,
-    [LangEnum.RU]: flagRu,
-    [LangEnum.SP]: flagSp,
-    [LangEnum.PT]: flagPt,
-    [LangEnum.DE]: flagDe,
-    [LangEnum.IT]: flagIt,
-    [LangEnum.OTH]: flagOth,
 }
 
 const GalleryCard: FC<PropsT> = ({ card }) => {
@@ -115,7 +98,7 @@ const GalleryCard: FC<PropsT> = ({ card }) => {
                             height: '100%',
                             borderRadius: '16px',
                         }} />
-                        <img src={ mapLangEnumToIcon[lang] } className='flagIcon' />
+                        <Flag className='flagIcon' lang={lang} />
                         <Text className='textBadge' style={{
                                 backgroundImage: !isEtched && !isFoil ? 'none' : `url(${foilCover})`,
                         }}>

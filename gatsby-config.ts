@@ -15,6 +15,7 @@ const config: GatsbyConfig = {
     DEV_SSR: true
   },
   plugins: [
+    'gatsby-plugin-sass',
     {
       resolve: 'gatsby-source-filesystem',
       options: {
