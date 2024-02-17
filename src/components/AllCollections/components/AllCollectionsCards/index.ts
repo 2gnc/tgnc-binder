@@ -1,0 +1,1 @@
+export { AllCollectionsCards } from './AllCollectionsCards';

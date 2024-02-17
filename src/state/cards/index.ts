@@ -37,6 +37,7 @@ const cardsSlice = createSlice({
                 isLoaded: payload,
             }
         },
+        // cardsPageLoaded: (state) => state,
         popullateCards: (state, { payload }: PopullateCardsActionT): CardsStateT => {
             const { rawCards, rawSets, owner} = payload;
             const { sets, setTypes, setBlocks, codesParents, parentSets } = parseRawSetsResponse(rawSets);

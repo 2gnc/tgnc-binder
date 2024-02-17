@@ -4,7 +4,7 @@ import isNil from 'lodash/isNil';
 import { FilterParamNameEnum, ColorEnum } from '../models';
 import { updateSearchURL } from './utils/update-search-url';
 
-import cardsReducer from './cards';
+import cardsReducer, { actions as cardsA } from './cards';
 import tradeReducer from './trade';
 import filtersReducer, { actions as af} from './filters';
 import galleryReducer, { actions as ag} from './gallery';

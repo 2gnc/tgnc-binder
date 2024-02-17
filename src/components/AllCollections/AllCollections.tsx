@@ -7,6 +7,8 @@ import { Footer } from '../Footer/Footer';
 import { IS_MOBILE } from '../../utils/is-mobile';
 import { selectors as filtersS } from '../../state/filters';
 import { AllCollectionsTable } from './components/AllCollectionsTable/AllCollectionsTable';
+import { actions as galleryA} from '../../state/gallery';
+import { AllCollectionsCards } from './components/AllCollectionsCards';
 
 import './styles.css';
 
@@ -18,7 +20,11 @@ export const AllCollections: FC<PropsT> = () => {
     const [isRendered, setIsRendered] = useState(false);
     useEffect(() => {
         setIsRendered(true);
-    }, [])
+    }, []);
+    const dispatch = useDispatch();
+    useEffect(() => {
+        dispatch(galleryA.galleryPageLoaded());
+    }, []);
     const cards = useSelector(filtersS.filtredCards);
     const [currentChunk, setCurrentChunk] = useState(0);
     const handleLoadMore = () => {
@@ -36,6 +42,11 @@ export const AllCollections: FC<PropsT> = () => {
     if (!isRendered) {
         return null;
     }
+    const cardsListProps = {
+        cards: getChunk(),
+        handleLoadMore: handleLoadMore,
+        total: cards.length
+    }
     return (
         <Container spaceRow={ IS_MOBILE ? '4' : '6' } style={{
             height: '100vh',
@@ -46,7 +57,9 @@ export const AllCollections: FC<PropsT> = () => {
                 path={ '' }
             />
             <CollectionFilters />
-            <AllCollectionsTable cards={ getChunk() } handleLoadMore={ handleLoadMore } total={cards.length} />
+            {
+                IS_MOBILE ? <AllCollectionsCards { ...cardsListProps } /> : <AllCollectionsTable { ...cardsListProps } />
+            }
             <Footer />
         </Container>
     )

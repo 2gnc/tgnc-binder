@@ -1,5 +1,12 @@
-.allCollectionTable {}
+.AllCollectionTable table {
+    width: 100%;
+}
 
 .allCollectionTable__FlagIcon {
     width: 22px;
+}
+
+.AllCollectionTable__InCollectionPrice {
+    color: #666;
+    font-style: italic;
 }
