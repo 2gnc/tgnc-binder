@@ -10,3 +10,7 @@
     color: #666;
     font-style: italic;
 }
+
+.AllCollectionTable__SetTooltip div.yc-action-tooltip__description {
+    color: #333;
+}

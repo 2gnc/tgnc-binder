@@ -53,6 +53,9 @@ export const Footer: FC<PropsT> = () => {
 
     return (
         <div className='footerBox'>
+            <Button size="l" view='action' onClick={ openSortingPanel } ref={ buttonFiltersRef }>
+                <Icon data={ IconSorting } />
+            </Button>
             {
                 IS_MOBILE && (
                     <Button size='l' width='auto' view='action' className='filtersButton_mob'
@@ -62,9 +65,6 @@ export const Footer: FC<PropsT> = () => {
                     </Button>
                 )
             }
-            <Button size="l" view='action' onClick={ openSortingPanel } ref={ buttonFiltersRef }>
-                <Icon data={ IconSorting } />
-            </Button>
             <Popup anchorRef={ buttonFiltersRef } open={ isSortingMenuOpen } onOutsideClick={ closeSortingPanel }>
                 <Menu size='xl'>
                     { renderSortingMenuItems() }

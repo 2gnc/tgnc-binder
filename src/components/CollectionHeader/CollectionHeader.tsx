@@ -14,7 +14,6 @@ type PropsT = {
     path: string;
 }
 const CollectionHeader:FC<PropsT> = ({
-    isMobile,
     path,
 }) => {
     const { collection } = useSelector(filtersSelectors.filters);

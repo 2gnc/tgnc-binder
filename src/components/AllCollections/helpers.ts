@@ -4,12 +4,12 @@ import map from 'lodash/map';
 import { CardThesaurusItemT, UserCardMetaT, GalleryCardT } from '../../models';
 import { calculatePrice } from '../../utils/tune-price';
 
-export const renderCardMainInfo = (card: CardThesaurusItemT) => {
+export const renderCardMainInfo = (card: CardThesaurusItemT, isMobile = false) => {
     const { name, number } = card;
     if (isNaN(number)) {
         return name;
     }
-    return `${name} #${number}`
+    return `${name}${!isMobile ? `#${number}` : ''}`
 };
 
 export const prepareTableData = (cards: Array<GalleryCardT>) => {
