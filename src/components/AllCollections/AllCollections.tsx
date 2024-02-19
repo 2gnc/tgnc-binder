@@ -1,6 +1,6 @@
 import React, { type FC, useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Container, Modal } from '@gravity-ui/uikit';
+import { Container } from '@gravity-ui/uikit';
 import CollectionFilters from '../../components/CollectionFilters/CollectionFilters';
 import CollectionHeader from '../../components/CollectionHeader/CollectionHeader';
 import { Footer } from '../Footer/Footer';
@@ -62,6 +62,6 @@ export const AllCollections: FC<PropsT> = () => {
             }
             <Footer />
         </Container>
-    )
-    return null;
+        
+    );
 }

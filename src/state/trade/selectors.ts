@@ -25,6 +25,8 @@ import {
 const dealsByOwners = (state: RootState) => state.trade.dealsByOwners;
 const dealsbyCards = (state: RootState) => state.trade.dealsByCards;
 
+const orderingCard = (state: RootState) => state.trade.orderingCard;
+
 const cardsInDeals = createSelector([dealsByOwners, cardsThesaurus], (deals, thesaurus) => {
     const dealCardsKeys = entries(deals);
     const usersDeals: UsersDealsT = [];
@@ -91,4 +93,5 @@ export const selectors = {
     cardsInDeals,
     pickedCardsCount,
     addedInDealsQuantity,
+    orderingCard,
 };

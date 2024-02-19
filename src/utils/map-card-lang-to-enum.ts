@@ -20,8 +20,10 @@ export function mapCardLangToEnum(cardlang: string): LangEnum {
             return LangEnum.FR;
         case 'jp':
             return LangEnum.JP;
-        case 'cht':
-                return LangEnum.CH;
+        case 'cs':
+            return LangEnum.CS;
+        case 'ct':
+            return LangEnum.CS;
         default:
             return LangEnum.OTH;
     }

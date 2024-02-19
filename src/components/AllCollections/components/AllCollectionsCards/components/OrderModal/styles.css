@@ -1,0 +1,20 @@
+.OrderModal {
+    width: 90vw;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 12px;
+}
+
+.OrderModal__CardName {
+    padding: 12px 0;
+
+}
+
+.OrderModal__OrderRow {
+    margin-bottom: 4px;
+}
+
+.OrderModal__OrderRow .yc-col {
+    display: flex;
+    align-items: center;
+}

@@ -28,7 +28,7 @@ const mapLangEnumToIcon = {
     [LangEnum.IT]: flagIt,
     [LangEnum.JP]: flagJp,
     [LangEnum.FR]: flagFr,
-    [LangEnum.CH]: flagCh,
+    [LangEnum.CS]: flagCh,
     [LangEnum.OTH]: flagOth,
 }
 

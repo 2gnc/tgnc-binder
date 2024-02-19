@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { Button, Text, Flex, Icon } from '@gravity-ui/uikit';
 import { TrashBin, Minus } from '@gravity-ui/icons';
 import copy from 'copy-to-clipboard';
+import { nanoid } from 'nanoid';
 import { tunePrice } from '../../utils/tune-price';
 
 import {
@@ -55,7 +56,7 @@ export const SelectedCardsView: FC<PropsT> = ({ handleClose }) => {
     const dealsUuids = map(deals, (deal, i) => `${deal.owner}${i}`);
     const renderTabContent = (cards: Array<CardInDealT>, owner: string) => map(cards, (item) => {
         return (
-            <Flex alignItems='center' justifyContent='space-between' className='dealRow' key={ item.card.id}>
+            <Flex alignItems='center' justifyContent='space-between' className='dealRow' key={ nanoid() }>
                 <Text>{ buildDealString(item) }</Text>
                 <Button onClick={ () => handleRemoveItemFromDeal(item, owner) } size="m" view="outlined">
                     <Icon data={ item.quantity > 1 ? Minus : TrashBin } size={ 16 } />
@@ -80,7 +81,7 @@ export const SelectedCardsView: FC<PropsT> = ({ handleClose }) => {
         TOTAL += total.summ;
 
         return (
-            <AccordionItem uuid={ uuid } className=''>
+            <AccordionItem uuid={ uuid } className='' key={ nanoid() }>
                 <AccordionItemHeading>
                     <AccordionItemButton>
                         <div>

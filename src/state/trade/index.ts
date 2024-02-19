@@ -6,15 +6,26 @@ import values from 'lodash/values';
 export { selectors } from './selectors';
 import {
     AddCardToDealActionT,
-    RemoveCardFromDealActionT
+    RemoveCardFromDealActionT,
+    SetOrderingCardActionT,
+    RequestTradeActionT,
 } from './actions';
-import { TradeStateT } from './models';
+import { TradeStateT, DealByCardT } from './models';
 import { buildCardThesaurusKey } from '../helpers';
-import { ConditionEnum } from '../../models';
+import { ConditionEnum, OwnerT } from '../../models';
+
+type DataT = [{
+    key: string;
+    quantity: number;
+    condition: ConditionEnum;
+}]
 
 const initialState: TradeStateT = {
     dealsByOwners: {},
     dealsByCards: {},
+    requestsByOwners: {},
+    requestsByCards: {},
+    orderingCard: null,
 }
 
 // Slice
@@ -22,35 +33,30 @@ const tradeSlice = createSlice({
     name: 'trade',
     initialState,
     reducers: {
+        setOrderingCard: (state, { payload }: SetOrderingCardActionT): TradeStateT => {
+            return {
+                ...state,
+                orderingCard: payload,
+            }
+        },
         addCardToDeal: (state, { payload }: AddCardToDealActionT): TradeStateT => {
             const { owner, cardKey, condition } = payload;
 
-            const data = [{
+            const data: DataT = [{
                 key: cardKey,
                 quantity: 1,
                 condition,
             }];
 
-            const ownerDeals = state.dealsByOwners[owner.name] ? state.dealsByOwners[owner.name]?.concat(data) : data;
-
-            const cardDeals = {...state.dealsByCards[cardKey]};
-            if (isEmpty(cardDeals)) {
-                forEach(values(ConditionEnum), (cond) => {
-                    cardDeals[cond] = {};
-                });
-                cardDeals[condition] = { [owner.name]: 1 }
-            } else {
-                cardDeals[condition] = {
-                    ...state.dealsByCards[cardKey][condition],
-                    [owner.name]: state.dealsByCards[cardKey][condition] ? state.dealsByCards[cardKey][condition][owner.name] + 1 : 1
-                }
-            }
+            const ownerDeals = state.dealsByOwners[owner] ? state.dealsByOwners[owner]?.concat(data) : data;
+            
+            const cardDeals = buildByCardsData(state.dealsByCards[cardKey], owner, data);
 
             return {
                 ...state,
                 dealsByOwners: {
                     ...state.dealsByOwners,
-                    [owner.name]: ownerDeals
+                    [owner]: ownerDeals
                 },
                 dealsByCards: {
                     ...state.dealsByCards,
@@ -60,11 +66,45 @@ const tradeSlice = createSlice({
                 }
             }
         },
+        addCardToRequest: (state, { payload }: RequestTradeActionT): TradeStateT => {
+            const { owner, cardKey, condition } = payload;
+
+            const data: DataT = [{
+                key: cardKey,
+                quantity: 1,
+                condition,
+            }];
+
+            const ownerRequests = state.requestsByOwners[owner] ? state.requestsByOwners[owner]?.concat(data) : data;
+            const cardRequests = buildByCardsData(state.requestsByCards[cardKey], owner, data);
+
+            return {
+                ...state,
+                requestsByOwners: {
+                    ...state.requestsByOwners,
+                    [owner]: ownerRequests,
+                },
+                requestsByCards: {
+                    ...state.requestsByCards,
+                    [cardKey]: {
+                        ...cardRequests
+                    }
+                }
+            }
+        },
         flushDeals: (state): TradeStateT => {
             return {
                 ...state,
                 dealsByOwners: initialState.dealsByOwners,
                 dealsByCards: initialState.dealsByCards,
+            }
+        },
+
+        flushRequests: (state): TradeStateT => {
+            return {
+                ...state,
+                requestsByCards: initialState.requestsByCards,
+                requestsByOwners: initialState.requestsByOwners,
             }
         },
 
@@ -132,3 +172,21 @@ export default tradeSlice.reducer;
 
 // Actions
 export const actions = tradeSlice.actions;
+
+function buildByCardsData(deals: DealByCardT, owner: string, data: DataT ): DealByCardT {
+    const cardDeals = {...deals};
+    const [{ condition, quantity, key }] = data;
+
+    if (isEmpty(cardDeals)) {
+        forEach(values(ConditionEnum), (cond) => {
+            cardDeals[cond] = {} as DealByCardT;
+        });
+        cardDeals[condition] = { [owner]: 1 }
+    } else {
+        cardDeals[condition] = {
+            ...deals[condition],
+            [owner]: deals[condition] ? deals[condition][owner] + 1 : 1
+        }
+    }
+    return cardDeals;
+}

@@ -2,7 +2,7 @@ import React, { type FC } from 'react';
 import size from 'lodash/size';
 import find from 'lodash/find';
 import { useSelector } from 'react-redux';
-import { Row, Text, Col } from '@gravity-ui/uikit';
+import { Row, Text } from '@gravity-ui/uikit';
 import { InfiniteScroll } from '@gravity-ui/components';
 import GalleryCard from '../GalleryCard/GalleryCard';
 import { GalleryCardT } from '../../models';

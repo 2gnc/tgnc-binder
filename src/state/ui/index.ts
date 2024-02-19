@@ -3,12 +3,14 @@ export { selectors } from './selectors';
 import {
     SetIsFilterModalOpenActionT,
     SetIsTradeModalOpenActionT,
+    SetIsOrderModalOpenActionT,
 } from './actions';
 import { UiStateT } from './models';
 
 const initialState: UiStateT = {
     isFiltersModalOpen: false,
     isTradeModalOpen: false,
+    isOrderModalOpen: false,
 };
 
 // Slice
@@ -26,6 +28,12 @@ const uiSlice = createSlice({
         return {
             ...state,
             isTradeModalOpen: payload,
+        }
+    },
+    setIsOrderModalOpen: (state, { payload }: SetIsOrderModalOpenActionT) => {
+        return {
+            ...state,
+            isOrderModalOpen: payload,
         }
     },
   }

@@ -8,8 +8,12 @@ const isFiltersModalOpen = createSelector([uiState], (ui) => {
 const isTradeModalOpen = createSelector([uiState], (ui) => {
     return ui.isTradeModalOpen;
 });
+const isOrderModalOpen = createSelector([uiState], (ui) => {
+    return ui.isOrderModalOpen;
+});
 
 export const selectors = {
     isFiltersModalOpen,
     isTradeModalOpen,
+    isOrderModalOpen,
 };

@@ -1,18 +1,22 @@
-import React, { type FC } from 'react';
+import React, { type FC, memo } from 'react';
+import { useDispatch } from 'react-redux';
 import size from 'lodash/size';
 import map from 'lodash/map';
 import isEmpty from 'lodash/isEmpty';
 import entries from 'lodash/entries';
 import cn from 'classnames';
+import { nanoid } from 'nanoid';
 import { Link } from 'gatsby';
 import { Text, Card, Row, Col, Label, Icon } from '@gravity-ui/uikit';
 import { TagRuble, ShoppingCart, Person, Lock, Layers } from '@gravity-ui/icons';
 import { InfiniteScroll } from '@gravity-ui/components';
-import { nanoid } from 'nanoid';
-import { GalleryCardT } from '../../../../models';
 import { CardCell, SetCell, LangCell } from '../AllCollectionsTable/cells';
 import { RarityIcon } from '../AllCollectionsTable/RarityIcon';
+import { GalleryCardT } from '../../../../models';
 import { calculatePrice } from '../../../../utils/tune-price';
+import { actions as uiA, selectors as uiS } from '../../../../state/ui';
+import { actions as tradeA } from '../../../../state/trade';
+import { OrderModal } from './components/OrderModal';
 
 import './styles.css';
 
@@ -22,12 +26,13 @@ type PropsT = {
     total: number;
 }
 
-export const AllCollectionsCards:FC<PropsT> = ({
+export const AllCollectionsCards:FC<PropsT> = memo(({
     cards,
     handleLoadMore,
     total,
 }) => {
-    console.log(cards)
+    const dispatch = useDispatch();
+
     if (!size(cards)) {
         return (
             <div className='emptyBox'>
@@ -35,6 +40,12 @@ export const AllCollectionsCards:FC<PropsT> = ({
             </div>
         );
     }
+
+    const onCardTradeRowClick = (card: Nullable<GalleryCardT>) => {
+        dispatch(uiA.setIsOrderModalOpen(true));
+        dispatch(tradeA.setOrderingCard(card));
+    };
+
     const renderPerticularities = (str: string) => {
         if (isEmpty(str)) {
             return null;
@@ -108,10 +119,16 @@ export const AllCollectionsCards:FC<PropsT> = ({
                                                                                 { data.userName }
                                                                             </Link>
                                                                         </Col>
-                                                                        <Col s={ 1 }>{ data.tradable ? data.quantity : '-' }</Col>
-                                                                        <Col s={ 2 }>{ data.tradable ? calculatePrice(item) : '-' }</Col>
-                                                                        <Col s={ 1 }>{ !data.tradable ? data.quantity : '-' }</Col>
-                                                                        <Col s={ 2 }>{ !data.tradable ? calculatePrice(item) : '-' }</Col>
+                                                                        <Col s={6}>
+                                                                            <div onClick={() => onCardTradeRowClick(item)}>
+                                                                                <Row space={0}>
+                                                                                    <Col s={ 2 }>{ data.tradable ? data.quantity : '-' }</Col>
+                                                                                    <Col s={ 4 }>{ data.tradable ? calculatePrice(item) : '-' }</Col>
+                                                                                    <Col s={ 2 }>{ !data.tradable ? data.quantity : '-' }</Col>
+                                                                                    <Col s={ 4 }>{ !data.tradable ? calculatePrice(item) : '-' }</Col>
+                                                                                </Row>
+                                                                            </div>
+                                                                        </Col>
                                                                     </Row>
                                                                 )
                                                             })
@@ -128,6 +145,7 @@ export const AllCollectionsCards:FC<PropsT> = ({
                 })
             }
             </InfiniteScroll>
+            <OrderModal />
         </div>
     );
-}
+});
