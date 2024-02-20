@@ -8,7 +8,8 @@ export type AddCardToDealActionT = PayloadAction<{
 }>;
 
 export type RemoveCardFromDealActionT = PayloadAction<{
-    card: CardInDealT,
+    key: string;
+    condition: ConditionEnum;   
     owner: string;
 }>;
 

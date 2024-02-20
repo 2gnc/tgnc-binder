@@ -8,7 +8,7 @@ import cn from 'classnames';
 import { nanoid } from 'nanoid';
 import { Link } from 'gatsby';
 import { Text, Card, Row, Col, Label, Icon } from '@gravity-ui/uikit';
-import { TagRuble, ShoppingCart, Person, Lock, Layers } from '@gravity-ui/icons';
+import { TagRuble, ArrowRightArrowLeft, Person, Lock, Layers } from '@gravity-ui/icons';
 import { InfiniteScroll } from '@gravity-ui/components';
 import { CardCell, SetCell, LangCell } from '../AllCollectionsTable/cells';
 import { RarityIcon } from '../AllCollectionsTable/RarityIcon';
@@ -97,7 +97,7 @@ export const AllCollectionsCards:FC<PropsT> = memo(({
                                         <Col s={ 11 }>
                                             <Row space={ 0 }>
                                                 <Col s={ 6 }><Icon data={ Person } /></Col>
-                                                <Col s={ 1 } style={{ color: 'green'}}><Icon data={ ShoppingCart } /></Col>
+                                                <Col s={ 1 } style={{ color: 'green'}}><Icon data={ ArrowRightArrowLeft } /></Col>
                                                 <Col s={ 2 } style={{ color: 'green'}}><Icon data={ TagRuble } /></Col>
                                                 <Col s={ 1 } style={{ color: 'red'}}><Icon data={ Lock } /></Col>
                                                 <Col s={ 2 } style={{ color: 'red'}}><Icon data={ TagRuble } /></Col>

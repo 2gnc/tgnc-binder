@@ -109,15 +109,13 @@ const tradeSlice = createSlice({
         },
 
         removeCardFromDeal: (state, { payload }: RemoveCardFromDealActionT): TradeStateT => {
-            const { owner, card } = payload;
-            const { condition } = card;
+            const { owner, key, condition } = payload;
 
-            const dealCardKey = buildCardThesaurusKey(card.card);
             let foundIndex = -1;
             const ownerDeals = [...state.dealsByOwners[owner]];
 
             const tradeItem = find(ownerDeals, (deal, i) => {
-                const match = deal.key === dealCardKey && deal.condition === condition;
+                const match = deal.key === key && deal.condition === condition;
                 if (match) {
                     foundIndex = i;
                 }
@@ -135,9 +133,9 @@ const tradeSlice = createSlice({
             }
 
             const updatedCradDeals = {
-                ...state.dealsByCards[dealCardKey],
+                ...state.dealsByCards[key],
                 [condition]: {
-                    ...state.dealsByCards[dealCardKey][condition]
+                    ...state.dealsByCards[key][condition]
                 }
             }
             if (updatedCradDeals[condition][owner] === 1) {
@@ -154,7 +152,7 @@ const tradeSlice = createSlice({
                 },
                 dealsByCards: {
                     ...state.dealsByCards,
-                    [dealCardKey]: updatedCradDeals,
+                    [key]: updatedCradDeals,
                 },
             };
 
@@ -177,6 +175,7 @@ function buildByCardsData(deals: DealByCardT, owner: string, data: DataT ): Deal
     const cardDeals = {...deals};
     const [{ condition, quantity, key }] = data;
 
+
     if (isEmpty(cardDeals)) {
         forEach(values(ConditionEnum), (cond) => {
             cardDeals[cond] = {} as DealByCardT;
@@ -185,7 +184,7 @@ function buildByCardsData(deals: DealByCardT, owner: string, data: DataT ): Deal
     } else {
         cardDeals[condition] = {
             ...deals[condition],
-            [owner]: deals[condition] ? deals[condition][owner] + 1 : 1
+            [owner]: deals[condition][owner] ? deals[condition][owner] + 1 : 1
         }
     }
     return cardDeals;

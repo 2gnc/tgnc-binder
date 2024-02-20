@@ -7,11 +7,13 @@ import map from 'lodash/map';
 import size from 'lodash/size';
 import { nanoid } from 'nanoid';
 import { Modal, Text, Flex, Row, Col, Button, Icon } from '@gravity-ui/uikit';
-import { CirclePlus, CircleMinus, CircleQuestion } from '@gravity-ui/icons';
+import { CircleQuestion } from '@gravity-ui/icons';
+import { AddToDeal } from '../AddToDeal';
 import { actions as uiA, selectors as uiS } from '../../../../../../state/ui';
 import { actions as tradeA, selectors as tradeS } from '../../../../../../state/trade';
 import { ConditionEnum, UserCardMetaT } from '../../../../../../models';
 import { calculatePrice } from '../../../../../../utils/tune-price';
+import { buildCardThesaurusKey } from '../../../../../../state/helpers';
 
 import './styles.css';
 
@@ -21,10 +23,13 @@ export const OrderModal: FC<PropsT> = () => {
     const isModalOpen = useSelector(uiS.isOrderModalOpen);
     const dispatch = useDispatch();
     const card = useSelector(tradeS.orderingCard);
-
+    const cardsRequests = useSelector(tradeS.requestsByCards);
+    
     if (isNil(card)) {
         return null;
     }
+    const dealKey = buildCardThesaurusKey(card.card);
+    const thisCardRequests = cardsRequests[dealKey];
 
     const tradable: Array<UserCardMetaT> = [];
     const nonTradable: Array<UserCardMetaT> = [];
@@ -57,26 +62,15 @@ export const OrderModal: FC<PropsT> = () => {
             }));
         };
 
-        const handleAddToDeal = (owner: string, condition: ConditionEnum, cardKey: string) => {
-            dispatch(tradeA.addCardToDeal({
-                owner,
-                cardKey,
-                condition,
-            }));
+        const renderRequestBtn = (owner: string, condition: ConditionEnum, cardKey: string) => {
+            const isRequested = !isNil(thisCardRequests?.[condition]?.[owner]);
+            return (
+                <Button onClick={() => handleRequestDeal(owner, condition, cardKey)} view='outlined' disabled={ isRequested }>
+                    <Icon data={ CircleQuestion }/>
+                    {isRequested ? 'Requested' : 'Request'}
+                </Button>
+            );
         };
-
-        const renderRequestBtn = (owner: string, condition: ConditionEnum, cardKey: string) => (
-            <Button onClick={() => handleRequestDeal(owner, condition, cardKey)} view='outlined'>
-                <Icon data={ CircleQuestion }/>
-                Request
-            </Button>
-        );
-
-        const renderAddToDealBtn = (owner: string, condition: ConditionEnum, cardKey: string) => (
-            <Button onClick={() => handleAddToDeal(owner, condition, cardKey)} view='outlined'>
-                <Icon data={ CirclePlus }/>
-            </Button>
-        );
 
         return (
             <>
@@ -86,10 +80,15 @@ export const OrderModal: FC<PropsT> = () => {
                         <Row space={ 0 } key={ nanoid() } className='OrderModal__OrderRow'>
                             <Col s={ 1 }>{ meta.condition }</Col>
                             <Col s={ 4 }>{ meta.userName }</Col>
-                            <Col s={ 1 }>{ meta.quantity }</Col>
+                            <Col s={ 1 }>{ !tradable && meta.quantity }</Col>
                             <Col s={ 2 }>{ `${calculatePrice(card)}₽` }</Col>
-                            <Col s={ 3 }>{ tradable
-                                    ? renderAddToDealBtn(meta.userName, meta.condition, meta.key)
+                            <Col s={ 4 }>{ tradable
+                                    ? <AddToDeal
+                                        owner={ meta.userName }
+                                        condition={ meta.condition }
+                                        cardKey={ meta.key }
+                                        quantity={ meta.quantity }
+                                    />
                                     : renderRequestBtn(meta.userName, meta.condition, meta.key)
                                 }
                             </Col>

@@ -23,7 +23,7 @@ const GalleryCard: FC<PropsT> = ({ card }) => {
     const { edhRank, imageUrl, name, id, setName, keywords, lang, isFoil, isEtched, number, ruName, promoTypes, set } = card.card;
     const meta = card.meta;
 
-    const dealKey = buildCardThesaurusKey(card.card)
+    const dealKey = buildCardThesaurusKey(card.card);
     const inDealsQyantity = useSelector(s.addedInDealsQuantity);
     const thisCardInDeals = inDealsQyantity[dealKey];
 

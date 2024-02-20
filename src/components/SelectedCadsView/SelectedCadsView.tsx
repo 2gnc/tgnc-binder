@@ -6,6 +6,7 @@ import { TrashBin, Minus } from '@gravity-ui/icons';
 import copy from 'copy-to-clipboard';
 import { nanoid } from 'nanoid';
 import { tunePrice } from '../../utils/tune-price';
+import { buildCardThesaurusKey } from '../../state/helpers';
 
 import {
     Accordion,
@@ -48,8 +49,9 @@ export const SelectedCardsView: FC<PropsT> = ({ handleClose }) => {
 
     const handleRemoveItemFromDeal = (card: CardInDealT, owner: string) => {
         dispatch(a.removeCardFromDeal({
-            card,
-            owner
+            key: buildCardThesaurusKey(card.card),
+            owner,
+            condition: card.condition
         }))
     }
 

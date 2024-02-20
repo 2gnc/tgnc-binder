@@ -22,8 +22,12 @@ import {
     GalleryCardMetaT,
 } from '../../models';
 
+import { DealByCardT } from './models';
+
 const dealsByOwners = (state: RootState) => state.trade.dealsByOwners;
+const requestsByOwners = (state: RootState) => state.trade.requestsByOwners;
 const dealsbyCards = (state: RootState) => state.trade.dealsByCards;
+const requestsByCards = (state: RootState) => state.trade.requestsByCards;
 
 const orderingCard = (state: RootState) => state.trade.orderingCard;
 
@@ -73,6 +77,19 @@ const pickedCardsCount = createSelector([cardsInDeals], (inDeals) => {
 });
 
 const addedInDealsQuantity = createSelector([dealsbyCards], (cards) => {
+    return calculateInDealsCards(cards);
+});
+
+export const selectors = {
+    cardsInDeals,
+    pickedCardsCount,
+    addedInDealsQuantity,
+    orderingCard,
+    requestsByCards,
+    dealsbyCards,
+};
+
+function calculateInDealsCards(cards: Record<string, DealByCardT>): Record<string, Record<ConditionEnum, number>> {
     const result = {} as Record<string, Record<ConditionEnum, number>>;
     forEach(entries(cards), ([cardKey, conditions]) => {
         forEach(entries(conditions), ([condition, deals]) => {
@@ -87,11 +104,4 @@ const addedInDealsQuantity = createSelector([dealsbyCards], (cards) => {
         });
     });
     return result;
-});
-
-export const selectors = {
-    cardsInDeals,
-    pickedCardsCount,
-    addedInDealsQuantity,
-    orderingCard,
-};
+}
