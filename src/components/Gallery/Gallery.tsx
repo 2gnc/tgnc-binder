@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import type { HeadFC, PageProps } from 'gatsby';
 import { Container, ThemeProvider, Modal } from '@gravity-ui/uikit';
 import { FilterParamNameEnum, OwnerT } from '../../models';
-import { SelectedCardsView  } from '../SelectedCadsView/SelectedCadsView';
+import { TradePanel  } from '../TradePanel/TradePanel';
 
 import CollectionHeader from '../../components/CollectionHeader/CollectionHeader';
 import CollectionFilters from '../../components/CollectionFilters/CollectionFilters';
@@ -13,7 +13,6 @@ import { GoUpButton } from '../GoUpButton/GoUpButton';
 import { useSelector, useDispatch } from 'react-redux';
 import { actions as filtersA, selectors as filtersS } from '../../state/filters';
 import { actions as ag } from '../../state/gallery';
-import { actions as uiA, selectors as uiS } from '../../state/ui';
 import { IS_MOBILE } from '../../utils/is-mobile';
 
 import './gallery.css';
@@ -26,11 +25,6 @@ type PropsT = PageProps & {
 
 const GalleryPage: React.FC<PropsT> = ({ owner, path }) => {
     const dispatch = useDispatch();
-    const isTradeModalOpen = useSelector(uiS.isTradeModalOpen);
-
-    const handleCloseTradeModal = () => {
-        dispatch(uiA.setIsTradeModalOpen(false));
-    };
 
     useEffect(() => {
         dispatch(filtersA.setFilter({
@@ -89,15 +83,7 @@ const GalleryPage: React.FC<PropsT> = ({ owner, path }) => {
                 <Footer />
             </Container>
             <GoUpButton />
-            <Modal
-                open={ isTradeModalOpen }
-                onOutsideClick={ handleCloseTradeModal }
-                contentClassName='selectedCardsView'
-            >
-                <SelectedCardsView
-                    handleClose={ handleCloseTradeModal }
-                />
-            </Modal>
+            <TradePanel />
         </ThemeProvider>
     );
 }

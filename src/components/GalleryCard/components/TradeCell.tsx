@@ -29,7 +29,7 @@ export const TradeCell: FC<PropsT> = ({ id, cardCode, tradable, condition, avala
         if (!owner) return;
 
         dispatch(a.addCardToDeal({
-            owner,
+            owner: owner.name,
             cardKey: cardCode,
             condition,
         }));

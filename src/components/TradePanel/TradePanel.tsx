@@ -1,7 +1,7 @@
 import React, { type FC } from 'react';
 import map from 'lodash/map';
 import { useSelector, useDispatch } from 'react-redux';
-import { Button, Text, Flex, Icon } from '@gravity-ui/uikit';
+import { Button, Text, Flex, Icon, Modal } from '@gravity-ui/uikit';
 import { TrashBin, Minus } from '@gravity-ui/icons';
 import copy from 'copy-to-clipboard';
 import { nanoid } from 'nanoid';
@@ -18,24 +18,27 @@ import {
 
 import { CardInDealT } from '../../models';
 import { selectors as s, actions as a} from '../../state/trade';
+import { actions as uiA, selectors as uiS } from '../../state/ui';
 
 import './styles.css';
 import { forEach } from 'lodash';
 
-type PropsT = {
-    handleClose: () => void;
-}
-
-export const SelectedCardsView: FC<PropsT> = ({ handleClose }) => {
+export const TradePanel: FC = () => {
     let TEXT = '';
     let TOTAL = 0;
 
     const dispatch = useDispatch();
     const deals = useSelector(s.cardsInDeals);
 
+    const isTradeModalOpen = useSelector(uiS.isTradeModalOpen);
+
+    const handleCloseTradeModal = () => {
+        dispatch(uiA.setIsTradeModalOpen(false));
+    };
+
     const handleCopyList = () => {
         copy(`${TEXT}\n Total: ${TOTAL} rub`);
-        handleClose();
+        dispatch(uiA.setIsTradeModalOpen(false));
     };
 
     const handleClear = () => {
@@ -101,15 +104,21 @@ export const SelectedCardsView: FC<PropsT> = ({ handleClose }) => {
         );
     });
     return (
-        <div className='selectedCardsView__box'>
-            <Text variant='header-2' className='selectedCardsView__header' as='div'>Cards picked for trade</Text>
-            <Accordion allowZeroExpanded preExpanded={ dealsUuids.slice(0, 1) }>
-                { rendertabs() }
-            </Accordion>
-            <Flex space='3' justifyContent='center' className='selectedCardsView__buttons'>
-                <Button view='outlined-danger' onClick={ handleClear }>Clear</Button>
-                <Button view='normal' onClick={ handleClose }>Close</Button>
-            </Flex>
-        </div>
+        <Modal
+            open={ isTradeModalOpen }
+            onOutsideClick={ handleCloseTradeModal }
+            contentClassName='selectedCardsView'
+        >
+            <div className='selectedCardsView__box'>
+                <Text variant='header-2' className='selectedCardsView__header' as='div'>Cards picked for trade</Text>
+                <Accordion allowZeroExpanded preExpanded={ dealsUuids.slice(0, 1) }>
+                    { rendertabs() }
+                </Accordion>
+                <Flex space='3' justifyContent='center' className='selectedCardsView__buttons'>
+                    <Button view='outlined-danger' onClick={ handleClear }>Clear</Button>
+                    <Button view='normal' onClick={ handleCloseTradeModal }>Close</Button>
+                </Flex>
+            </div>
+        </Modal>
     )
 }

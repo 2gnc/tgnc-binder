@@ -17,6 +17,7 @@ import { calculatePrice } from '../../../../utils/tune-price';
 import { actions as uiA, selectors as uiS } from '../../../../state/ui';
 import { actions as tradeA } from '../../../../state/trade';
 import { OrderModal } from './components/OrderModal';
+import { TradePanel } from '../../../TradePanel/TradePanel';
 
 import './styles.css';
 
@@ -146,6 +147,7 @@ export const AllCollectionsCards:FC<PropsT> = memo(({
             }
             </InfiniteScroll>
             <OrderModal />
+            <TradePanel />
         </div>
     );
 });
