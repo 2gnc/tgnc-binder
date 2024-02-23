@@ -70,8 +70,48 @@ const cardsInDeals = createSelector([dealsByOwners, cardsThesaurus], (deals, the
     return usersDeals;
 });
 
-const pickedCardsCount = createSelector([cardsInDeals], (inDeals) => {
-    return inDeals.reduce((acc, val) => {
+const cardsInRequests = createSelector([requestsByOwners, cardsThesaurus], (requests, thesaurus) => {
+    const requestCardsKeys = entries(requests);
+    const usersRequests: UsersDealsT = [];
+
+    forEach(requestCardsKeys, ([owner, dealItem]) => {
+        const hash = {} as Record<string, Record<ConditionEnum, number>>;
+        forEach(dealItem, (item) => {
+            const { quantity, condition, key } = item;
+            if (!hash[key]) {
+                hash[key] = {} as Record<ConditionEnum, number>;
+
+                forEach(values(ConditionEnum), (value) => {
+                    hash[key][value] = 0;
+                });
+            }
+            hash[key][condition] = hash[key][condition] + quantity;
+        });
+
+        const cards: Array<CardInDealT> = [];
+        forEach(entries(hash), ([key, data]) => {
+            forEach(entries(data), ([condition, quantity]) => {
+                if (quantity) {
+                    cards.push({
+                        card: thesaurus.cards[key],
+                        quantity,
+                        condition: condition as ConditionEnum,
+                    });
+                }
+            })
+        });
+
+        usersRequests.push({
+            owner,
+            cards,
+        });
+    });
+
+    return usersRequests;
+});
+
+const pickedCardsCount = createSelector([cardsInDeals, cardsInRequests], (inDeals, inRequests) => {
+    return inDeals.concat(inRequests).reduce((acc, val) => {
         return acc + val.cards.reduce((acc, val) => acc + val.quantity, 0);
     }, 0);
 });
@@ -82,6 +122,7 @@ const addedInDealsQuantity = createSelector([dealsbyCards], (cards) => {
 
 export const selectors = {
     cardsInDeals,
+    cardsInRequests,
     pickedCardsCount,
     addedInDealsQuantity,
     orderingCard,
@@ -104,4 +145,4 @@ function calculateInDealsCards(cards: Record<string, DealByCardT>): Record<strin
         });
     });
     return result;
-}
+};

@@ -1,5 +1,6 @@
 import React, { type FC } from 'react';
 import map from 'lodash/map';
+import cn from 'classnames';
 import { useSelector, useDispatch } from 'react-redux';
 import { Button, Text, Flex, Icon, Modal } from '@gravity-ui/uikit';
 import { TrashBin, Minus } from '@gravity-ui/icons';
@@ -7,6 +8,7 @@ import copy from 'copy-to-clipboard';
 import { nanoid } from 'nanoid';
 import { tunePrice } from '../../utils/tune-price';
 import { buildCardThesaurusKey } from '../../state/helpers';
+import { IS_MOBILE } from '../../utils/is-mobile';
 
 import {
     Accordion,
@@ -17,7 +19,7 @@ import {
 } from 'react-accessible-accordion';
 
 import { CardInDealT } from '../../models';
-import { selectors as s, actions as a} from '../../state/trade';
+import { selectors as tradeS, actions as tradeA} from '../../state/trade';
 import { actions as uiA, selectors as uiS } from '../../state/ui';
 
 import './styles.css';
@@ -28,7 +30,8 @@ export const TradePanel: FC = () => {
     let TOTAL = 0;
 
     const dispatch = useDispatch();
-    const deals = useSelector(s.cardsInDeals);
+    const deals = useSelector(tradeS.cardsInDeals);
+    const requests = useSelector(tradeS.cardsInRequests);
 
     const isTradeModalOpen = useSelector(uiS.isTradeModalOpen);
 
@@ -42,7 +45,7 @@ export const TradePanel: FC = () => {
     };
 
     const handleClear = () => {
-        dispatch(a.flushDeals());
+        dispatch(tradeA.flushDeals());
     };
 
     const buildDealString = (item: CardInDealT) => {
@@ -51,7 +54,7 @@ export const TradePanel: FC = () => {
     };
 
     const handleRemoveItemFromDeal = (card: CardInDealT, owner: string) => {
-        dispatch(a.removeCardFromDeal({
+        dispatch(tradeA.removeCardFromDeal({
             key: buildCardThesaurusKey(card.card),
             owner,
             condition: card.condition
@@ -59,6 +62,7 @@ export const TradePanel: FC = () => {
     }
 
     const dealsUuids = map(deals, (deal, i) => `${deal.owner}${i}`);
+    const requestsUuids = map(requests, (request, i) => `${request.owner}${i}`);
     const renderTabContent = (cards: Array<CardInDealT>, owner: string) => map(cards, (item) => {
         return (
             <Flex alignItems='center' justifyContent='space-between' className='dealRow' key={ nanoid() }>
@@ -69,7 +73,7 @@ export const TradePanel: FC = () => {
             </Flex>
         );
     });
-    const rendertabs = () => map(deals, (deal, i) => {
+    const renderTradeTabs = () => map(deals, (deal, i) => {
         const uuid = `${deal.owner}${i}`;
         const total = deal.cards.reduce((acc, val) => {
             return {
@@ -84,17 +88,18 @@ export const TradePanel: FC = () => {
         });
 
         TOTAL += total.summ;
+        const buttonText = IS_MOBILE ? 'Copy' : 'Copy trade offer to clipboard';
 
         return (
             <AccordionItem uuid={ uuid } className='' key={ nanoid() }>
                 <AccordionItemHeading>
-                    <AccordionItemButton>
+                    <AccordionItemButton className={ cn('accordion__button', { mobile: IS_MOBILE }) }>
                         <div>
                             <Text variant='subheader-1' className='dealTotalPart'>{ `${deal.owner}:` }</Text>
                             <Text className='dealTotalPart'>{ `${total.cards} card(s) picked, ` }</Text>
                             <Text className='dealTotalPart'>{ `total amount ${total.summ} rub.` }</Text>
                         </div>
-                        <button onClick={ handleCopyList }>Copy trade offer to clipboard</button>
+                        <button onClick={ handleCopyList }>{ buttonText }</button>
                     </AccordionItemButton>
                 </AccordionItemHeading>
                 <AccordionItemPanel>
@@ -103,6 +108,33 @@ export const TradePanel: FC = () => {
             </AccordionItem>
         );
     });
+    const renderRequestsTabs = () => map(requests, (req, i) => {
+        const uuid = `${req.owner}${i}`;
+        forEach(req.cards, (item) => {
+            const rowText = buildDealString(item);
+            TEXT += `${rowText}\n`;
+        });
+
+        const buttonText = IS_MOBILE ? 'Copy' : 'Copy request to clipboard';
+
+        return (
+            <AccordionItem uuid={ uuid } className='' key={ nanoid() }>
+                <AccordionItemHeading>
+                    <AccordionItemButton className={ cn('accordion__button', { mobile: IS_MOBILE }) }>
+                        <div>
+                            <Text variant='subheader-1' className='dealTotalPart'>{ `${req.owner}` }</Text>
+                        </div>
+                        <button onClick={ handleCopyList }>{ buttonText }</button>
+                    </AccordionItemButton>
+                </AccordionItemHeading>
+                <AccordionItemPanel>
+                    { renderTabContent(req.cards, req.owner) }
+                </AccordionItemPanel>
+            </AccordionItem>
+        );
+
+    });
+
     return (
         <Modal
             open={ isTradeModalOpen }
@@ -110,10 +142,16 @@ export const TradePanel: FC = () => {
             contentClassName='selectedCardsView'
         >
             <div className='selectedCardsView__box'>
-                <Text variant='header-2' className='selectedCardsView__header' as='div'>Cards picked for trade</Text>
-                <Accordion allowZeroExpanded preExpanded={ dealsUuids.slice(0, 1) }>
-                    { rendertabs() }
-                </Accordion>
+                <div className='selectedCardsView__deals'>
+                    <Text variant='header-1' className='selectedCardsView__header' as='div'>Picked for trade</Text>
+                    <Accordion allowZeroExpanded preExpanded={ dealsUuids.slice(0, 1) }>
+                        { renderTradeTabs() }
+                    </Accordion>
+                    <Text variant='header-1' className='selectedCardsView__header' as='div'>Requests</Text>
+                    <Accordion allowZeroExpanded preExpanded={ requestsUuids.slice(0, 1) }>
+                        { renderRequestsTabs() }
+                    </Accordion>
+                </div>
                 <Flex space='3' justifyContent='center' className='selectedCardsView__buttons'>
                     <Button view='outlined-danger' onClick={ handleClear }>Clear</Button>
                     <Button view='normal' onClick={ handleCloseTradeModal }>Close</Button>

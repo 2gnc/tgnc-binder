@@ -11,7 +11,7 @@
 
 .selectedCardsView__buttons {
     position: absolute;
-    bottom: 32px;
+    bottom: 24px;
     left: 50%;
     transform: translateX(-50%);
 }
@@ -28,10 +28,15 @@
     margin-right: 6px;
 }
 
+.selectedCardsView__deals {
+    max-height: calc(80vh - 84px);
+    overflow: scroll;
+}
+
 .accordion {
     border-radius: 2px;
-    overflow: scroll;
     max-height: calc(100% - 96px);
+    margin-bottom: 8px;
 }
 
 .accordion__item + .accordion__item {
@@ -47,6 +52,11 @@
     border: none;
     display: grid;
     grid-template-columns: 50px auto 200px;
+}
+
+.accordion__button.mobile {
+    display: flex;
+    gap: 8px;
 }
 
 .accordion__button:hover {
@@ -75,7 +85,6 @@
 
 .accordion__panel {
     animation: fadein 0.35s ease-in;
-    overflow: scroll;
     max-height: 50vh;
     border: 1px solid rgba(0, 0, 1, 0.1);
     padding: 0 16px;
