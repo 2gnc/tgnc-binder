@@ -9,6 +9,7 @@ import { selectors as filtersS } from '../../state/filters';
 import { AllCollectionsTable } from './components/AllCollectionsTable/AllCollectionsTable';
 import { actions as galleryA} from '../../state/gallery';
 import { AllCollectionsCards } from './components/AllCollectionsCards';
+import { TradePanel } from '../TradePanel/TradePanel';
 
 import './styles.css';
 
@@ -48,20 +49,22 @@ export const AllCollections: FC<PropsT> = () => {
         total: cards.length
     }
     return (
-        <Container spaceRow={ IS_MOBILE ? '4' : '6' } style={{
-            height: '100vh',
-            maxHeight: '100vh',
-        }}>
-            <CollectionHeader
-                isMobile={ IS_MOBILE }
-                path={ '' }
-            />
-            <CollectionFilters />
-            {
-                IS_MOBILE ? <AllCollectionsCards { ...cardsListProps } /> : <AllCollectionsTable { ...cardsListProps } />
-            }
-            <Footer />
-        </Container>
-        
+        <>
+            <Container spaceRow={ IS_MOBILE ? '4' : '6' } style={{
+                height: '100vh',
+                maxHeight: '100vh',
+            }}>
+                <CollectionHeader
+                    isMobile={ IS_MOBILE }
+                    path={ '' }
+                    />
+                <CollectionFilters />
+                {
+                    IS_MOBILE ? <AllCollectionsCards { ...cardsListProps } /> : <AllCollectionsTable { ...cardsListProps } />
+                }
+                <Footer />
+            </Container>
+            <TradePanel />
+        </>
     );
 }

@@ -20,8 +20,8 @@ export const AddToDeal:FC<PropsT> = ({ owner, condition, cardKey, quantity }) =>
     const thisItemInDealsQuantity = inDeals[cardKey]?.[condition]?.[owner] || 0;
     const avalaibleQuantity = quantity - thisItemInDealsQuantity;
 
-    const shouldBlockPlus = avalaibleQuantity < thisItemInDealsQuantity;
-    const shouldBlockMinus = avalaibleQuantity > thisItemInDealsQuantity;
+    const shouldBlockPlus = avalaibleQuantity === 0;
+    const shouldBlockMinus = thisItemInDealsQuantity === 0;
 
     const handleAddToDeal = (owner: string, condition: ConditionEnum, cardKey: string) => {
         if (shouldBlockPlus) {

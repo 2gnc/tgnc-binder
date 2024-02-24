@@ -1,5 +1,6 @@
 import React, { FC } from 'react';
-import { Text } from '@gravity-ui/uikit';
+import { AddToDeal } from '../../AllCollectionsCards/components/AddToDeal';
+import { RequestBtn } from '../../AllCollectionsCards/components/RequestBtn';
 import { UserCardMetaT } from '../../../../../models';
 
 type PropsT = {
@@ -8,9 +9,20 @@ type PropsT = {
 
 export const ActionsCell: FC<PropsT> = ({ meta }) => {
     if (meta.tradable) {
-        return 'Order'
+        return (
+            <AddToDeal
+                owner={ meta.userName }
+                condition={ meta.condition }
+                cardKey={ meta.key }
+                quantity={ meta.quantity }
+            />
+        );
     }
     return (
-        <Text>Request</Text>
+        <RequestBtn
+            owner={ meta.userName }
+            condition={ meta.condition }
+            cardKey={ meta.key }
+        />
     );
 }

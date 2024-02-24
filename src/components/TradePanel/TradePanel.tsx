@@ -26,9 +26,6 @@ import './styles.css';
 import { forEach } from 'lodash';
 
 export const TradePanel: FC = () => {
-    let TEXT = '';
-    let TOTAL = 0;
-
     const dispatch = useDispatch();
     const deals = useSelector(tradeS.cardsInDeals);
     const requests = useSelector(tradeS.cardsInRequests);
@@ -39,8 +36,12 @@ export const TradePanel: FC = () => {
         dispatch(uiA.setIsTradeModalOpen(false));
     };
 
-    const handleCopyList = () => {
-        copy(`${TEXT}\n Total: ${TOTAL} rub`);
+    const handleCopy = (text: string, total?: number) => {
+        if (total) {
+            copy(`${text}\n Total: ${total} rub`);
+        } else {
+            copy(`${text}\n`);
+        }
         dispatch(uiA.setIsTradeModalOpen(false));
     };
 
@@ -74,6 +75,9 @@ export const TradePanel: FC = () => {
         );
     });
     const renderTradeTabs = () => map(deals, (deal, i) => {
+        let TEXT = '';
+        let TOTAL = 0;
+
         const uuid = `${deal.owner}${i}`;
         const total = deal.cards.reduce((acc, val) => {
             return {
@@ -99,7 +103,7 @@ export const TradePanel: FC = () => {
                             <Text className='dealTotalPart'>{ `${total.cards} card(s) picked, ` }</Text>
                             <Text className='dealTotalPart'>{ `total amount ${total.summ} rub.` }</Text>
                         </div>
-                        <button onClick={ handleCopyList }>{ buttonText }</button>
+                        <button onClick={ () => handleCopy(TEXT, TOTAL) }>{ buttonText }</button>
                     </AccordionItemButton>
                 </AccordionItemHeading>
                 <AccordionItemPanel>
@@ -109,6 +113,8 @@ export const TradePanel: FC = () => {
         );
     });
     const renderRequestsTabs = () => map(requests, (req, i) => {
+        let TEXT = '';
+
         const uuid = `${req.owner}${i}`;
         forEach(req.cards, (item) => {
             const rowText = buildDealString(item);
@@ -124,7 +130,7 @@ export const TradePanel: FC = () => {
                         <div>
                             <Text variant='subheader-1' className='dealTotalPart'>{ `${req.owner}` }</Text>
                         </div>
-                        <button onClick={ handleCopyList }>{ buttonText }</button>
+                        <button onClick={ () => handleCopy(TEXT) }>{ buttonText }</button>
                     </AccordionItemButton>
                 </AccordionItemHeading>
                 <AccordionItemPanel>
