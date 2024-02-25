@@ -49,6 +49,7 @@ const CollectionFilters: FC<PropsT> = ({}) => {
         color: colorFilter,
         lang: languageFilter,
         set: setsFilter,
+        name: namesFilter,
     } = useSelector(filtersS.filters);
     const isFiltersModalOpen = useSelector(uiS.isFiltersModalOpen);
     const avalaibleLanguages = useSelector(filtersS.avalaibleLanguages);
@@ -227,6 +228,18 @@ const CollectionFilters: FC<PropsT> = ({}) => {
                  <HighlightedSubstring text={ item } substring={ spellnameSearch } color='brand' />
             </Menu.Item>
         ))
+    }
+
+    const renderNamesSearch = () => {
+        const handleNameClear = (name: string) => {
+            dispatch(filtersA.removeFilter({
+                filter: FilterParamNameEnum.NAME,
+                value: name
+            }))
+        }
+        return map(namesFilter, name => {
+            return <Label type='close' onClose={ () => handleNameClear(name) } >{ name }</Label>
+        })
     }
     // Spell by name search -- end
 
@@ -409,10 +422,17 @@ const CollectionFilters: FC<PropsT> = ({}) => {
                     size={IS_MOBILE ? 'l' : 's'}
                     onChange={ onSpellNameSearch }
                     value={ spellnameSearch }
-                    onBlur={closeNameSuggest}
+                    onBlur={ closeNameSuggest }
                     placeholder='abrade'
                     hasClear
                 />
+                <Row space={ 0 } style={{ paddingTop: '5px'}}>
+                    <Col s={ 12 }>
+                        <Flex space={ 2 } wrap>
+                            { renderNamesSearch() }
+                        </Flex>
+                    </Col>
+                </Row>
                 <Popup
                     open={isNameSuggestOpen}
                     anchorRef={spellNameSearchRef}

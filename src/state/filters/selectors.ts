@@ -8,6 +8,7 @@ import values from 'lodash/values';
 import forEach from 'lodash/forEach';
 import isEmpty from 'lodash/isEmpty';
 import flatMap from 'lodash/flatMap';
+import includes from 'lodash/includes';
 import { RootState } from '../store';
 import {
     LangEnum,
@@ -186,8 +187,11 @@ const filtredCards = createSelector([ownersCards, filters, sorting], (ownerCards
     };
 
     const isMatchByName = (card: GalleryCardT) => {
-        const re = new RegExp(filters.name[0]?.toLowerCase());
-        return re.test(card.card.name.toLowerCase());
+        if (!size(filters.name)) {
+            return true;
+        }
+        const reArr = map(filters.name, (name) => new RegExp(name.toLowerCase()).test(card.card.name.toLowerCase()));
+        return includes(reArr, true);
     };
 
     const isMatchByLanguage = (card: GalleryCardT) => {
