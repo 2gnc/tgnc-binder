@@ -1,5 +1,133 @@
 import { graphql } from "gatsby";
 
+export const GragonLeechCardsQuery = graphql`
+    fragment GragonLeechCards on GragonLeechCardsCsv {
+        set
+        quantity
+        name
+        set_name
+        image_url
+        price_usd
+        price_usd_foil
+        price_usd_etched
+        price_eur
+        price_eur_foil
+        price_eur_etched
+        collection
+        is_list
+        frame
+        is_foil
+        keywords
+        lang
+        artist
+        edhrec_rank
+        rarity
+        id
+        colors
+        types
+        condition
+        number
+        promo_types
+        ru_name
+    }
+`
+
+export const SadgeBusinessCardsQuery = graphql`
+    fragment SadgeBusinessCards on SadgeBusinessCardsCsv {
+        set
+        quantity
+        name
+        set_name
+        image_url
+        price_usd
+        price_usd_foil
+        price_usd_etched
+        price_eur
+        price_eur_foil
+        price_eur_etched
+        collection
+        is_list
+        frame
+        is_foil
+        keywords
+        lang
+        artist
+        edhrec_rank
+        rarity
+        id
+        colors
+        types
+        condition
+        number
+        promo_types
+        ru_name
+    }
+`
+
+export const KirillgaevoyCardsQuery = graphql`
+    fragment KirillgaevoyCards on KirillgaevoyCardsCsv {
+        set
+        quantity
+        name
+        set_name
+        image_url
+        price_usd
+        price_usd_foil
+        price_usd_etched
+        price_eur
+        price_eur_foil
+        price_eur_etched
+        collection
+        is_list
+        frame
+        is_foil
+        keywords
+        lang
+        artist
+        edhrec_rank
+        rarity
+        id
+        colors
+        types
+        condition
+        number
+        promo_types
+        ru_name
+    }
+`
+
+export const TmOOneCardsQuery = graphql`
+    fragment TmOOneCards on TmOOneCardsCsv {
+        set
+        quantity
+        name
+        set_name
+        image_url
+        price_usd
+        price_usd_foil
+        price_usd_etched
+        price_eur
+        price_eur_foil
+        price_eur_etched
+        collection
+        is_list
+        frame
+        is_foil
+        keywords
+        lang
+        artist
+        edhrec_rank
+        rarity
+        id
+        colors
+        types
+        condition
+        number
+        promo_types
+        ru_name
+    }
+`
+
 export const IjaCardsQuery = graphql`
     fragment IjaCards on IjaCardsCsv {
         set

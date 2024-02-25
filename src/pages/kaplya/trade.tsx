@@ -53,9 +53,8 @@ export const queryMulticolor = graphql`
 
 const IndexPage: React.FC<PageProps> = ({ data }) => {
   const { codesParents} = parseRawSetsResponse(data.sets.nodes);
-  const { cards } = parseRawCardsResponse(data.cards.nodes, codesParents);
-
-  return <TradeTable cards={ cards } />
+  const { userCards, cardsThesaurus } = parseRawCardsResponse(data.cards.nodes, codesParents);
+  return <TradeTable cards={ userCards } thesaurus={ cardsThesaurus } />
 }
 
 export default IndexPage;

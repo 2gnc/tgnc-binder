@@ -7,7 +7,7 @@ import TradeTable from '../../components/TradeTable/TradeTable';
 
 export const queryMulticolor = graphql`
   query {
-    cards: allKseniaCardsCsv(sort: {name: ASC}) {
+    cards: allGragonLeechCardsCsv(sort: {name: ASC}) {
       nodes {
         artist
         set_name

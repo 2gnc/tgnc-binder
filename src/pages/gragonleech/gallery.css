@@ -1,0 +1,67 @@
+.helpContent {
+    padding: 0;
+}
+
+.helpButton {
+    color: #333;
+    margin: 0 4px;
+}
+
+.card {
+    padding: 8px;
+}
+
+.label {
+    margin: 3px;
+}
+
+.priceCol {
+    text-align: right;
+}
+
+.priceRow {
+    padding: 8px 0;
+}
+
+.detailsRow {
+    padding: 4px 0;
+}
+
+.hidden {
+    display: none;
+}
+
+.manaCheckbox {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    opacity: 0.5;
+    transition: transform 0.2s linear;
+}
+
+.manaCheckbox:hover {
+    cursor: pointer;
+}
+
+.manaCheckbox_checked {
+    opacity: 1;
+    transform: scale(1.2);
+    transition: transform 0.2s linear;
+}
+
+.manaSymbol {
+    width: 100%;
+}
+
+.manaLabels {
+    display: flex;
+    align-items: center;
+}
+
+.manaLabels label {
+    margin: 0 8px;
+}
+
+.filterHeader {
+    margin-right: 8px;
+}

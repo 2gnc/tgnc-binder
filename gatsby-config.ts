@@ -49,6 +49,30 @@ const config: GatsbyConfig = {
     {
       resolve: 'gatsby-source-filesystem',
       options: {
+        path: `${__dirname}/data/tmOOne/`,
+      }
+    },
+    {
+      resolve: 'gatsby-source-filesystem',
+      options: {
+        path: `${__dirname}/data/kirillgaevoy/`,
+      }
+    },
+    {
+      resolve: 'gatsby-source-filesystem',
+      options: {
+        path: `${__dirname}/data/sadgeBusiness/`,
+      }
+    },
+    {
+      resolve: 'gatsby-source-filesystem',
+      options: {
+        path: `${__dirname}/data/gragonleech/`,
+      }
+    },
+    {
+      resolve: 'gatsby-source-filesystem',
+      options: {
         path: `${__dirname}/data/sets/`,
       }
     },
@@ -57,3 +81,4 @@ const config: GatsbyConfig = {
 }
 
 export default config;
+

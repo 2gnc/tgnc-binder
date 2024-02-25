@@ -1,9 +1,9 @@
 import React, { type FC } from 'react';
-import { CardT } from '../../models';
-import { tunePrice } from '../../utils/tune-price';
+import { UserCardMetaT, CardThesaurusItemT, GalleryCardT } from '../../models';
+import { calculatePrice } from '../../utils/tune-price';
 
 type PropsT = {
-    cards: Array<CardT>;
+    cards: Array<UserCardMetaT & { data: CardThesaurusItemT }>;
     color: string;
 }
 
@@ -20,28 +20,33 @@ export const TradeGroupedTable: FC<PropsT> = ({ cards, color }) => {
             }}>
             <thead> 
                 <tr>
-                    <th>Количество</th>
-                    <th>Название</th>
-                    <th>Особенности</th>
-                    <th>Сет</th>
-                    <th>Язык</th>
-                    <th>Цена, руб</th>
+                    <th>Qty</th>
+                    <th>Name</th>
+                    <th>Details</th>
+                    <th>Set</th>
+                    <th>Language</th>
+                    <th>Price, rub</th>
                 </tr>
             </thead>
             <tbody>
             {
                 cards.map(card => {
+                    const calcData = {
+                        card: card.data,
+                        meta: card,
+                    };
+
                     return (
-                    <tr key={card.id}>
+                    <tr key={card.key}>
                         <td style={{border: '1px solid silver'}}>{card.quantity}</td>
                         <td style={{border: '1px solid silver'}}>
-                            {card.name}
-                            { card.ruName && (<><br /> <span>{card.ruName}</span></>) }
+                            {card.data.name}
+                            { card.data.ruName && (<><br /> <span>{card.data.ruName}</span></>) }
                         </td>
-                        <td style={{border: '1px solid silver'}}>{card.perticularities}</td>
-                        <td style={{border: '1px solid silver'}}>{`${card.set} #${card.number}`}</td>
-                        <td style={{border: '1px solid silver'}}>{card.lang}</td>
-                        <td style={{border: '1px solid silver'}}>{tunePrice(card)}</td>
+                        <td style={{border: '1px solid silver'}}>{card.data.perticularities}</td>
+                        <td style={{border: '1px solid silver'}}>{`${card.data.set} #${card.data.number}`}</td>
+                        <td style={{border: '1px solid silver'}}>{card.data.lang}</td>
+                        <td style={{border: '1px solid silver'}}>{calculatePrice(calcData)}</td>
                     </tr>
                     )
                 })

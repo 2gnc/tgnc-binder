@@ -1,9 +1,8 @@
 import React, { memo } from 'react';
-import { HeadFC, PageProps, useStaticQuery } from 'gatsby';
-import { useSelector, useDispatch } from 'react-redux';
+import { useStaticQuery } from 'gatsby';
+import { useDispatch } from 'react-redux';
 import { graphql } from 'gatsby';
 import { actions as a } from '../../state/cards';
-import { selectors as s } from '../../state/cards/selectors';
 
 interface LayoutProptT {
     children: React.ReactNode;
@@ -30,6 +29,21 @@ export default Layout;
 
 export const queryCards = graphql`
     query {
+        GragonLeech: allGragonLeechCardsCsv(filter: {}) {
+            nodes {
+                ...GragonLeechCards
+            }
+        }
+        SadgeBusiness: allSadgeBusinessCardsCsv(filter: {}) {
+            nodes {
+                ...SadgeBusinessCards
+            }
+        }
+        Kirillgaevoy: allKirillgaevoyCardsCsv(filter: {}) {
+            nodes {
+                ...KirillgaevoyCards
+            }
+        }
         Ija: allIjaCardsCsv(filter: {}) {
             nodes {
                 ...IjaCards
@@ -53,6 +67,11 @@ export const queryCards = graphql`
         TwoBlueCats: allTwoBlueCatsCardsCsv(filter: {}) {
             nodes {
                 ...TwoBlueCatsCards
+            }
+        }
+        Tm00ne: allTmOOneCardsCsv(filter: {}) {
+            nodes {
+                ...TmOOneCards
             }
         }
         sets: allSetsCsv {

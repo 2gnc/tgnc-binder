@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { type CardT, ColorEnum } from '../../models';
+import { type CardT, ColorEnum, UserCardsT, CardThesaurusT, UserCardMetaT, CardThesaurusItemT } from '../../models';
 import { TradeGroupedTable } from './TradeGroupedTable';
 import entries from 'lodash/entries'; 
 import map from 'lodash/map';
+import values from 'lodash/values';
 
 type TablePropsT = {
-    cards: Array<CardT>
+    cards: UserCardsT;
+    thesaurus: CardThesaurusT;
 }
 
-const TradeTable: React.FC<TablePropsT> = ({ cards }) => {
+const TradeTable: React.FC<TablePropsT> = ({ cards, thesaurus }) => {
     const [collection, setCollection] = useState('');
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
@@ -16,7 +18,7 @@ const TradeTable: React.FC<TablePropsT> = ({ cards }) => {
         setCollection(collection);
     }, []);
 
-    const byColors: Record<string, Array<CardT>> = {
+    const byColors: Record<string, Array<UserCardMetaT & { data: CardThesaurusItemT }>> = {
         multicolor: [],
         colorless: [],
         lands: [],
@@ -28,40 +30,47 @@ const TradeTable: React.FC<TablePropsT> = ({ cards }) => {
         green: []
     };
 
-    cards.forEach(card => {
+    const cardsArr = map(map(values(cards), itm => itm['']), (item) => {
+      return {
+        ...item,
+        data: thesaurus[item.key]
+      }
+    });
+
+    cardsArr.forEach(card => {
         if ((!collection || !card.collections.includes(collection)) && collection !== 'all') {
             return;
         }
 
-        if (card.colors.length > 1) {
+        if (card.data.colors.length > 1) {
           byColors.multicolor.push(card);
           return;
         }
         if (
-          card.colors.includes(ColorEnum.COLORLESS)
-          && !card.isLand
-          && !card.isToken
+          card.data.colors.includes(ColorEnum.COLORLESS)
+          && !card.data.isLand
+          && !card.data.isToken
         ) {
           byColors.colorless.push(card);
           return;
         }
         if (
-          card.colors.includes(ColorEnum.COLORLESS)
-          && card.isLand
+          card.data.colors.includes(ColorEnum.COLORLESS)
+          && card.data.isLand
         ) {
           byColors.lands.push(card);
           return;
         }
         if (
-          card.colors.includes(ColorEnum.COLORLESS)
-          && card.isToken
+          card.data.colors.includes(ColorEnum.COLORLESS)
+          && card.data.isToken
         ) {
           byColors.tokens.push(card);
           return;
         }
     
-        if (card.colors.length === 1) {
-          switch(card.colors[0]) {
+        if (card.data.colors.length === 1) {
+          switch(card.data.colors[0]) {
             case ColorEnum.WHITE:
               byColors.white.push(card);
               return;

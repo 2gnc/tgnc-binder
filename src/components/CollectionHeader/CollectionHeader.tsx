@@ -1,6 +1,6 @@
 import React, { type FC } from 'react';
 import { Link } from 'gatsby';
-import { Breadcrumbs, Icon, Button } from '@gravity-ui/uikit';
+import { Icon, Button } from '@gravity-ui/uikit';
 import { Receipt } from '@gravity-ui/icons';
 import logo from '../../images/logo.png';
 import { useSelector } from 'react-redux';
@@ -18,21 +18,6 @@ const CollectionHeader:FC<PropsT> = ({
 }) => {
     const { collection } = useSelector(filtersSelectors.filters);
     const owner = useSelector(sg.galleryOwner)
-    const items = owner ? [
-        {
-            text: owner.name,
-            action: () => {},
-        },
-        {
-            text: 'Gallery',
-            action: () => {},
-            href: path
-        },
-        {
-            text: collection,
-            action: () => {}
-        }
-    ] : [];
 
     return (
         <div className='headerBox'>
@@ -40,12 +25,6 @@ const CollectionHeader:FC<PropsT> = ({
                 <Link to='/'>
                     <img src={ logo } className='logoLink' />
                 </Link>
-                <Breadcrumbs
-                    items={ items }
-                    firstDisplayedItemsCount={0}
-                    lastDisplayedItemsCount={2}
-                    renderItemDivider={() => '>'}
-                />
             </div>
             {
                 owner && (

@@ -1,17 +1,20 @@
 import React from 'react';
 import type { HeadFC, PageProps } from "gatsby";
-import { Text } from '@gravity-ui/uikit';
+
+import Gallery from '../../components/Gallery/Gallery';
 import DataTransport from '../../components/Loyout/Layout';
 
-const SearchPage: React.FC<PageProps> = (props) => {
+const OWNER = { name: 'SadgeBusiness', contactLink: 'https://telegram.me/sadgeBusiness' };
+
+const GalleryPage: React.FC<PageProps> = (props) => {
     return (
         <DataTransport>
-            <Text variant='display-1'>search</Text>
+            <Gallery owner={OWNER} {...props} />
         </DataTransport>
     );
 }
 
-export default SearchPage;
+export default GalleryPage;
 
 export const Head: HeadFC = () => (
     <>
